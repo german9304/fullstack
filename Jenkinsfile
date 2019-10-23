@@ -13,7 +13,9 @@ pipeline {
         }
         stage('Front-End'){
             agent {
-                image 'node:10.16'
+                docker {
+                    image 'node:10.16'
+                }
             }
             steps {
                 sh 'node -v'
