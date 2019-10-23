@@ -3,4 +3,5 @@
 echo "inside front end directory"
 
 cd frontend 
-ls -l
+yarn install
+yarn run dev

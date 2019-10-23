@@ -21,7 +21,7 @@ pipeline {
             steps {
                 sh 'node -v'
                 echo 'Checking directory'
-                sh './scripts/start.sh'
+                sh './scripts/build.sh'
             }
         }
     }
