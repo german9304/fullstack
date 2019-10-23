@@ -15,10 +15,13 @@ pipeline {
             agent {
                 docker {
                     image 'node:10.16'
+                    args '-p 3000:3000'
                 }
             }
             steps {
                 sh 'node -v'
+                echo 'Checking directory'
+                sh './scripts/start.sh'
             }
         }
     }
