@@ -1,9 +1,9 @@
 pipeline {
     agent none
     stages {
-        stage('Full stack back end') {
+        stage('Back-End') {
             parallel {
-                stage('Back end') {
+                stage('Start') {
                     agent {
                         docker {
                             image 'golang:1.12'
