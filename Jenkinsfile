@@ -7,9 +7,6 @@ pipeline {
                     image 'golang:1.12'
                 }
             }
-            steps {
-                echo 'running here'
-            }
             stages {
                 stage('Build') {
                     steps {
