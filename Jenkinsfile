@@ -23,10 +23,14 @@ pipeline {
                     args '-p 3000:3000'
                 }
             }
-            steps {
-                sh 'node -v'
-                echo 'Checking directory'
-                sh './frontend/scripts/build.sh'
+            stages {
+                stage('Build') {
+                    steps {
+                        sh 'node -v'
+                        echo 'Checking directory'
+                        sh './frontend/scripts/build.sh'
+                    }
+                }
             }
         }
     }
