@@ -2,3 +2,7 @@
 
 endpoint: http://prisma:4466/fullstackapp/posts
 datamodel: ./backend/datamodel.graphql
+
+generate:
+  - generator: go-client
+    output: ./backend/prisma-client/
