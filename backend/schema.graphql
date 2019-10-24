@@ -1,0 +1,61 @@
+type Query {
+  users: [User]
+  posts: [Post]
+  likes: [Like]
+  user(id: String): User
+  post(id: String): Post
+  like(id: String): Like
+}
+
+type Mutation {
+  createUser(usrinpt: UserInput): User
+  createPost(pstinpt: PostInput): Post
+  createLike(user: String, quantity: Int): Like
+}
+
+input UserInput {
+  email: String!
+  name: String!
+  password: String!
+  age: Int!
+}
+
+input PostInput {
+  text: String!
+  author: String!
+}
+
+input LikeInput {
+  user: String!
+  post: String!
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  password: String!
+  age: Int!
+  createdAt: Time
+  posts: [Post]
+  likes: [Like]
+}
+
+type Post {
+  id: ID!
+  text: String!
+  createdAt: Time!
+  updatedAt: Time!
+  author: ID!
+  likes: [Like]
+}
+
+type Like {
+  user: ID!
+  post: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  quantity: Int
+}
+
+scalar Time

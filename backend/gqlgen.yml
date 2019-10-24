@@ -1,0 +1,22 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+  - schema.graphql
+exec:
+  filename: generated.go
+# model:
+#   filename: models_gen.go
+models:
+  User:
+    model: github.com/german9304/fullstack-backend/models.User
+  Post:
+    model: github.com/german9304/fullstack-backend/models.Post
+  Like:
+    model: github.com/german9304/fullstack-backend/models.Like
+resolver:
+  filename: resolver.go
+  type: Resolver
+autobind: []
