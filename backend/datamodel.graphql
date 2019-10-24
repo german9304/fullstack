@@ -1,4 +1,27 @@
 type User {
   id: ID! @id
+  email: String! @unique
   name: String!
+  password: String!
+  age: Int!
+  createdAt: DateTime
+  posts: [Post]
+  likes: [Likes]
+}
+
+type Post {
+  id: ID! @id
+  text: String!
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  author: User @relation(link: INLINE, onDelete: CASCADE)
+  likes: [Likes]
+}
+
+type Likes {
+  user: User @relation(link: INLINE, onDelete: CASCADE)
+  post: Post @relation(link: INLINE, onDelete: CASCADE)
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  quantity: Int @default(value: 0)
 }
