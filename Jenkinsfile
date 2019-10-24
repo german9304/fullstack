@@ -2,16 +2,18 @@ pipeline {
     agent none
     stages {
         stage('Back-End') {
-            agent {
-                docker {
-                    image 'golang:1.12'
+            parallel {
+                agent {
+                    docker {
+                        image 'golang:1.12'
+                    }
                 }
-            }
-            stages {
-                stage('Build') {
-                    steps {
-                        echo 'running here'
-                        sh 'go version'
+                stages {
+                    stage('Build') {
+                        steps {
+                            echo 'running here'
+                            sh 'go version'
+                        }
                     }
                 }
             }
