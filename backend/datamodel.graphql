@@ -4,7 +4,7 @@ type User {
   name: String!
   password: String!
   age: Int!
-  createdAt: DateTime
+  createdAt: DateTime! @createdAt
   posts: [Post]
   likes: [Likes]
 }
@@ -19,6 +19,7 @@ type Post {
 }
 
 type Likes {
+  id: ID! @id
   user: User @relation(link: INLINE, onDelete: CASCADE)
   post: Post @relation(link: INLINE, onDelete: CASCADE)
   createdAt: DateTime! @createdAt

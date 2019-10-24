@@ -1,2 +1,4 @@
-endpoint: http://prisma:4466
+#  http://prisma:4466/fullstackapp/posts/_admin
+
+endpoint: http://prisma:4466/fullstackapp/posts
 datamodel: ./backend/datamodel.graphql
