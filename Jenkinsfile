@@ -7,10 +7,13 @@ pipeline {
                     image 'golang:1.12'
                 }
             }
+            steps {
+                echo 'running here'
+            }
             stages {
-                stage('Build an test project') {
+                stage('Build') {
                     steps {
-                        echo 'buidling golang version'
+                        echo 'running here'
                         sh 'go version'
                     }
                 }
