@@ -18,7 +18,7 @@ pipeline {
                         }
                         stage('Test') {
                             steps {
-                                sh 'go test'
+                                sh './backend/scripts/test.sh'
                             }
                         }
                     }
