@@ -5,14 +5,8 @@ pipeline {
             agent any
             stages {
                 stage('Build') {
-                    agent {
-                        docker {
-                            image 'node:10.16'
-                        }
-                    }
                     steps {
-                        sh 'yarn run prisma deploy'
-                        sh 'yarn run prisma generate'
+                        sh '/usr/local/bin/docker-compose --version'
                     }
                 }
                 stage('Test') {
