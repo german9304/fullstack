@@ -1,8 +1,7 @@
 pipeline {
-    agent none
+    agent any
     stages {
-        stage('Back end') {
-            agent none
+        stage('Back-end') {
             stages {
                 stage('Build') {
                     steps {
@@ -26,22 +25,22 @@ pipeline {
         }
 
 
-        stage('Front-End'){
-            agent {
-                docker {
-                    image 'node:10.16'
-                    args '-p 3000:3000'
-                }
-            }
-            stages {
-                stage('Build') {
-                    steps {
-                        sh 'node -v'
-                        echo 'Checking directory'
-                        sh './frontend/scripts/build.sh'
-                    }
-                }
-            }
-        }
+        // stage('Front-End'){
+        //     agent {
+        //         docker {
+        //             image 'node:10.16'
+        //             args '-p 3000:3000'
+        //         }
+        //     }
+        //     stages {
+        //         stage('Build') {
+        //             steps {
+        //                 sh 'node -v'
+        //                 echo 'Checking directory'
+        //                 sh './frontend/scripts/build.sh'
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
