@@ -3,10 +3,14 @@ pipeline {
     stages {
         stage('Back-end') {
             agent any
+            environment {
+                PATH = "/usr/local/bin"
+            }
             stages {
                 stage('Build') {
                     steps {
-                        sh '/usr/local/bin/docker-compose --version'
+                        echo 'Path is'
+                        echo '$PATH'
                     }
                 }
                 stage('Test') {
