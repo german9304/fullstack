@@ -1,46 +1,48 @@
 pipeline {
-    agent any
+    agent none
     stages {
         stage('Back-end') {
+            agent any
             stages {
                 stage('Build') {
+                    agent {
+                        docker {
+                            image 'node:10.16'
+                        }
+                    }
                     steps {
-                        echo 'start docker container'
-                        sh 'docker-compose up -d'
+                        sh 'yarn run prisma deploy'
+                        sh 'yarn run prisma generate'
                     }
                 }
                 stage('Test') {
+                    agent {
+                        docker {
+                            image 'golang:1.12'
+                        }
+                    }
                     steps {
-                        echo 'running container'
-                        sh 'docker ps'
+                        sh 'go version'
                     }
                 }
             }
         }
-
-        stage('middle') {
-            steps {
-                sh 'docker-compose stop'
+        stage('Front-End'){
+            agent {
+                docker {
+                    image 'node:10.16'
+                    args '-p 3000:3000'
+                }
+            }
+            stages {
+                stage('Build') {
+                    steps {
+                        sh 'node -v'
+                        echo 'Checking directory'
+                        sh './frontend/scripts/build.sh'
+                    }
+                }
             }
         }
-
-
-        // stage('Front-End'){
-        //     agent {
-        //         docker {
-        //             image 'node:10.16'
-        //             args '-p 3000:3000'
-        //         }
-        //     }
-        //     stages {
-        //         stage('Build') {
-        //             steps {
-        //                 sh 'node -v'
-        //                 echo 'Checking directory'
-        //                 sh './frontend/scripts/build.sh'
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
