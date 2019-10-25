@@ -1,4 +1,4 @@
 #! /bin/bash
 
-cd backend
-go test
+cd frontend
+yarn run prisma deploy

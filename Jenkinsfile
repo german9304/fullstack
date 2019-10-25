@@ -11,7 +11,7 @@ pipeline {
                     }
                     steps {
                         echo 'build stage'
-                        sh 'node -v'
+                        sh './backend/scripts/test.sh'
                     }
                 }
                 stage('Test') {
