@@ -1,11 +1,11 @@
 pipeline {
     agent none
+    environment {
+        PATH = "/usr/local/bin"
+    }
     stages {
         stage('Back-end') {
             agent any
-            environment {
-                PATH = "/usr/local/bin"
-            }
             stages {
                 stage('Build') {
                     steps {
