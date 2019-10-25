@@ -17,9 +17,12 @@ func main() {
 		port = defaultPort
 	}
 
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(fullstack_backend.NewExecutableSchema(fullstack_backend.Config{Resolvers: &fullstack_backend.Resolver{}})))
+	h := handler.GraphQL(fullstack_backend.NewExecutableSchema(fullstack_backend.Config{Resolvers: &fullstack_backend.Resolver{}}))
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
+	http.Handle("/query", h)
+	http.Handle("/", h)
+
+	log.Printf("connect to http://localhost:%s/playground for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

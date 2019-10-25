@@ -33,6 +33,7 @@ services:
     image: golang:1.12
     volumes:
       - ./backend/:/fullstack-backend/
+      - ./backend/server/:/backendserver/
     ports:
       - '8000:8000'
 

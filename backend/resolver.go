@@ -9,7 +9,7 @@ import (
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-type Resolver struct{
+type Resolver struct {
 	users []*prisma.User
 }
 
@@ -47,7 +47,24 @@ func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Likes) (*time.
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, usrinpt *UserInput) (*prisma.User, error) {
-	panic("not implemented")
+	client := prisma.New(nil)
+	email := usrinpt.Email
+	name := usrinpt.Name
+	pwd := usrinpt.Password
+	age := int32(usrinpt.Age)
+
+	user, err := client.CreateUser(prisma.UserCreateInput{
+		Email:    email,
+		Name:     name,
+		Age:      age,
+		Password: pwd,
+	}).Exec(ctx)
+
+	if err != nil {
+		return &prisma.User{}, err
+	}
+
+	return user, nil
 }
 func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt *PostInput) (*prisma.Post, error) {
 	panic("not implemented")
