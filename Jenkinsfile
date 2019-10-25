@@ -11,6 +11,7 @@ pipeline {
                     }
                     steps {
                         echo 'build stage'
+                        sh 'ls -l'
                         sh './backend/scripts/test.sh'
                     }
                 }
