@@ -20,8 +20,8 @@ type Post {
 
 type Likes {
   id: ID! @id
-  user: User @relation(link: INLINE, onDelete: CASCADE)
-  post: Post @relation(link: INLINE, onDelete: CASCADE)
+  user: User! @relation(link: INLINE, onDelete: CASCADE)
+  post: Post! @relation(link: INLINE, onDelete: CASCADE)
   createdAt: DateTime! @createdAt
   updatedAt: DateTime! @updatedAt
   quantity: Int @default(value: 0)

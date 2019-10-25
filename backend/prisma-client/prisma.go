@@ -768,7 +768,7 @@ Age *int32 `json:"age,omitempty"`
 
       type LikesCreateWithoutUserInput struct {
         ID *string `json:"id,omitempty"`
-Post *PostCreateOneWithoutLikesInput `json:"post,omitempty"`
+Post PostCreateOneWithoutLikesInput `json:"post"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -783,8 +783,8 @@ Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
       type LikesUpdateInput struct {
-        User *UserUpdateOneWithoutLikesInput `json:"user,omitempty"`
-Post *PostUpdateOneWithoutLikesInput `json:"post,omitempty"`
+        User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
+Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -794,12 +794,10 @@ Author *UserUpdateOneWithoutPostsInput `json:"author,omitempty"`
 Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
-      type UserUpdateOneWithoutLikesInput struct {
+      type UserUpdateOneRequiredWithoutLikesInput struct {
         Create *UserCreateWithoutLikesInput `json:"create,omitempty"`
 Update *UserUpdateWithoutLikesDataInput `json:"update,omitempty"`
 Upsert *UserUpsertWithoutLikesInput `json:"upsert,omitempty"`
-Delete *bool `json:"delete,omitempty"`
-Disconnect *bool `json:"disconnect,omitempty"`
 Connect *UserWhereUniqueInput `json:"connect,omitempty"`
           }
 
@@ -846,7 +844,7 @@ Data PostUpdateWithoutAuthorDataInput `json:"data"`
           }
 
       type LikesUpdateWithoutUserDataInput struct {
-        Post *PostUpdateOneWithoutLikesInput `json:"post,omitempty"`
+        Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -930,7 +928,7 @@ Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
           }
 
       type LikesUpdateWithoutPostDataInput struct {
-        User *UserUpdateOneWithoutLikesInput `json:"user,omitempty"`
+        User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -1110,8 +1108,8 @@ Create PostCreateWithoutAuthorInput `json:"create"`
 
       type LikesCreateInput struct {
         ID *string `json:"id,omitempty"`
-User *UserCreateOneWithoutLikesInput `json:"user,omitempty"`
-Post *PostCreateOneWithoutLikesInput `json:"post,omitempty"`
+User UserCreateOneWithoutLikesInput `json:"user"`
+Post PostCreateOneWithoutLikesInput `json:"post"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -1209,12 +1207,10 @@ Connect *UserWhereUniqueInput `json:"connect,omitempty"`
 Author *UserUpdateOneWithoutPostsInput `json:"author,omitempty"`
           }
 
-      type PostUpdateOneWithoutLikesInput struct {
+      type PostUpdateOneRequiredWithoutLikesInput struct {
         Create *PostCreateWithoutLikesInput `json:"create,omitempty"`
 Update *PostUpdateWithoutLikesDataInput `json:"update,omitempty"`
 Upsert *PostUpsertWithoutLikesInput `json:"upsert,omitempty"`
-Delete *bool `json:"delete,omitempty"`
-Disconnect *bool `json:"disconnect,omitempty"`
 Connect *PostWhereUniqueInput `json:"connect,omitempty"`
           }
 
@@ -1239,7 +1235,7 @@ Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
 
       type LikesCreateWithoutPostInput struct {
         ID *string `json:"id,omitempty"`
-User *UserCreateOneWithoutLikesInput `json:"user,omitempty"`
+User UserCreateOneWithoutLikesInput `json:"user"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 

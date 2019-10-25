@@ -11,11 +11,11 @@ exec:
 #   filename: models_gen.go
 models:
   User:
-    model: github.com/german9304/fullstack-backend/models.User
+    model: github.com/german9304/fullstack-backend/prisma-client.User
   Post:
-    model: github.com/german9304/fullstack-backend/models.Post
+    model: github.com/german9304/fullstack-backend/prisma-client.Post
   Like:
-    model: github.com/german9304/fullstack-backend/models.Like
+    model: github.com/german9304/fullstack-backend/prisma-client.Likes
 resolver:
   filename: resolver.go
   type: Resolver
