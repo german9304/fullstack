@@ -2,6 +2,7 @@ pipeline {
     agent none
     stages {
         stage('Back end') {
+            agent none
             stages {
                 stage('Build') {
                     steps {
