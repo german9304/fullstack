@@ -10,7 +10,7 @@ pipeline {
                 stage('Build') {
                     steps {
                         echo 'Path is'
-                        echo '$PATH'
+                        echo "PATH is: $PATH"
                     }
                 }
                 stage('Test') {
