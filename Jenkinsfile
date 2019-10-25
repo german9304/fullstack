@@ -4,7 +4,9 @@ pipeline {
         stage('Back end') {
             stages {
                 stage('Build') {
-                    echo 'start container'
+                    steps {
+                         echo 'start container'
+                    }
 
                     steps {
                         sh 'docker-compose -up -d'
