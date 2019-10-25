@@ -4,29 +4,31 @@ pipeline {
         stage('Back end') {
             stages {
                 stage('Build') {
-                    agent {
-                        docker {
-                            image 'node:10.16'
-                        }
-                    }
+                    echo 'start container'
+
                     steps {
-                        echo 'build stage'
-                        sh 'ls -l'
-                        sh './backend/scripts/test.sh'
+                        sh 'docker-compose -up -d'
                     }
                 }
                 stage('Test') {
-                    agent {
-                        docker {
-                            image 'golang:1.12'
-                        }
-                    }
                     steps {
-                        echo 'test step'
+                        sh 'docker ps'
+                    }
+
+                    steps {
+                        echo 'running container'
                     }
                 }
             }
         }
+
+        stage('middle') {
+            steps {
+                sh 'docker-compose stop'
+            }
+        }
+
+
         stage('Front-End'){
             agent {
                 docker {
