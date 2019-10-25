@@ -5,20 +5,14 @@ pipeline {
             stages {
                 stage('Build') {
                     steps {
-                         echo 'start container'
-                    }
-
-                    steps {
+                        echo 'start docker container'
                         sh 'docker-compose -up -d'
                     }
                 }
                 stage('Test') {
                     steps {
-                        sh 'docker ps'
-                    }
-
-                    steps {
                         echo 'running container'
+                        sh 'docker ps'
                     }
                 }
             }
