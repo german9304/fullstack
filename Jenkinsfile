@@ -1,30 +1,19 @@
 pipeline {
     agent none
-    environment {
-        PATH = "/usr/local/bin"
-    }
     stages {
         stage('Back-end') {
-            agent any
+            agent {
+                docker {
+                    image 'golang:1.12'
+                }
+            }
             stages {
                 stage('Build') {
-                    steps {
-                        echo 'Path is'
-                        echo "PATH is: $PATH"
-                    }
-                }
-                stage('Test') {
-                    agent {
-                        docker {
-                            image 'golang:1.12'
-                        }
-                    }
-                    steps {
-                        sh 'go version'
-                    }
+                    sh 'go version'
                 }
             }
         }
+
         stage('Front-End'){
             agent {
                 docker {
