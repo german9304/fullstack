@@ -5,7 +5,7 @@ curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compo
 chmod +x /usr/local/bin/docker-compose
 mv /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd /usr/bin/
-ls
+ls | grep docker
 # ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # docker-compose --version
