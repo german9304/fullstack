@@ -5,4 +5,4 @@
 
 cd /usr/local/bin
 
-ls
+ls -l
