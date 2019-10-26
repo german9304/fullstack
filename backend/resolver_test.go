@@ -68,13 +68,10 @@ func (fs *FullStackSuite) TestCreateUserMutation() {
 
 	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3", 32}
 
-	// set any variables
 	req.Var("userinput", usr)
 
-	// set header fields
 	req.Header.Set("Cache-Control", "no-cache")
 
-	// define a Context for the request
 	ctx := context.Background()
 
 	// run it and capture the response
@@ -82,10 +79,10 @@ func (fs *FullStackSuite) TestCreateUserMutation() {
 	if err := clientGraphql.Run(ctx, req, &respData); err != nil {
 		log.Fatal(err)
 	}
+	newUser := respData["createUser"]
+	log.Printf("New user: %v \n", newUser)
 
-	for k, v := range respData {
-		log.Printf("Key: %v  Value: %v\n", k, v)
-	}
+	
 }
 
 // In order for 'go test' to run this suite, we need to create
