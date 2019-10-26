@@ -24,16 +24,17 @@ var (
 
 func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
-	// name := "John"
-	// password := "293902122"
-	// age := 32
+	name := "John"
+	password := "293902122"
+	age := 32
 
-	// user, _ := client.CreateUser(prisma.UserCreateInput{
-	// 	Email:    email,
-	// 	Name:     name,
-	// 	Password: password,
-	// 	Age:      int32(age),
-	// }).Exec(ctx)
+	client.CreateUser(prisma.UserCreateInput{
+		Email:    email,
+		Name:     name,
+		Password: password,
+		Age:      int32(age),
+	}).Exec(ctx)
+	// log.Printf("Created %v \n", user)
 
 	// log.Printf("type => %T \n", user)
 	// log.Printf("Value => %v \n", user)
@@ -41,15 +42,19 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 
 func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
-	// user, _ := client.DeleteUser(prisma.UserWhereUniqueInput{
-	// 	Email: &email,
-	// }).Exec(ctx)
-	// log.Printf("Deleted %v \n", user)
+	client.DeleteUser(prisma.UserWhereUniqueInput{
+		Email: &email,
+	}).Exec(ctx)
+	userEmail := "mark@mail.com"
+	client.DeleteUser(prisma.UserWhereUniqueInput{
+		Email: &userEmail,
+	}).Exec(ctx)
+	log.Printf("Deleted \n")
 }
 
 // All methods that begin with "Test" are run as tests within a
 // suite.
-func (fs *FullStackSuite) TestCreateUser() {
+func (fs *FullStackSuite) TestCreateUserMutation() {
 	// make a request
 	req := graphql.NewRequest(`
 		mutation CreateUserMutation($userinput: UserInput) {
@@ -61,7 +66,7 @@ func (fs *FullStackSuite) TestCreateUser() {
 		}
 	`)
 
-	usr := UserInput{"mark@mail.com", "Makrk", "2923ij3j3", 32}
+	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3", 32}
 
 	// set any variables
 	req.Var("userinput", usr)
@@ -73,13 +78,14 @@ func (fs *FullStackSuite) TestCreateUser() {
 	ctx := context.Background()
 
 	// run it and capture the response
-	var respData map[string]interface{}
+	var respData map[string]prisma.User
 	if err := clientGraphql.Run(ctx, req, &respData); err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("result => %v \n", respData)
-
+	for k, v := range respData {
+		log.Printf("Key: %v  Value: %v\n", k, v)
+	}
 }
 
 // In order for 'go test' to run this suite, we need to create
