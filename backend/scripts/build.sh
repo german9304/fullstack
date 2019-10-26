@@ -8,4 +8,4 @@ cd /usr/bin/
 ls | grep docker
 # ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
-# docker-compose --version
+docker-compose --version
