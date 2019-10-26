@@ -26,13 +26,11 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
 	name := "John"
 	password := "293902122"
-	age := 32
 
 	client.CreateUser(prisma.UserCreateInput{
 		Email:    email,
 		Name:     name,
 		Password: password,
-		Age:      int32(age),
 	}).Exec(ctx)
 	// log.Printf("Created %v \n", user)
 
@@ -57,16 +55,15 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 func (fs *FullStackSuite) TestCreateUserMutation() {
 	// make a request
 	req := graphql.NewRequest(`
-		mutation CreateUserMutation($userinput: UserInput) {
-			createUser (usrinpt: $userinput) {
+		mutation signupMutation($userinput: UserInput!) {
+			signup (usrinpt: $userinput) {
 				id
 				name
-				age
 			}
 		}
 	`)
 
-	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3", 32}
+	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
 
 	req.Var("userinput", usr)
 
@@ -79,7 +76,7 @@ func (fs *FullStackSuite) TestCreateUserMutation() {
 	if err := clientGraphql.Run(ctx, req, &respData); err != nil {
 		log.Fatal(err)
 	}
-	newUser := respData["createUser"]
+	newUser := respData["signup"]
 	log.Printf("New user: %v \n", newUser)
 
 	

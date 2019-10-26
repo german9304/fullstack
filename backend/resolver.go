@@ -9,9 +9,7 @@ import (
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-type Resolver struct {
-	users []*prisma.User
-}
+type Resolver struct{}
 
 func (r *Resolver) Like() LikeResolver {
 	return &likeResolver{r}
@@ -46,17 +44,15 @@ func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Likes) (*time.
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateUser(ctx context.Context, usrinpt *UserInput) (*prisma.User, error) {
+func (r *mutationResolver) Signup(ctx context.Context, usrinpt UserInput) (*prisma.User, error) {
 	client := prisma.New(nil)
 	email := usrinpt.Email
 	name := usrinpt.Name
 	pwd := usrinpt.Password
-	age := int32(usrinpt.Age)
 
 	user, err := client.CreateUser(prisma.UserCreateInput{
 		Email:    email,
 		Name:     name,
-		Age:      age,
 		Password: pwd,
 	}).Exec(ctx)
 
@@ -66,7 +62,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, usrinpt *UserInput) (
 
 	return user, nil
 }
-func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt *PostInput) (*prisma.Post, error) {
+func (r *mutationResolver) Signin(ctx context.Context, email string, password string) (*prisma.User, error) {
+	panic("not implemented")
+}
+func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
+	panic("not implemented")
+}
+func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreateLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {

@@ -265,7 +265,7 @@ Last *int32 `json:"last,omitempty"`
           params,
           [2]string{"UserWhereUniqueInput!", "User"},
           "user",
-          []string{"id","email","name","password","age","createdAt"})
+          []string{"id","email","name","password","createdAt"})
 
         return &UserExec{ret}
       }
@@ -298,7 +298,7 @@ Last *int32 `json:"last,omitempty"`
           wparams,
           [3]string{"UserWhereInput", "UserOrderByInput", "User"},
           "users",
-          []string{"id","email","name","password","age","createdAt"})
+          []string{"id","email","name","password","createdAt"})
 
         return &UserExecArray{ret}
       }
@@ -516,7 +516,7 @@ Update PostUpdateInput `json:"update"`
           params,
           [2]string{"UserCreateInput!", "User"},
           "createUser",
-          []string{"id","email","name","password","age","createdAt"})
+          []string{"id","email","name","password","createdAt"})
 
         return &UserExec{ret}
       }
@@ -533,7 +533,7 @@ Where UserWhereUniqueInput `json:"where"`
                  },
                  [3]string{"UserUpdateInput!", "UserWhereUniqueInput!", "User"},
                  "updateUser",
-                 []string{"id","email","name","password","age","createdAt"})
+                 []string{"id","email","name","password","createdAt"})
 
         return &UserExec{ret}
       }
@@ -568,7 +568,7 @@ Update UserUpdateInput `json:"update"`
           uparams,
           [4]string{"UserWhereUniqueInput!", "UserCreateInput!", "UserUpdateInput!","User"},
           "upsertUser",
-          []string{"id","email","name","password","age","createdAt"})
+          []string{"id","email","name","password","createdAt"})
 
         return &UserExec{ret}
       }
@@ -578,7 +578,7 @@ Update UserUpdateInput `json:"update"`
           params,
           [2]string{"UserWhereUniqueInput!", "User"},
           "deleteUser",
-          []string{"id","email","name","password","age","createdAt"})
+          []string{"id","email","name","password","createdAt"})
 
         return &UserExec{ret}
       }
@@ -623,8 +623,6 @@ UserOrderByInputNameAsc UserOrderByInput = "name_ASC"
 UserOrderByInputNameDesc UserOrderByInput = "name_DESC"
 UserOrderByInputPasswordAsc UserOrderByInput = "password_ASC"
 UserOrderByInputPasswordDesc UserOrderByInput = "password_DESC"
-UserOrderByInputAgeAsc UserOrderByInput = "age_ASC"
-UserOrderByInputAgeDesc UserOrderByInput = "age_DESC"
 UserOrderByInputCreatedAtAsc UserOrderByInput = "createdAt_ASC"
 UserOrderByInputCreatedAtDesc UserOrderByInput = "createdAt_DESC"
           )
@@ -652,25 +650,6 @@ UpdateMany []PostUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
         ID *string `json:"id,omitempty"`
           }
 
-      type PostCreateOneWithoutLikesInput struct {
-        Create *PostCreateWithoutLikesInput `json:"create,omitempty"`
-Connect *PostWhereUniqueInput `json:"connect,omitempty"`
-          }
-
-      type UserUpdateWithoutPostsDataInput struct {
-        Email *string `json:"email,omitempty"`
-Name *string `json:"name,omitempty"`
-Password *string `json:"password,omitempty"`
-Age *int32 `json:"age,omitempty"`
-Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
-          }
-
-      type PostCreateWithoutLikesInput struct {
-        ID *string `json:"id,omitempty"`
-Text string `json:"text"`
-Author *UserCreateOneWithoutPostsInput `json:"author,omitempty"`
-          }
-
       type LikesUpdateManyWithoutPostInput struct {
         Create []LikesCreateWithoutPostInput `json:"create,omitempty"`
 Delete []LikesWhereUniqueInput `json:"delete,omitempty"`
@@ -681,181 +660,6 @@ Update []LikesUpdateWithWhereUniqueWithoutPostInput `json:"update,omitempty"`
 Upsert []LikesUpsertWithWhereUniqueWithoutPostInput `json:"upsert,omitempty"`
 DeleteMany []LikesScalarWhereInput `json:"deleteMany,omitempty"`
 UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
-          }
-
-      type UserCreateOneWithoutPostsInput struct {
-        Create *UserCreateWithoutPostsInput `json:"create,omitempty"`
-Connect *UserWhereUniqueInput `json:"connect,omitempty"`
-          }
-
-      type LikesWhereInput struct {
-        ID *string `json:"id,omitempty"`
-IDNot *string `json:"id_not,omitempty"`
-IDIn []string `json:"id_in,omitempty"`
-IDNotIn []string `json:"id_not_in,omitempty"`
-IDLt *string `json:"id_lt,omitempty"`
-IDLte *string `json:"id_lte,omitempty"`
-IDGt *string `json:"id_gt,omitempty"`
-IDGte *string `json:"id_gte,omitempty"`
-IDContains *string `json:"id_contains,omitempty"`
-IDNotContains *string `json:"id_not_contains,omitempty"`
-IDStartsWith *string `json:"id_starts_with,omitempty"`
-IDNotStartsWith *string `json:"id_not_starts_with,omitempty"`
-IDEndsWith *string `json:"id_ends_with,omitempty"`
-IDNotEndsWith *string `json:"id_not_ends_with,omitempty"`
-User *UserWhereInput `json:"user,omitempty"`
-Post *PostWhereInput `json:"post,omitempty"`
-CreatedAt *string `json:"createdAt,omitempty"`
-CreatedAtNot *string `json:"createdAt_not,omitempty"`
-CreatedAtIn []string `json:"createdAt_in,omitempty"`
-CreatedAtNotIn []string `json:"createdAt_not_in,omitempty"`
-CreatedAtLt *string `json:"createdAt_lt,omitempty"`
-CreatedAtLte *string `json:"createdAt_lte,omitempty"`
-CreatedAtGt *string `json:"createdAt_gt,omitempty"`
-CreatedAtGte *string `json:"createdAt_gte,omitempty"`
-UpdatedAt *string `json:"updatedAt,omitempty"`
-UpdatedAtNot *string `json:"updatedAt_not,omitempty"`
-UpdatedAtIn []string `json:"updatedAt_in,omitempty"`
-UpdatedAtNotIn []string `json:"updatedAt_not_in,omitempty"`
-UpdatedAtLt *string `json:"updatedAt_lt,omitempty"`
-UpdatedAtLte *string `json:"updatedAt_lte,omitempty"`
-UpdatedAtGt *string `json:"updatedAt_gt,omitempty"`
-UpdatedAtGte *string `json:"updatedAt_gte,omitempty"`
-Quantity *int32 `json:"quantity,omitempty"`
-QuantityNot *int32 `json:"quantity_not,omitempty"`
-QuantityIn []int32 `json:"quantity_in,omitempty"`
-QuantityNotIn []int32 `json:"quantity_not_in,omitempty"`
-QuantityLt *int32 `json:"quantity_lt,omitempty"`
-QuantityLte *int32 `json:"quantity_lte,omitempty"`
-QuantityGt *int32 `json:"quantity_gt,omitempty"`
-QuantityGte *int32 `json:"quantity_gte,omitempty"`
-And []LikesWhereInput `json:"AND,omitempty"`
-Or []LikesWhereInput `json:"OR,omitempty"`
-Not []LikesWhereInput `json:"NOT,omitempty"`
-          }
-
-      type UserCreateWithoutPostsInput struct {
-        ID *string `json:"id,omitempty"`
-Email string `json:"email"`
-Name string `json:"name"`
-Password string `json:"password"`
-Age int32 `json:"age"`
-Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
-          }
-
-      type PostSubscriptionWhereInput struct {
-        MutationIn []MutationType `json:"mutation_in,omitempty"`
-UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
-UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
-UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
-Node *PostWhereInput `json:"node,omitempty"`
-And []PostSubscriptionWhereInput `json:"AND,omitempty"`
-Or []PostSubscriptionWhereInput `json:"OR,omitempty"`
-Not []PostSubscriptionWhereInput `json:"NOT,omitempty"`
-          }
-
-      type LikesCreateManyWithoutUserInput struct {
-        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
-          }
-
-      type UserUpdateManyMutationInput struct {
-        Email *string `json:"email,omitempty"`
-Name *string `json:"name,omitempty"`
-Password *string `json:"password,omitempty"`
-Age *int32 `json:"age,omitempty"`
-          }
-
-      type LikesCreateWithoutUserInput struct {
-        ID *string `json:"id,omitempty"`
-Post PostCreateOneWithoutLikesInput `json:"post"`
-Quantity *int32 `json:"quantity,omitempty"`
-          }
-
-      type UserCreateInput struct {
-        ID *string `json:"id,omitempty"`
-Email string `json:"email"`
-Name string `json:"name"`
-Password string `json:"password"`
-Age int32 `json:"age"`
-Posts *PostCreateManyWithoutAuthorInput `json:"posts,omitempty"`
-Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
-          }
-
-      type LikesUpdateInput struct {
-        User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
-Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
-Quantity *int32 `json:"quantity,omitempty"`
-          }
-
-      type PostUpdateInput struct {
-        Text *string `json:"text,omitempty"`
-Author *UserUpdateOneWithoutPostsInput `json:"author,omitempty"`
-Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
-          }
-
-      type UserUpdateOneRequiredWithoutLikesInput struct {
-        Create *UserCreateWithoutLikesInput `json:"create,omitempty"`
-Update *UserUpdateWithoutLikesDataInput `json:"update,omitempty"`
-Upsert *UserUpsertWithoutLikesInput `json:"upsert,omitempty"`
-Connect *UserWhereUniqueInput `json:"connect,omitempty"`
-          }
-
-      type PostCreateInput struct {
-        ID *string `json:"id,omitempty"`
-Text string `json:"text"`
-Author *UserCreateOneWithoutPostsInput `json:"author,omitempty"`
-Likes *LikesCreateManyWithoutPostInput `json:"likes,omitempty"`
-          }
-
-      type UserUpdateWithoutLikesDataInput struct {
-        Email *string `json:"email,omitempty"`
-Name *string `json:"name,omitempty"`
-Password *string `json:"password,omitempty"`
-Age *int32 `json:"age,omitempty"`
-Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
-          }
-
-      type PostUpsertWithoutLikesInput struct {
-        Update PostUpdateWithoutLikesDataInput `json:"update"`
-Create PostCreateWithoutLikesInput `json:"create"`
-          }
-
-      type LikesUpdateManyWithoutUserInput struct {
-        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
-Delete []LikesWhereUniqueInput `json:"delete,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
-Set []LikesWhereUniqueInput `json:"set,omitempty"`
-Disconnect []LikesWhereUniqueInput `json:"disconnect,omitempty"`
-Update []LikesUpdateWithWhereUniqueWithoutUserInput `json:"update,omitempty"`
-Upsert []LikesUpsertWithWhereUniqueWithoutUserInput `json:"upsert,omitempty"`
-DeleteMany []LikesScalarWhereInput `json:"deleteMany,omitempty"`
-UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
-          }
-
-      type UserUpsertWithoutPostsInput struct {
-        Update UserUpdateWithoutPostsDataInput `json:"update"`
-Create UserCreateWithoutPostsInput `json:"create"`
-          }
-
-      type PostUpdateWithWhereUniqueWithoutAuthorInput struct {
-        Where PostWhereUniqueInput `json:"where"`
-Data PostUpdateWithoutAuthorDataInput `json:"data"`
-          }
-
-      type LikesUpdateWithoutUserDataInput struct {
-        Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
-Quantity *int32 `json:"quantity,omitempty"`
-          }
-
-      type PostUpdateWithoutAuthorDataInput struct {
-        Text *string `json:"text,omitempty"`
-Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
-          }
-
-      type UserCreateOneWithoutLikesInput struct {
-        Create *UserCreateWithoutLikesInput `json:"create,omitempty"`
-Connect *UserWhereUniqueInput `json:"connect,omitempty"`
           }
 
       type PostWhereInput struct {
@@ -912,24 +716,177 @@ Or []PostWhereInput `json:"OR,omitempty"`
 Not []PostWhereInput `json:"NOT,omitempty"`
           }
 
-      type PostCreateManyWithoutAuthorInput struct {
-        Create []PostCreateWithoutAuthorInput `json:"create,omitempty"`
-Connect []PostWhereUniqueInput `json:"connect,omitempty"`
-          }
-
       type LikesUpdateWithWhereUniqueWithoutPostInput struct {
         Where LikesWhereUniqueInput `json:"where"`
 Data LikesUpdateWithoutPostDataInput `json:"data"`
           }
 
-      type LikesCreateManyWithoutPostInput struct {
-        Create []LikesCreateWithoutPostInput `json:"create,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+      type LikesWhereInput struct {
+        ID *string `json:"id,omitempty"`
+IDNot *string `json:"id_not,omitempty"`
+IDIn []string `json:"id_in,omitempty"`
+IDNotIn []string `json:"id_not_in,omitempty"`
+IDLt *string `json:"id_lt,omitempty"`
+IDLte *string `json:"id_lte,omitempty"`
+IDGt *string `json:"id_gt,omitempty"`
+IDGte *string `json:"id_gte,omitempty"`
+IDContains *string `json:"id_contains,omitempty"`
+IDNotContains *string `json:"id_not_contains,omitempty"`
+IDStartsWith *string `json:"id_starts_with,omitempty"`
+IDNotStartsWith *string `json:"id_not_starts_with,omitempty"`
+IDEndsWith *string `json:"id_ends_with,omitempty"`
+IDNotEndsWith *string `json:"id_not_ends_with,omitempty"`
+User *UserWhereInput `json:"user,omitempty"`
+Post *PostWhereInput `json:"post,omitempty"`
+CreatedAt *string `json:"createdAt,omitempty"`
+CreatedAtNot *string `json:"createdAt_not,omitempty"`
+CreatedAtIn []string `json:"createdAt_in,omitempty"`
+CreatedAtNotIn []string `json:"createdAt_not_in,omitempty"`
+CreatedAtLt *string `json:"createdAt_lt,omitempty"`
+CreatedAtLte *string `json:"createdAt_lte,omitempty"`
+CreatedAtGt *string `json:"createdAt_gt,omitempty"`
+CreatedAtGte *string `json:"createdAt_gte,omitempty"`
+UpdatedAt *string `json:"updatedAt,omitempty"`
+UpdatedAtNot *string `json:"updatedAt_not,omitempty"`
+UpdatedAtIn []string `json:"updatedAt_in,omitempty"`
+UpdatedAtNotIn []string `json:"updatedAt_not_in,omitempty"`
+UpdatedAtLt *string `json:"updatedAt_lt,omitempty"`
+UpdatedAtLte *string `json:"updatedAt_lte,omitempty"`
+UpdatedAtGt *string `json:"updatedAt_gt,omitempty"`
+UpdatedAtGte *string `json:"updatedAt_gte,omitempty"`
+Quantity *int32 `json:"quantity,omitempty"`
+QuantityNot *int32 `json:"quantity_not,omitempty"`
+QuantityIn []int32 `json:"quantity_in,omitempty"`
+QuantityNotIn []int32 `json:"quantity_not_in,omitempty"`
+QuantityLt *int32 `json:"quantity_lt,omitempty"`
+QuantityLte *int32 `json:"quantity_lte,omitempty"`
+QuantityGt *int32 `json:"quantity_gt,omitempty"`
+QuantityGte *int32 `json:"quantity_gte,omitempty"`
+And []LikesWhereInput `json:"AND,omitempty"`
+Or []LikesWhereInput `json:"OR,omitempty"`
+Not []LikesWhereInput `json:"NOT,omitempty"`
+          }
+
+      type UserCreateOneWithoutPostsInput struct {
+        Create *UserCreateWithoutPostsInput `json:"create,omitempty"`
+Connect *UserWhereUniqueInput `json:"connect,omitempty"`
+          }
+
+      type UserUpdateWithoutPostsDataInput struct {
+        Email *string `json:"email,omitempty"`
+Name *string `json:"name,omitempty"`
+Password *string `json:"password,omitempty"`
+Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
+          }
+
+      type UserCreateWithoutPostsInput struct {
+        ID *string `json:"id,omitempty"`
+Email string `json:"email"`
+Name string `json:"name"`
+Password string `json:"password"`
+Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
       type LikesUpdateWithoutPostDataInput struct {
         User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
+          }
+
+      type LikesCreateManyWithoutUserInput struct {
+        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
+Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+          }
+
+      type PostSubscriptionWhereInput struct {
+        MutationIn []MutationType `json:"mutation_in,omitempty"`
+UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
+UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
+UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
+Node *PostWhereInput `json:"node,omitempty"`
+And []PostSubscriptionWhereInput `json:"AND,omitempty"`
+Or []PostSubscriptionWhereInput `json:"OR,omitempty"`
+Not []PostSubscriptionWhereInput `json:"NOT,omitempty"`
+          }
+
+      type LikesCreateWithoutUserInput struct {
+        ID *string `json:"id,omitempty"`
+Post PostCreateOneWithoutLikesInput `json:"post"`
+Quantity *int32 `json:"quantity,omitempty"`
+          }
+
+      type UserUpdateManyMutationInput struct {
+        Email *string `json:"email,omitempty"`
+Name *string `json:"name,omitempty"`
+Password *string `json:"password,omitempty"`
+          }
+
+      type LikesUpdateInput struct {
+        User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
+Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
+Quantity *int32 `json:"quantity,omitempty"`
+          }
+
+      type UserCreateInput struct {
+        ID *string `json:"id,omitempty"`
+Email string `json:"email"`
+Name string `json:"name"`
+Password string `json:"password"`
+Posts *PostCreateManyWithoutAuthorInput `json:"posts,omitempty"`
+Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
+          }
+
+      type UserUpdateOneRequiredWithoutLikesInput struct {
+        Create *UserCreateWithoutLikesInput `json:"create,omitempty"`
+Update *UserUpdateWithoutLikesDataInput `json:"update,omitempty"`
+Upsert *UserUpsertWithoutLikesInput `json:"upsert,omitempty"`
+Connect *UserWhereUniqueInput `json:"connect,omitempty"`
+          }
+
+      type PostUpdateManyMutationInput struct {
+        Text *string `json:"text,omitempty"`
+          }
+
+      type UserUpdateWithoutLikesDataInput struct {
+        Email *string `json:"email,omitempty"`
+Name *string `json:"name,omitempty"`
+Password *string `json:"password,omitempty"`
+Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
+          }
+
+      type PostCreateInput struct {
+        ID *string `json:"id,omitempty"`
+Text string `json:"text"`
+Author *UserCreateOneWithoutPostsInput `json:"author,omitempty"`
+Likes *LikesCreateManyWithoutPostInput `json:"likes,omitempty"`
+          }
+
+      type LikesUpdateWithoutUserDataInput struct {
+        Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
+Quantity *int32 `json:"quantity,omitempty"`
+          }
+
+      type LikesUpdateManyMutationInput struct {
+        Quantity *int32 `json:"quantity,omitempty"`
+          }
+
+      type PostUpdateWithWhereUniqueWithoutAuthorInput struct {
+        Where PostWhereUniqueInput `json:"where"`
+Data PostUpdateWithoutAuthorDataInput `json:"data"`
+          }
+
+      type UserUpsertWithoutPostsInput struct {
+        Update UserUpdateWithoutPostsDataInput `json:"update"`
+Create UserCreateWithoutPostsInput `json:"create"`
+          }
+
+      type PostUpdateWithoutAuthorDataInput struct {
+        Text *string `json:"text,omitempty"`
+Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
+          }
+
+      type UserCreateOneWithoutLikesInput struct {
+        Create *UserCreateWithoutLikesInput `json:"create,omitempty"`
+Connect *UserWhereUniqueInput `json:"connect,omitempty"`
           }
 
       type UserWhereInput struct {
@@ -989,14 +946,6 @@ PasswordStartsWith *string `json:"password_starts_with,omitempty"`
 PasswordNotStartsWith *string `json:"password_not_starts_with,omitempty"`
 PasswordEndsWith *string `json:"password_ends_with,omitempty"`
 PasswordNotEndsWith *string `json:"password_not_ends_with,omitempty"`
-Age *int32 `json:"age,omitempty"`
-AgeNot *int32 `json:"age_not,omitempty"`
-AgeIn []int32 `json:"age_in,omitempty"`
-AgeNotIn []int32 `json:"age_not_in,omitempty"`
-AgeLt *int32 `json:"age_lt,omitempty"`
-AgeLte *int32 `json:"age_lte,omitempty"`
-AgeGt *int32 `json:"age_gt,omitempty"`
-AgeGte *int32 `json:"age_gte,omitempty"`
 CreatedAt *string `json:"createdAt,omitempty"`
 CreatedAtNot *string `json:"createdAt_not,omitempty"`
 CreatedAtIn []string `json:"createdAt_in,omitempty"`
@@ -1016,21 +965,53 @@ Or []UserWhereInput `json:"OR,omitempty"`
 Not []UserWhereInput `json:"NOT,omitempty"`
           }
 
+      type PostCreateManyWithoutAuthorInput struct {
+        Create []PostCreateWithoutAuthorInput `json:"create,omitempty"`
+Connect []PostWhereUniqueInput `json:"connect,omitempty"`
+          }
+
+      type LikesUpdateWithWhereUniqueWithoutUserInput struct {
+        Where LikesWhereUniqueInput `json:"where"`
+Data LikesUpdateWithoutUserDataInput `json:"data"`
+          }
+
+      type LikesCreateManyWithoutPostInput struct {
+        Create []LikesCreateWithoutPostInput `json:"create,omitempty"`
+Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+          }
+
+      type LikesUpdateManyWithoutUserInput struct {
+        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
+Delete []LikesWhereUniqueInput `json:"delete,omitempty"`
+Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+Set []LikesWhereUniqueInput `json:"set,omitempty"`
+Disconnect []LikesWhereUniqueInput `json:"disconnect,omitempty"`
+Update []LikesUpdateWithWhereUniqueWithoutUserInput `json:"update,omitempty"`
+Upsert []LikesUpsertWithWhereUniqueWithoutUserInput `json:"upsert,omitempty"`
+DeleteMany []LikesScalarWhereInput `json:"deleteMany,omitempty"`
+UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
+          }
+
+      type PostCreateOneWithoutLikesInput struct {
+        Create *PostCreateWithoutLikesInput `json:"create,omitempty"`
+Connect *PostWhereUniqueInput `json:"connect,omitempty"`
+          }
+
       type LikesUpsertWithWhereUniqueWithoutPostInput struct {
         Where LikesWhereUniqueInput `json:"where"`
 Update LikesUpdateWithoutPostDataInput `json:"update"`
 Create LikesCreateWithoutPostInput `json:"create"`
           }
 
-      type LikesSubscriptionWhereInput struct {
+      type UserSubscriptionWhereInput struct {
         MutationIn []MutationType `json:"mutation_in,omitempty"`
 UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
 UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
 UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
-Node *LikesWhereInput `json:"node,omitempty"`
-And []LikesSubscriptionWhereInput `json:"AND,omitempty"`
-Or []LikesSubscriptionWhereInput `json:"OR,omitempty"`
-Not []LikesSubscriptionWhereInput `json:"NOT,omitempty"`
+Node *UserWhereInput `json:"node,omitempty"`
+And []UserSubscriptionWhereInput `json:"AND,omitempty"`
+Or []UserSubscriptionWhereInput `json:"OR,omitempty"`
+Not []UserSubscriptionWhereInput `json:"NOT,omitempty"`
           }
 
       type LikesScalarWhereInput struct {
@@ -1077,8 +1058,12 @@ Or []LikesScalarWhereInput `json:"OR,omitempty"`
 Not []LikesScalarWhereInput `json:"NOT,omitempty"`
           }
 
-      type PostUpdateManyMutationInput struct {
-        Text *string `json:"text,omitempty"`
+      type UserUpdateInput struct {
+        Email *string `json:"email,omitempty"`
+Name *string `json:"name,omitempty"`
+Password *string `json:"password,omitempty"`
+Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
+Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
       type LikesUpdateManyWithWhereNestedInput struct {
@@ -1086,18 +1071,19 @@ Not []LikesScalarWhereInput `json:"NOT,omitempty"`
 Data LikesUpdateManyDataInput `json:"data"`
           }
 
-      type LikesUpdateManyMutationInput struct {
-        Quantity *int32 `json:"quantity,omitempty"`
+      type PostUpdateInput struct {
+        Text *string `json:"text,omitempty"`
+Author *UserUpdateOneWithoutPostsInput `json:"author,omitempty"`
+Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
       type LikesUpdateManyDataInput struct {
         Quantity *int32 `json:"quantity,omitempty"`
           }
 
-      type LikesUpsertWithWhereUniqueWithoutUserInput struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Update LikesUpdateWithoutUserDataInput `json:"update"`
-Create LikesCreateWithoutUserInput `json:"create"`
+      type PostUpsertWithoutLikesInput struct {
+        Update PostUpdateWithoutLikesDataInput `json:"update"`
+Create PostCreateWithoutLikesInput `json:"create"`
           }
 
       type PostUpsertWithWhereUniqueWithoutAuthorInput struct {
@@ -1174,15 +1160,10 @@ Likes *LikesCreateManyWithoutPostInput `json:"likes,omitempty"`
 Data PostUpdateManyDataInput `json:"data"`
           }
 
-      type UserSubscriptionWhereInput struct {
-        MutationIn []MutationType `json:"mutation_in,omitempty"`
-UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
-UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
-UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
-Node *UserWhereInput `json:"node,omitempty"`
-And []UserSubscriptionWhereInput `json:"AND,omitempty"`
-Or []UserSubscriptionWhereInput `json:"OR,omitempty"`
-Not []UserSubscriptionWhereInput `json:"NOT,omitempty"`
+      type PostCreateWithoutLikesInput struct {
+        ID *string `json:"id,omitempty"`
+Text string `json:"text"`
+Author *UserCreateOneWithoutPostsInput `json:"author,omitempty"`
           }
 
       type PostUpdateManyDataInput struct {
@@ -1224,13 +1205,15 @@ Create UserCreateWithoutLikesInput `json:"create"`
 Email *string `json:"email,omitempty"`
           }
 
-      type UserUpdateInput struct {
-        Email *string `json:"email,omitempty"`
-Name *string `json:"name,omitempty"`
-Password *string `json:"password,omitempty"`
-Age *int32 `json:"age,omitempty"`
-Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
-Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
+      type LikesSubscriptionWhereInput struct {
+        MutationIn []MutationType `json:"mutation_in,omitempty"`
+UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
+UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
+UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
+Node *LikesWhereInput `json:"node,omitempty"`
+And []LikesSubscriptionWhereInput `json:"AND,omitempty"`
+Or []LikesSubscriptionWhereInput `json:"OR,omitempty"`
+Not []LikesSubscriptionWhereInput `json:"NOT,omitempty"`
           }
 
       type LikesCreateWithoutPostInput struct {
@@ -1244,13 +1227,13 @@ Quantity *int32 `json:"quantity,omitempty"`
 Email string `json:"email"`
 Name string `json:"name"`
 Password string `json:"password"`
-Age int32 `json:"age"`
 Posts *PostCreateManyWithoutAuthorInput `json:"posts,omitempty"`
           }
 
-      type LikesUpdateWithWhereUniqueWithoutUserInput struct {
+      type LikesUpsertWithWhereUniqueWithoutUserInput struct {
         Where LikesWhereUniqueInput `json:"where"`
-Data LikesUpdateWithoutUserDataInput `json:"data"`
+Update LikesUpdateWithoutUserDataInput `json:"update"`
+Create LikesCreateWithoutUserInput `json:"create"`
           }
 
 
@@ -1288,36 +1271,69 @@ Data LikesUpdateWithoutUserDataInput `json:"data"`
             return v, err
           }
 
-        var UserPreviousValuesFields = []string{"id", "email", "name", "password", "age", "createdAt"}
+        var UserPreviousValuesFields = []string{"id", "email", "name", "password", "createdAt"}
 
         type UserPreviousValues struct {
           ID string `json:"id"`
 Email string `json:"email"`
 Name string `json:"name"`
 Password string `json:"password"`
-Age int32 `json:"age"`
 CreatedAt string `json:"createdAt"`
         }
 
-        type LikesEdgeExec struct {
+
+        type PostExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *LikesEdgeExec) Node() *LikesExec {
+                func (instance *PostExec) Author() *UserExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
-                    [2]string{"", "Likes"},
-                    "node",
+                    [2]string{"", "User"},
+                    "author",
+                    []string{"id","email","name","password","createdAt"})
+
+                  return &UserExec{ret}
+                }
+
+                type LikesParamsExec struct {
+                  Where *LikesWhereInput
+OrderBy *LikesOrderByInput
+Skip *int32
+After *string
+Before *string
+First *int32
+Last *int32
+                }
+                func (instance *PostExec) Likes(params *LikesParamsExec) *LikesExecArray {
+                  var wparams *prisma.WhereParams
+                  if params != nil {
+                    wparams = &prisma.WhereParams{
+                      Where: params.Where,
+                      OrderBy: (*string)(params.OrderBy),
+                      Skip: params.Skip,
+                      After: params.After,
+                      Before: params.Before,
+                      First: params.First,
+                      Last: params.Last,
+                    }
+                  }
+
+                  ret := instance.exec.Client.GetMany(
+                    instance.exec,
+                    wparams,
+                    [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
+                    "likes",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesExec{ret}
+                  return &LikesExecArray{ret}
                 }
 
           
-                func (instance LikesEdgeExec) Exec(ctx context.Context) (*LikesEdge, error) {
-                  var v LikesEdge
+                func (instance PostExec) Exec(ctx context.Context) (*Post, error) {
+                  var v Post
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1329,347 +1345,23 @@ CreatedAt string `json:"createdAt"`
                 }
               
 
-          func (instance LikesEdgeExec) Exists(ctx context.Context) (bool, error) {
+          func (instance PostExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesEdgeExecArray struct {
+          type PostExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesEdgeExecArray) Exec(ctx context.Context) ([]LikesEdge, error) {
-            var v []LikesEdge
+          func (instance PostExecArray) Exec(ctx context.Context) ([]Post, error) {
+            var v []Post
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesEdgeFields = []string{"cursor"}
+        var PostFields = []string{"id", "text", "createdAt", "updatedAt"}
 
-        type LikesEdge struct {
-          Node Likes `json:"node"`
-Cursor string `json:"cursor"`
-        }
-
-        type PostSubscriptionPayloadExec struct {
-          exec *prisma.Exec
-        }
-
-        
-                func (instance *PostSubscriptionPayloadExec) Node() *PostExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "Post"},
-                    "node",
-                    []string{"id","text","createdAt","updatedAt"})
-
-                  return &PostExec{ret}
-                }
-
-                func (instance *PostSubscriptionPayloadExec) PreviousValues() *PostPreviousValuesExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "PostPreviousValues"},
-                    "previousValues",
-                    []string{"id","text","createdAt","updatedAt"})
-
-                  return &PostPreviousValuesExec{ret}
-                }
-
-          
-                func (instance PostSubscriptionPayloadExec) Exec(ctx context.Context) (*PostSubscriptionPayload, error) {
-                  var v PostSubscriptionPayload
-                  ok, err := instance.exec.Exec(ctx, &v)
-                  if err != nil {
-                    return nil, err
-                  }
-                  if !ok {
-                    return nil, ErrNoResult
-                  }
-                  return &v, nil
-                }
-              
-
-          func (instance PostSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
-            return instance.exec.Exists(ctx)
-          }
-
-          type PostSubscriptionPayloadExecArray struct {
-            exec *prisma.Exec
-          }
-
-          func (instance PostSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]PostSubscriptionPayload, error) {
-            var v []PostSubscriptionPayload
-            err := instance.exec.ExecArray(ctx, &v)
-            return v, err
-          }
-
-        var PostSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
-
-        type PostSubscriptionPayload struct {
-          Mutation MutationType `json:"mutation"`
-Node *Post `json:"node,omitempty"`
-UpdatedFields []string `json:"updatedFields,omitempty"`
-        }
-
-
-        type UserConnectionExec struct {
-          exec *prisma.Exec
-        }
-
-        
-                func (instance *UserConnectionExec) PageInfo() *PageInfoExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "PageInfo"},
-                    "pageInfo",
-                    []string{"hasNextPage","hasPreviousPage","startCursor","endCursor"})
-
-                  return &PageInfoExec{ret}
-                }
-
-                  func (instance *UserConnectionExec) Edges() *UserEdgeExecArray {
-                    edges := instance.exec.Client.GetMany(
-                      instance.exec,
-                      nil,
-                      [3]string{"UserWhereInput", "UserOrderByInput", "UserEdge"},
-                      "edges",
-                      []string{"cursor"})
-
-                    nodes := edges.Client.GetOne(
-                      edges,
-                      nil,
-                      [2]string{"", "User"},
-                      "node",
-                      UserFields)
-
-                    return &UserEdgeExecArray{nodes}
-                  }
-
-                  func (instance *UserConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
-                    ret := instance.exec.Client.GetOne(
-                      instance.exec,
-                      nil,
-                      [2]string{"", "AggregateUser"},
-                      "aggregate",
-                      []string{"count"})
-
-                    var v Aggregate
-                    _, err := ret.Exec(ctx, &v)
-                    return &v, err
-                  }
-
-          
-                func (instance UserConnectionExec) Exec(ctx context.Context) (*UserConnection, error) {
-                  edges, err := instance.Edges().Exec(ctx)
-                  if err != nil {
-                    return nil, err
-                  }
-
-                  pageInfo, err := instance.PageInfo().Exec(ctx)
-                  if err != nil {
-                    return nil, err
-                  }
-
-                  return &UserConnection{
-                    Edges:    edges,
-                    PageInfo: *pageInfo,
-                  }, nil
-                }
-              
-
-          func (instance UserConnectionExec) Exists(ctx context.Context) (bool, error) {
-            return instance.exec.Exists(ctx)
-          }
-
-          type UserConnectionExecArray struct {
-            exec *prisma.Exec
-          }
-
-          func (instance UserConnectionExecArray) Exec(ctx context.Context) ([]UserConnection, error) {
-            var v []UserConnection
-            err := instance.exec.ExecArray(ctx, &v)
-            return v, err
-          }
-
-        var UserConnectionFields = []string{}
-
-        type UserConnection struct {
-          PageInfo PageInfo `json:"pageInfo"`
-Edges []UserEdge `json:"edges"`
-        }
-
-        type PageInfoExec struct {
-          exec *prisma.Exec
-        }
-
-        
-
-          
-                func (instance PageInfoExec) Exec(ctx context.Context) (*PageInfo, error) {
-                  var v PageInfo
-                  ok, err := instance.exec.Exec(ctx, &v)
-                  if err != nil {
-                    return nil, err
-                  }
-                  if !ok {
-                    return nil, ErrNoResult
-                  }
-                  return &v, nil
-                }
-              
-
-          func (instance PageInfoExec) Exists(ctx context.Context) (bool, error) {
-            return instance.exec.Exists(ctx)
-          }
-
-          type PageInfoExecArray struct {
-            exec *prisma.Exec
-          }
-
-          func (instance PageInfoExecArray) Exec(ctx context.Context) ([]PageInfo, error) {
-            var v []PageInfo
-            err := instance.exec.ExecArray(ctx, &v)
-            return v, err
-          }
-
-        var PageInfoFields = []string{"hasNextPage", "hasPreviousPage", "startCursor", "endCursor"}
-
-        type PageInfo struct {
-          HasNextPage bool `json:"hasNextPage"`
-HasPreviousPage bool `json:"hasPreviousPage"`
-StartCursor *string `json:"startCursor,omitempty"`
-EndCursor *string `json:"endCursor,omitempty"`
-        }
-
-
-        type LikesConnectionExec struct {
-          exec *prisma.Exec
-        }
-
-        
-                func (instance *LikesConnectionExec) PageInfo() *PageInfoExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "PageInfo"},
-                    "pageInfo",
-                    []string{"hasNextPage","hasPreviousPage","startCursor","endCursor"})
-
-                  return &PageInfoExec{ret}
-                }
-
-                  func (instance *LikesConnectionExec) Edges() *LikesEdgeExecArray {
-                    edges := instance.exec.Client.GetMany(
-                      instance.exec,
-                      nil,
-                      [3]string{"LikesWhereInput", "LikesOrderByInput", "LikesEdge"},
-                      "edges",
-                      []string{"cursor"})
-
-                    nodes := edges.Client.GetOne(
-                      edges,
-                      nil,
-                      [2]string{"", "Likes"},
-                      "node",
-                      LikesFields)
-
-                    return &LikesEdgeExecArray{nodes}
-                  }
-
-                  func (instance *LikesConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
-                    ret := instance.exec.Client.GetOne(
-                      instance.exec,
-                      nil,
-                      [2]string{"", "AggregateLikes"},
-                      "aggregate",
-                      []string{"count"})
-
-                    var v Aggregate
-                    _, err := ret.Exec(ctx, &v)
-                    return &v, err
-                  }
-
-          
-                func (instance LikesConnectionExec) Exec(ctx context.Context) (*LikesConnection, error) {
-                  edges, err := instance.Edges().Exec(ctx)
-                  if err != nil {
-                    return nil, err
-                  }
-
-                  pageInfo, err := instance.PageInfo().Exec(ctx)
-                  if err != nil {
-                    return nil, err
-                  }
-
-                  return &LikesConnection{
-                    Edges:    edges,
-                    PageInfo: *pageInfo,
-                  }, nil
-                }
-              
-
-          func (instance LikesConnectionExec) Exists(ctx context.Context) (bool, error) {
-            return instance.exec.Exists(ctx)
-          }
-
-          type LikesConnectionExecArray struct {
-            exec *prisma.Exec
-          }
-
-          func (instance LikesConnectionExecArray) Exec(ctx context.Context) ([]LikesConnection, error) {
-            var v []LikesConnection
-            err := instance.exec.ExecArray(ctx, &v)
-            return v, err
-          }
-
-        var LikesConnectionFields = []string{}
-
-        type LikesConnection struct {
-          PageInfo PageInfo `json:"pageInfo"`
-Edges []LikesEdge `json:"edges"`
-        }
-
-
-        type PostPreviousValuesExec struct {
-          exec *prisma.Exec
-        }
-
-        
-
-          
-                func (instance PostPreviousValuesExec) Exec(ctx context.Context) (*PostPreviousValues, error) {
-                  var v PostPreviousValues
-                  ok, err := instance.exec.Exec(ctx, &v)
-                  if err != nil {
-                    return nil, err
-                  }
-                  if !ok {
-                    return nil, ErrNoResult
-                  }
-                  return &v, nil
-                }
-              
-
-          func (instance PostPreviousValuesExec) Exists(ctx context.Context) (bool, error) {
-            return instance.exec.Exists(ctx)
-          }
-
-          type PostPreviousValuesExecArray struct {
-            exec *prisma.Exec
-          }
-
-          func (instance PostPreviousValuesExecArray) Exec(ctx context.Context) ([]PostPreviousValues, error) {
-            var v []PostPreviousValues
-            err := instance.exec.ExecArray(ctx, &v)
-            return v, err
-          }
-
-        var PostPreviousValuesFields = []string{"id", "text", "createdAt", "updatedAt"}
-
-        type PostPreviousValues struct {
+        type Post struct {
           ID string `json:"id"`
 Text string `json:"text"`
 CreatedAt string `json:"createdAt"`
@@ -1763,58 +1455,102 @@ UpdatedAt string `json:"updatedAt"`
 Edges []PostEdge `json:"edges"`
         }
 
-        type PostExec struct {
+        type LikesConnectionExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *PostExec) Author() *UserExec {
+                func (instance *LikesConnectionExec) PageInfo() *PageInfoExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
-                    [2]string{"", "User"},
-                    "author",
-                    []string{"id","email","name","password","age","createdAt"})
+                    [2]string{"", "PageInfo"},
+                    "pageInfo",
+                    []string{"hasNextPage","hasPreviousPage","startCursor","endCursor"})
 
-                  return &UserExec{ret}
+                  return &PageInfoExec{ret}
                 }
 
-                type LikesParamsExec struct {
-                  Where *LikesWhereInput
-OrderBy *LikesOrderByInput
-Skip *int32
-After *string
-Before *string
-First *int32
-Last *int32
-                }
-                func (instance *PostExec) Likes(params *LikesParamsExec) *LikesExecArray {
-                  var wparams *prisma.WhereParams
-                  if params != nil {
-                    wparams = &prisma.WhereParams{
-                      Where: params.Where,
-                      OrderBy: (*string)(params.OrderBy),
-                      Skip: params.Skip,
-                      After: params.After,
-                      Before: params.Before,
-                      First: params.First,
-                      Last: params.Last,
-                    }
+                  func (instance *LikesConnectionExec) Edges() *LikesEdgeExecArray {
+                    edges := instance.exec.Client.GetMany(
+                      instance.exec,
+                      nil,
+                      [3]string{"LikesWhereInput", "LikesOrderByInput", "LikesEdge"},
+                      "edges",
+                      []string{"cursor"})
+
+                    nodes := edges.Client.GetOne(
+                      edges,
+                      nil,
+                      [2]string{"", "Likes"},
+                      "node",
+                      LikesFields)
+
+                    return &LikesEdgeExecArray{nodes}
                   }
 
-                  ret := instance.exec.Client.GetMany(
-                    instance.exec,
-                    wparams,
-                    [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
-                    "likes",
-                    []string{"id","createdAt","updatedAt","quantity"})
+                  func (instance *LikesConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
+                    ret := instance.exec.Client.GetOne(
+                      instance.exec,
+                      nil,
+                      [2]string{"", "AggregateLikes"},
+                      "aggregate",
+                      []string{"count"})
 
-                  return &LikesExecArray{ret}
-                }
+                    var v Aggregate
+                    _, err := ret.Exec(ctx, &v)
+                    return &v, err
+                  }
 
           
-                func (instance PostExec) Exec(ctx context.Context) (*Post, error) {
-                  var v Post
+                func (instance LikesConnectionExec) Exec(ctx context.Context) (*LikesConnection, error) {
+                  edges, err := instance.Edges().Exec(ctx)
+                  if err != nil {
+                    return nil, err
+                  }
+
+                  pageInfo, err := instance.PageInfo().Exec(ctx)
+                  if err != nil {
+                    return nil, err
+                  }
+
+                  return &LikesConnection{
+                    Edges:    edges,
+                    PageInfo: *pageInfo,
+                  }, nil
+                }
+              
+
+          func (instance LikesConnectionExec) Exists(ctx context.Context) (bool, error) {
+            return instance.exec.Exists(ctx)
+          }
+
+          type LikesConnectionExecArray struct {
+            exec *prisma.Exec
+          }
+
+          func (instance LikesConnectionExecArray) Exec(ctx context.Context) ([]LikesConnection, error) {
+            var v []LikesConnection
+            err := instance.exec.ExecArray(ctx, &v)
+            return v, err
+          }
+
+        var LikesConnectionFields = []string{}
+
+        type LikesConnection struct {
+          PageInfo PageInfo `json:"pageInfo"`
+Edges []LikesEdge `json:"edges"`
+        }
+
+        type PostPreviousValuesExec struct {
+          exec *prisma.Exec
+        }
+
+        
+
+          
+                func (instance PostPreviousValuesExec) Exec(ctx context.Context) (*PostPreviousValues, error) {
+                  var v PostPreviousValues
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1826,28 +1562,232 @@ Last *int32
                 }
               
 
-          func (instance PostExec) Exists(ctx context.Context) (bool, error) {
+          func (instance PostPreviousValuesExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type PostExecArray struct {
+          type PostPreviousValuesExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance PostExecArray) Exec(ctx context.Context) ([]Post, error) {
-            var v []Post
+          func (instance PostPreviousValuesExecArray) Exec(ctx context.Context) ([]PostPreviousValues, error) {
+            var v []PostPreviousValues
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var PostFields = []string{"id", "text", "createdAt", "updatedAt"}
+        var PostPreviousValuesFields = []string{"id", "text", "createdAt", "updatedAt"}
 
-        type Post struct {
+        type PostPreviousValues struct {
           ID string `json:"id"`
 Text string `json:"text"`
 CreatedAt string `json:"createdAt"`
 UpdatedAt string `json:"updatedAt"`
         }
+
+        type LikesEdgeExec struct {
+          exec *prisma.Exec
+        }
+
+        
+                func (instance *LikesEdgeExec) Node() *LikesExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "Likes"},
+                    "node",
+                    []string{"id","createdAt","updatedAt","quantity"})
+
+                  return &LikesExec{ret}
+                }
+
+          
+                func (instance LikesEdgeExec) Exec(ctx context.Context) (*LikesEdge, error) {
+                  var v LikesEdge
+                  ok, err := instance.exec.Exec(ctx, &v)
+                  if err != nil {
+                    return nil, err
+                  }
+                  if !ok {
+                    return nil, ErrNoResult
+                  }
+                  return &v, nil
+                }
+              
+
+          func (instance LikesEdgeExec) Exists(ctx context.Context) (bool, error) {
+            return instance.exec.Exists(ctx)
+          }
+
+          type LikesEdgeExecArray struct {
+            exec *prisma.Exec
+          }
+
+          func (instance LikesEdgeExecArray) Exec(ctx context.Context) ([]LikesEdge, error) {
+            var v []LikesEdge
+            err := instance.exec.ExecArray(ctx, &v)
+            return v, err
+          }
+
+        var LikesEdgeFields = []string{"cursor"}
+
+        type LikesEdge struct {
+          Node Likes `json:"node"`
+Cursor string `json:"cursor"`
+        }
+
+
+        type UserConnectionExec struct {
+          exec *prisma.Exec
+        }
+
+        
+                func (instance *UserConnectionExec) PageInfo() *PageInfoExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "PageInfo"},
+                    "pageInfo",
+                    []string{"hasNextPage","hasPreviousPage","startCursor","endCursor"})
+
+                  return &PageInfoExec{ret}
+                }
+
+                  func (instance *UserConnectionExec) Edges() *UserEdgeExecArray {
+                    edges := instance.exec.Client.GetMany(
+                      instance.exec,
+                      nil,
+                      [3]string{"UserWhereInput", "UserOrderByInput", "UserEdge"},
+                      "edges",
+                      []string{"cursor"})
+
+                    nodes := edges.Client.GetOne(
+                      edges,
+                      nil,
+                      [2]string{"", "User"},
+                      "node",
+                      UserFields)
+
+                    return &UserEdgeExecArray{nodes}
+                  }
+
+                  func (instance *UserConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
+                    ret := instance.exec.Client.GetOne(
+                      instance.exec,
+                      nil,
+                      [2]string{"", "AggregateUser"},
+                      "aggregate",
+                      []string{"count"})
+
+                    var v Aggregate
+                    _, err := ret.Exec(ctx, &v)
+                    return &v, err
+                  }
+
+          
+                func (instance UserConnectionExec) Exec(ctx context.Context) (*UserConnection, error) {
+                  edges, err := instance.Edges().Exec(ctx)
+                  if err != nil {
+                    return nil, err
+                  }
+
+                  pageInfo, err := instance.PageInfo().Exec(ctx)
+                  if err != nil {
+                    return nil, err
+                  }
+
+                  return &UserConnection{
+                    Edges:    edges,
+                    PageInfo: *pageInfo,
+                  }, nil
+                }
+              
+
+          func (instance UserConnectionExec) Exists(ctx context.Context) (bool, error) {
+            return instance.exec.Exists(ctx)
+          }
+
+          type UserConnectionExecArray struct {
+            exec *prisma.Exec
+          }
+
+          func (instance UserConnectionExecArray) Exec(ctx context.Context) ([]UserConnection, error) {
+            var v []UserConnection
+            err := instance.exec.ExecArray(ctx, &v)
+            return v, err
+          }
+
+        var UserConnectionFields = []string{}
+
+        type UserConnection struct {
+          PageInfo PageInfo `json:"pageInfo"`
+Edges []UserEdge `json:"edges"`
+        }
+
+        type PostSubscriptionPayloadExec struct {
+          exec *prisma.Exec
+        }
+
+        
+                func (instance *PostSubscriptionPayloadExec) Node() *PostExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "Post"},
+                    "node",
+                    []string{"id","text","createdAt","updatedAt"})
+
+                  return &PostExec{ret}
+                }
+
+                func (instance *PostSubscriptionPayloadExec) PreviousValues() *PostPreviousValuesExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "PostPreviousValues"},
+                    "previousValues",
+                    []string{"id","text","createdAt","updatedAt"})
+
+                  return &PostPreviousValuesExec{ret}
+                }
+
+          
+                func (instance PostSubscriptionPayloadExec) Exec(ctx context.Context) (*PostSubscriptionPayload, error) {
+                  var v PostSubscriptionPayload
+                  ok, err := instance.exec.Exec(ctx, &v)
+                  if err != nil {
+                    return nil, err
+                  }
+                  if !ok {
+                    return nil, ErrNoResult
+                  }
+                  return &v, nil
+                }
+              
+
+          func (instance PostSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
+            return instance.exec.Exists(ctx)
+          }
+
+          type PostSubscriptionPayloadExecArray struct {
+            exec *prisma.Exec
+          }
+
+          func (instance PostSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]PostSubscriptionPayload, error) {
+            var v []PostSubscriptionPayload
+            err := instance.exec.ExecArray(ctx, &v)
+            return v, err
+          }
+
+        var PostSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
+
+        type PostSubscriptionPayload struct {
+          Mutation MutationType `json:"mutation"`
+Node *Post `json:"node,omitempty"`
+UpdatedFields []string `json:"updatedFields,omitempty"`
+        }
+
+
 
         type LikesPreviousValuesExec struct {
           exec *prisma.Exec
@@ -1966,7 +1906,7 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
                     nil,
                     [2]string{"", "User"},
                     "user",
-                    []string{"id","email","name","password","age","createdAt"})
+                    []string{"id","email","name","password","createdAt"})
 
                   return &UserExec{ret}
                 }
@@ -2019,37 +1959,15 @@ UpdatedAt string `json:"updatedAt"`
 Quantity *int32 `json:"quantity,omitempty"`
         }
 
-
-        type UserSubscriptionPayloadExec struct {
+        type PageInfoExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *UserSubscriptionPayloadExec) Node() *UserExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "User"},
-                    "node",
-                    []string{"id","email","name","password","age","createdAt"})
-
-                  return &UserExec{ret}
-                }
-
-                func (instance *UserSubscriptionPayloadExec) PreviousValues() *UserPreviousValuesExec {
-                  ret := instance.exec.Client.GetOne(
-                    instance.exec,
-                    nil,
-                    [2]string{"", "UserPreviousValues"},
-                    "previousValues",
-                    []string{"id","email","name","password","age","createdAt"})
-
-                  return &UserPreviousValuesExec{ret}
-                }
 
           
-                func (instance UserSubscriptionPayloadExec) Exec(ctx context.Context) (*UserSubscriptionPayload, error) {
-                  var v UserSubscriptionPayload
+                func (instance PageInfoExec) Exec(ctx context.Context) (*PageInfo, error) {
+                  var v PageInfo
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -2061,26 +1979,27 @@ Quantity *int32 `json:"quantity,omitempty"`
                 }
               
 
-          func (instance UserSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
+          func (instance PageInfoExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type UserSubscriptionPayloadExecArray struct {
+          type PageInfoExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance UserSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]UserSubscriptionPayload, error) {
-            var v []UserSubscriptionPayload
+          func (instance PageInfoExecArray) Exec(ctx context.Context) ([]PageInfo, error) {
+            var v []PageInfo
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var UserSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
+        var PageInfoFields = []string{"hasNextPage", "hasPreviousPage", "startCursor", "endCursor"}
 
-        type UserSubscriptionPayload struct {
-          Mutation MutationType `json:"mutation"`
-Node *User `json:"node,omitempty"`
-UpdatedFields []string `json:"updatedFields,omitempty"`
+        type PageInfo struct {
+          HasNextPage bool `json:"hasNextPage"`
+HasPreviousPage bool `json:"hasPreviousPage"`
+StartCursor *string `json:"startCursor,omitempty"`
+EndCursor *string `json:"endCursor,omitempty"`
         }
 
         type PostEdgeExec struct {
@@ -2132,6 +2051,69 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
         type PostEdge struct {
           Node Post `json:"node"`
 Cursor string `json:"cursor"`
+        }
+
+        type UserSubscriptionPayloadExec struct {
+          exec *prisma.Exec
+        }
+
+        
+                func (instance *UserSubscriptionPayloadExec) Node() *UserExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "User"},
+                    "node",
+                    []string{"id","email","name","password","createdAt"})
+
+                  return &UserExec{ret}
+                }
+
+                func (instance *UserSubscriptionPayloadExec) PreviousValues() *UserPreviousValuesExec {
+                  ret := instance.exec.Client.GetOne(
+                    instance.exec,
+                    nil,
+                    [2]string{"", "UserPreviousValues"},
+                    "previousValues",
+                    []string{"id","email","name","password","createdAt"})
+
+                  return &UserPreviousValuesExec{ret}
+                }
+
+          
+                func (instance UserSubscriptionPayloadExec) Exec(ctx context.Context) (*UserSubscriptionPayload, error) {
+                  var v UserSubscriptionPayload
+                  ok, err := instance.exec.Exec(ctx, &v)
+                  if err != nil {
+                    return nil, err
+                  }
+                  if !ok {
+                    return nil, ErrNoResult
+                  }
+                  return &v, nil
+                }
+              
+
+          func (instance UserSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
+            return instance.exec.Exists(ctx)
+          }
+
+          type UserSubscriptionPayloadExecArray struct {
+            exec *prisma.Exec
+          }
+
+          func (instance UserSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]UserSubscriptionPayload, error) {
+            var v []UserSubscriptionPayload
+            err := instance.exec.ExecArray(ctx, &v)
+            return v, err
+          }
+
+        var UserSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
+
+        type UserSubscriptionPayload struct {
+          Mutation MutationType `json:"mutation"`
+Node *User `json:"node,omitempty"`
+UpdatedFields []string `json:"updatedFields,omitempty"`
         }
 
         type UserExec struct {
@@ -2224,14 +2206,13 @@ Last *int32
             return v, err
           }
 
-        var UserFields = []string{"id", "email", "name", "password", "age", "createdAt"}
+        var UserFields = []string{"id", "email", "name", "password", "createdAt"}
 
         type User struct {
           ID string `json:"id"`
 Email string `json:"email"`
 Name string `json:"name"`
 Password string `json:"password"`
-Age int32 `json:"age"`
 CreatedAt string `json:"createdAt"`
         }
 
@@ -2246,7 +2227,7 @@ CreatedAt string `json:"createdAt"`
                     nil,
                     [2]string{"", "User"},
                     "node",
-                    []string{"id","email","name","password","age","createdAt"})
+                    []string{"id","email","name","password","createdAt"})
 
                   return &UserExec{ret}
                 }

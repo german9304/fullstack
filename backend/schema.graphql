@@ -8,16 +8,21 @@ type Query {
 }
 
 type Mutation {
-  createUser(usrinpt: UserInput): User
-  createPost(pstinpt: PostInput): Post
+  signup(usrinpt: UserInput!): User!
+  signin(email: String!, password: String!): User!
+  signout: Message
+  createPost(pstinpt: PostInput!): Post!
   createLike(user: String, quantity: Int): Like
+}
+
+type Message {
+  message: String!
 }
 
 input UserInput {
   email: String!
   name: String!
   password: String!
-  age: Int!
 }
 
 input PostInput {
@@ -35,8 +40,7 @@ type User {
   email: String!
   name: String!
   password: String!
-  age: Int!
-  createdAt: Time
+  createdAt: Time!
   posts: [Post]
   likes: [Like]
 }

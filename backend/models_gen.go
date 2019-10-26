@@ -7,6 +7,10 @@ type LikeInput struct {
 	Post string `json:"post"`
 }
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 type PostInput struct {
 	Text   string `json:"text"`
 	Author string `json:"author"`
@@ -16,5 +20,4 @@ type UserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	Age      int    `json:"age"`
 }
