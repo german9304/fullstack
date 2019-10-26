@@ -6,3 +6,5 @@
 cd /usr/local/bin
 
 ls -l
+
+docker-compose --version
