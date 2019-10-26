@@ -2,15 +2,13 @@ pipeline {
     agent none
     stages {
         stage('Back-end') {
-            agent {
-                docker {
-                    image 'golang:1.12'
-                }
-            }
+            agent any
             stages {
                 stage('Build') {
                    steps {
-                        sh 'go version'
+                        sh './backend/scripts/build.sh'
+                        echo "check docker compose"
+                        sh 'docker-compose --version'
                    } 
                 }
             }
