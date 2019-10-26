@@ -8,7 +8,7 @@ pipeline {
                    steps {
                         sh './backend/scripts/build.sh'
                         echo "check docker compose"
-                        sh './backend/scripts/build.sh'
+                        sh './backend/scripts/test.sh'
                    } 
                 }
             }
