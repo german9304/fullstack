@@ -9,6 +9,7 @@ pipeline {
                         sh './backend/scripts/build.sh'
                         echo "check docker compose"
                         sh './backend/scripts/test.sh'
+                        sh 'docker-compose --version'
                    } 
                 }
             }
