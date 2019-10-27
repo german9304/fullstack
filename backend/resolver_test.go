@@ -32,10 +32,6 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 		Name:     name,
 		Password: password,
 	}).Exec(ctx)
-	// log.Printf("Created %v \n", user)
-
-	// log.Printf("type => %T \n", user)
-	// log.Printf("Value => %v \n", user)
 }
 
 func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
@@ -47,7 +43,6 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
 	}).Exec(ctx)
-	log.Printf("Deleted \n")
 }
 
 // All methods that begin with "Test" are run as tests within a
