@@ -16,9 +16,9 @@ type FullStackSuite struct {
 }
 
 var (
-	client *prisma.Client  = prisma.New(nil)
-	ctx    context.Context = context.TODO()
-	email  string          = "John@mail.com"
+	client        *prisma.Client  = prisma.New(nil)
+	ctx           context.Context = context.TODO()
+	email         string          = "John@mail.com"
 	clientGraphql *graphql.Client = graphql.NewClient("http://localhost:8000/")
 )
 
@@ -48,15 +48,19 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 // All methods that begin with "Test" are run as tests within a
 // suite.
 func (fs *FullStackSuite) TestCreateUserMutation() {
-	// make a request
-	req := graphql.NewRequest(`
+
+	CREATE_USER := `
 		mutation signupMutation($userinput: UserInput!) {
 			signup (usrinpt: $userinput) {
 				id
+				email
 				name
+				password
 			}
 		}
-	`)
+	`
+	// make a request
+	req := graphql.NewRequest(CREATE_USER)
 
 	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
 
@@ -72,9 +76,10 @@ func (fs *FullStackSuite) TestCreateUserMutation() {
 		log.Fatal(err)
 	}
 	newUser := respData["signup"]
-	log.Printf("New user: %v \n", newUser)
 
-	
+	fs.Assert().Equal(usr.Email, newUser.Email)
+	fs.Assert().Equal(usr.Name, newUser.Name)
+	fs.Assert().Equal(usr.Password, newUser.Password)
 }
 
 // In order for 'go test' to run this suite, we need to create
