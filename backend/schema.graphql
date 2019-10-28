@@ -50,7 +50,7 @@ type Post {
   text: String!
   createdAt: Time!
   updatedAt: Time!
-  author: ID!
+  author: User
   likes: [Like]
 }
 

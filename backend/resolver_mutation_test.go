@@ -13,10 +13,11 @@ import (
 
 type FullStackSuite struct {
 	suite.Suite
+	postID string
 }
 
 var (
-	client        *prisma.Client  = prisma.New(nil)
+	// client        *prisma.Client  = prisma.New(nil)
 	ctx           context.Context = context.TODO()
 	email         string          = "John@mail.com"
 	clientGraphql *graphql.Client = graphql.NewClient("http://localhost:8000/")
@@ -43,11 +44,14 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
 	}).Exec(ctx)
+	// client.DeletePost(prisma.UserWhereUniqueInput{
+	// 	Email: &userEmail,
+	// }).Exec(ctx)
 }
 
 // All methods that begin with "Test" are run as tests within a
 // suite.
-func (fs *FullStackSuite) TestCreateUserMutation() {
+func (fs *FullStackSuite) TestMutations() {
 
 	CREATE_USER := `
 		mutation signupMutation($userinput: UserInput!) {
@@ -59,27 +63,66 @@ func (fs *FullStackSuite) TestCreateUserMutation() {
 			}
 		}
 	`
-	// make a request
-	req := graphql.NewRequest(CREATE_USER)
 
-	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
-
-	req.Var("userinput", usr)
-
-	req.Header.Set("Cache-Control", "no-cache")
+	CREATE_POST := `
+		mutation postMutation($postinput: PostInput!) {
+			createPost (pstinpt: $postinput) {
+				id
+				text
+				author {
+					id
+				}
+			}
+		}
+	`
 
 	ctx := context.Background()
 
+	// Create a user
+	signupReq := graphql.NewRequest(CREATE_USER)
+
+	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
+
+	signupReq.Var("userinput", usr)
+
+	signupReq.Header.Set("Cache-Control", "no-cache")
+
 	// run it and capture the response
-	var respData map[string]prisma.User
-	if err := clientGraphql.Run(ctx, req, &respData); err != nil {
+	var newUserRespData map[string]prisma.User
+	if err := clientGraphql.Run(ctx, signupReq, &newUserRespData); err != nil {
 		log.Fatal(err)
 	}
-	newUser := respData["signup"]
+	newUser := newUserRespData["signup"]
+
+	newUserId := newUser.ID
 
 	fs.Assert().Equal(usr.Email, newUser.Email)
 	fs.Assert().Equal(usr.Name, newUser.Name)
 	fs.Assert().Equal(usr.Password, newUser.Password)
+
+	// Create a post
+	newPostReq := graphql.NewRequest(CREATE_POST)
+
+	post := PostInput{"first", newUserId}
+
+	newPostReq.Var("postinput", post)
+
+	newPostReq.Header.Set("Cache-Control", "no-cache")
+
+	// run it and capture the response
+	var newPostRespData map[string]prisma.Post
+	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
+		log.Fatal(err)
+	}
+	newPost := newPostRespData["createPost"]
+
+	log.Printf("New created post: %v \n", newPost)
+	log.Printf("Post id %v \n", newPost.ID)
+
+}
+
+func (fs *FullStackSuite) TestMutation() {
+
 }
 
 // In order for 'go test' to run this suite, we need to create

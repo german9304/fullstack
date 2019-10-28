@@ -2,9 +2,14 @@ package fullstack_backend
 
 import (
 	"context"
+	"log"
 	"time"
 
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
+)
+
+var (
+	client *prisma.Client = prisma.New(nil)
 )
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
@@ -30,22 +35,21 @@ func (r *Resolver) User() UserResolver {
 type likeResolver struct{ *Resolver }
 
 func (r *likeResolver) User(ctx context.Context, obj *prisma.Likes) (string, error) {
-	panic("not implemented")
+	panic("not implemented likes")
 }
 func (r *likeResolver) Post(ctx context.Context, obj *prisma.Likes) (string, error) {
-	panic("not implemented")
+	panic("not implemented likes")
 }
 func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error) {
-	panic("not implemented")
+	panic("not implemented likes")
 }
 func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error) {
-	panic("not implemented")
+	panic("not implemented likes")
 }
 
 type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) Signup(ctx context.Context, usrinpt UserInput) (*prisma.User, error) {
-	client := prisma.New(nil)
 	email := usrinpt.Email
 	name := usrinpt.Name
 	pwd := usrinpt.Password
@@ -69,25 +73,49 @@ func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error) {
-	panic("not implemented")
+	log.Printf("post input %v \n", pstinpt)
+	text := pstinpt.Text
+	author := pstinpt.Author
+
+	newPost, err := client.CreatePost(prisma.PostCreateInput{
+		Text: text,
+		Author: &prisma.UserCreateOneWithoutPostsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &author,
+			},
+		},
+	}).Exec(ctx)
+
+	log.Printf("New Post %v \n", newPost)
+
+	if err != nil {
+		return &prisma.Post{}, err
+	}
+
+	return newPost, nil
 }
 func (r *mutationResolver) CreateLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
-	panic("not implemented")
+	panic("not implemented likes")
 }
 
 type postResolver struct{ *Resolver }
 
 func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
+	log.Println("author here")
 	panic("not implemented")
 }
 func (r *postResolver) UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
+	log.Println("author here")
 	panic("not implemented")
 }
-func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (string, error) {
-	panic("not implemented")
+func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error) {
+	postId := obj.ID
+	log.Printf("Post id %v \n", postId)
+	return nil, nil
 }
 func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]*prisma.Likes, error) {
-	panic("not implemented")
+
+	return []*prisma.Likes{}, nil
 }
 
 type queryResolver struct{ *Resolver }
@@ -114,11 +142,11 @@ func (r *queryResolver) Like(ctx context.Context, id *string) (*prisma.Likes, er
 type userResolver struct{ *Resolver }
 
 func (r *userResolver) CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error) {
-	panic("not implemented")
+	panic("not implemented user")
 }
 func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]*prisma.Post, error) {
-	panic("not implemented")
+	panic("not implemented user")
 }
 func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]*prisma.Likes, error) {
-	panic("not implemented")
+	panic("not implemented user")
 }

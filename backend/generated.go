@@ -112,7 +112,7 @@ type MutationResolver interface {
 type PostResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
 	UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
-	Author(ctx context.Context, obj *prisma.Post) (string, error)
+	Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error)
 	Likes(ctx context.Context, obj *prisma.Post) ([]*prisma.Likes, error)
 }
 type QueryResolver interface {
@@ -503,7 +503,7 @@ type Post {
   text: String!
   createdAt: Time!
   updatedAt: Time!
-  author: ID!
+  author: User
   likes: [Like]
 }
 
@@ -1287,15 +1287,12 @@ func (ec *executionContext) _Post_author(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*prisma.User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.CollectedField, obj *prisma.Post) (ret graphql.Marshaler) {
@@ -3332,9 +3329,6 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._Post_author(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "likes":
