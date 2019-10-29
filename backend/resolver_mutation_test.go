@@ -13,7 +13,6 @@ import (
 
 type FullStackSuite struct {
 	suite.Suite
-	postID string
 }
 
 var (
@@ -43,10 +42,6 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	userEmail := "mark@mail.com"
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
-	}).Exec(ctx)
-	log.Printf("post id => %v \n", fs.postID)
-	client.DeletePost(prisma.PostWhereUniqueInput{
-		ID: &fs.postID,
 	}).Exec(ctx)
 }
 
@@ -134,8 +129,6 @@ func (fs *FullStackSuite) TestMutations() {
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
 	authorLikes := requestedPost.Likes
-
-	fs.postID = postId
 
 	log.Printf("id: %v, text: %v \n", postId, postText)
 	log.Printf("Author: %v \n", authorPost)
