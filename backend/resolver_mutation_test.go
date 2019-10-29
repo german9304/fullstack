@@ -130,6 +130,7 @@ func (fs *FullStackSuite) TestMutations() {
 	authorPost := requestedPost.Author
 	authorLikes := requestedPost.Likes
 
+	log.Println("Created Post")
 	log.Printf("id: %v, text: %v \n", postId, postText)
 	log.Printf("Author: %v \n", authorPost)
 	log.Printf("Likes: %v \n", authorLikes)
