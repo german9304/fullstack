@@ -44,6 +44,7 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
 	}).Exec(ctx)
+	log.Printf("post id => %v \n", fs.postID)
 	// client.DeletePost(prisma.UserWhereUniqueInput{
 	// 	Email: &userEmail,
 	// }).Exec(ctx)
@@ -71,6 +72,8 @@ func (fs *FullStackSuite) TestMutations() {
 				text
 				author {
 					id
+					email
+					password
 				}
 			}
 		}
@@ -110,18 +113,19 @@ func (fs *FullStackSuite) TestMutations() {
 	newPostReq.Header.Set("Cache-Control", "no-cache")
 
 	// run it and capture the response
-	var newPostRespData map[string]prisma.Post
+
+	type PostWithAuthor struct {
+		Id     string
+		Text   string
+		Author prisma.User
+	}
+	var newPostRespData map[string]PostWithAuthor
 	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
 		log.Fatal(err)
 	}
-	newPost := newPostRespData["createPost"]
 
-	log.Printf("New created post: %v \n", newPost)
-	log.Printf("Post id %v \n", newPost.ID)
-
-}
-
-func (fs *FullStackSuite) TestMutation() {
+	// var postD map[string]prisma.Post
+	log.Println(newPostRespData["createPost"].Author)
 
 }
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	models "github.com/german9304/fullstack-backend/models"
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
 )
 
@@ -14,7 +15,9 @@ var (
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-type Resolver struct{}
+type Resolver struct {
+	postModel *models.PostModel
+}
 
 func (r *Resolver) Like() LikeResolver {
 	return &likeResolver{r}
@@ -77,22 +80,37 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 	text := pstinpt.Text
 	author := pstinpt.Author
 
-	newPost, err := client.CreatePost(prisma.PostCreateInput{
+	newPost := client.CreatePost(prisma.PostCreateInput{
 		Text: text,
 		Author: &prisma.UserCreateOneWithoutPostsInput{
 			Connect: &prisma.UserWhereUniqueInput{
 				ID: &author,
 			},
 		},
-	}).Exec(ctx)
+	})
 
-	log.Printf("New Post %v \n", newPost)
+	post, err := newPost.Exec(ctx)
 
 	if err != nil {
-		return &prisma.Post{}, err
+		return nil, err
 	}
 
-	return newPost, nil
+	// authorFromPost, errA := newPost.Author().Exec(ctx)
+
+	// if errA != nil {
+	// 	return nil, errA
+	// }
+
+	// likesFromPost, errL := newPost.Likes(nil).Exec(ctx)
+
+	// if errL != nil {
+	// 	return nil, errL
+	// }
+	// //Init postmodel struct
+	// r.postModel = models.NewPostModel(post, authorFromPost, likesFromPost)
+	// log.Println(r.postModel)
+
+	return post, nil
 }
 func (r *mutationResolver) CreateLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
 	panic("not implemented likes")
@@ -109,13 +127,29 @@ func (r *postResolver) UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.T
 	panic("not implemented")
 }
 func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error) {
-	postId := obj.ID
-	log.Printf("Post id %v \n", postId)
-	return nil, nil
+	postID := obj.ID
+
+	postAuthor, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &postID,
+	}).Author().Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postAuthor, nil
 }
 func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]*prisma.Likes, error) {
+	postID := obj.ID
 
-	return []*prisma.Likes{}, nil
+	postLikes, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &postID,
+	}).Likes(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return postLikes, nil
 }
 
 type queryResolver struct{ *Resolver }
