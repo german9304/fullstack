@@ -10,9 +10,12 @@ type Query {
 type Mutation {
   signup(usrinpt: UserInput!): User!
   signin(email: String!, password: String!): User!
-  signout: Message
+  signout: Message!
   createPost(pstinpt: PostInput!): Post!
-  createLike(user: String, quantity: Int): Like!
+  updatePost(id: String): Post!
+  deletePost(id: String): Post!
+  upLike(user: String, quantity: Int): Like!
+  downLike(user: String, quantity: Int): Like!
 }
 
 type Message {

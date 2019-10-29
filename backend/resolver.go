@@ -96,7 +96,20 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 
 	return post, nil
 }
-func (r *mutationResolver) CreateLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
+
+func (r *mutationResolver) UpdatePost(ctx context.Context, id *string) (*prisma.Post, error) {
+	panic("not implemented")
+}
+
+func (r *mutationResolver) DeletePost(ctx context.Context, id *string) (*prisma.Post, error) {
+	panic("not implemented")
+}
+
+func (r *mutationResolver) UpLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
+	panic("not implemented likes")
+}
+
+func (r *mutationResolver) DownLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
 	panic("not implemented likes")
 }
 
