@@ -133,7 +133,12 @@ func (fs *FullStackSuite) TestMutations() {
 	log.Println("Created Post")
 	log.Printf("id: %v, text: %v \n", postId, postText)
 	log.Printf("Author: %v \n", authorPost)
-	log.Printf("Likes: %v \n", authorLikes)
+	log.Printf("Likes: %v , len %v \n", authorLikes, len(authorLikes))
+
+	// testing author fields
+	fs.Assert().Equal(post.Text, postText)
+	fs.Assert().Equal(usr.Email, authorPost.Email)
+	fs.Assert().Equal(0, len(authorLikes))
 
 }
 
