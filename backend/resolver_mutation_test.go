@@ -125,16 +125,11 @@ func (fs *FullStackSuite) TestMutations() {
 
 	// var postD map[string]prisma.Post
 	requestedPost := newPostRespData["createPost"]
-	postId := requestedPost.Id
+	// postId := requestedPost.Id
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
 	authorLikes := requestedPost.Likes
-
-	log.Println("Created Post")
-	log.Printf("id: %v, text: %v \n", postId, postText)
-	log.Printf("Author: %v \n", authorPost)
-	log.Printf("Likes: %v , len %v \n", authorLikes, len(authorLikes))
-
+	
 	// testing author fields
 	fs.Assert().Equal(post.Text, postText)
 	fs.Assert().Equal(usr.Email, authorPost.Email)
