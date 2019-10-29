@@ -1,7 +1,7 @@
 type Query {
-  users: [User]
-  posts: [Post]
-  likes: [Like]
+  users: [User!]!
+  posts: [Post!]!
+  likes: [Like!]!
   user(id: String): User
   post(id: String): Post
   like(id: String): Like
@@ -12,7 +12,7 @@ type Mutation {
   signin(email: String!, password: String!): User!
   signout: Message
   createPost(pstinpt: PostInput!): Post!
-  createLike(user: String, quantity: Int): Like
+  createLike(user: String, quantity: Int): Like!
 }
 
 type Message {
@@ -41,8 +41,8 @@ type User {
   name: String!
   password: String!
   createdAt: Time!
-  posts: [Post]
-  likes: [Like]
+  posts: [Post!]!
+  likes: [Like!]!
 }
 
 type Post {
@@ -51,12 +51,12 @@ type Post {
   createdAt: Time!
   updatedAt: Time!
   author: User
-  likes: [Like]
+  likes: [Like!]!
 }
 
 type Like {
-  user: ID!
-  post: ID!
+  user: User!
+  post: Post!
   createdAt: Time!
   updatedAt: Time!
   quantity: Int

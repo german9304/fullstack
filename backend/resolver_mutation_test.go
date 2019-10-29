@@ -45,9 +45,9 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 		Email: &userEmail,
 	}).Exec(ctx)
 	log.Printf("post id => %v \n", fs.postID)
-	// client.DeletePost(prisma.UserWhereUniqueInput{
-	// 	Email: &userEmail,
-	// }).Exec(ctx)
+	client.DeletePost(prisma.PostWhereUniqueInput{
+		ID: &fs.postID,
+	}).Exec(ctx)
 }
 
 // All methods that begin with "Test" are run as tests within a
@@ -74,6 +74,9 @@ func (fs *FullStackSuite) TestMutations() {
 					id
 					email
 					password
+				}
+				likes {
+					createdAt
 				}
 			}
 		}
@@ -118,6 +121,7 @@ func (fs *FullStackSuite) TestMutations() {
 		Id     string
 		Text   string
 		Author prisma.User
+		Likes  []prisma.Likes
 	}
 	var newPostRespData map[string]PostWithAuthor
 	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
@@ -125,7 +129,17 @@ func (fs *FullStackSuite) TestMutations() {
 	}
 
 	// var postD map[string]prisma.Post
-	log.Println(newPostRespData["createPost"].Author)
+	requestedPost := newPostRespData["createPost"]
+	postId := requestedPost.Id
+	postText := requestedPost.Text
+	authorPost := requestedPost.Author
+	authorLikes := requestedPost.Likes
+
+	fs.postID = postId
+
+	log.Printf("id: %v, text: %v \n", postId, postText)
+	log.Printf("Author: %v \n", authorPost)
+	log.Printf("Likes: %v \n", authorLikes)
 
 }
 

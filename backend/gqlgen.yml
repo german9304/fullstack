@@ -9,6 +9,8 @@ exec:
   filename: generated.go
 # model:
 #   filename: models_gen.go
+omit_slice_element_pointers: true
+
 models:
   User:
     model: github.com/german9304/fullstack-backend/prisma-client.User

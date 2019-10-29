@@ -37,10 +37,10 @@ func (r *Resolver) User() UserResolver {
 
 type likeResolver struct{ *Resolver }
 
-func (r *likeResolver) User(ctx context.Context, obj *prisma.Likes) (string, error) {
+func (r *likeResolver) User(ctx context.Context, obj *prisma.Likes) (*prisma.User, error) {
 	panic("not implemented likes")
 }
-func (r *likeResolver) Post(ctx context.Context, obj *prisma.Likes) (string, error) {
+func (r *likeResolver) Post(ctx context.Context, obj *prisma.Likes) (*prisma.Post, error) {
 	panic("not implemented likes")
 }
 func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error) {
@@ -76,7 +76,6 @@ func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error) {
-	log.Printf("post input %v \n", pstinpt)
 	text := pstinpt.Text
 	author := pstinpt.Author
 
@@ -94,21 +93,6 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 	if err != nil {
 		return nil, err
 	}
-
-	// authorFromPost, errA := newPost.Author().Exec(ctx)
-
-	// if errA != nil {
-	// 	return nil, errA
-	// }
-
-	// likesFromPost, errL := newPost.Likes(nil).Exec(ctx)
-
-	// if errL != nil {
-	// 	return nil, errL
-	// }
-	// //Init postmodel struct
-	// r.postModel = models.NewPostModel(post, authorFromPost, likesFromPost)
-	// log.Println(r.postModel)
 
 	return post, nil
 }
@@ -139,7 +123,7 @@ func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.Us
 
 	return postAuthor, nil
 }
-func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]*prisma.Likes, error) {
+func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Likes, error) {
 	postID := obj.ID
 
 	postLikes, err := client.Post(prisma.PostWhereUniqueInput{
@@ -149,18 +133,19 @@ func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]*prisma.L
 	if err != nil {
 		return nil, err
 	}
+
 	return postLikes, nil
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Users(ctx context.Context) ([]*prisma.User, error) {
+func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Posts(ctx context.Context) ([]*prisma.Post, error) {
+func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Likes(ctx context.Context) ([]*prisma.Likes, error) {
+func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Likes, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) User(ctx context.Context, id *string) (*prisma.User, error) {
@@ -178,9 +163,9 @@ type userResolver struct{ *Resolver }
 func (r *userResolver) CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error) {
 	panic("not implemented user")
 }
-func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]*prisma.Post, error) {
+func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error) {
 	panic("not implemented user")
 }
-func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]*prisma.Likes, error) {
+func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]prisma.Likes, error) {
 	panic("not implemented user")
 }
