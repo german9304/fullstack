@@ -2,7 +2,7 @@ package fullstack_backend
 
 import (
 	"context"
-	"log"
+	// "log"
 	"time"
 
 	models "github.com/german9304/fullstack-backend/models"
@@ -116,12 +116,24 @@ func (r *mutationResolver) DownLike(ctx context.Context, user *string, quantity 
 type postResolver struct{ *Resolver }
 
 func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
-	log.Println("author here")
-	panic("not implemented")
+	createdAt := obj.CreatedAt
+	t, err := time.Parse(time.RFC3339, createdAt)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *postResolver) UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
-	log.Println("author here")
-	panic("not implemented")
+	updatedAt := obj.UpdatedAt
+	t, err := time.Parse(time.RFC3339, updatedAt)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error) {
 	postID := obj.ID

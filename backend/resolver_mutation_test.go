@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"testing"
+	"time"
 
 	// "github.com/stretchr/testify/assert"
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
@@ -65,6 +66,8 @@ func (fs *FullStackSuite) TestMutations() {
 			createPost (pstinpt: $postinput) {
 				id
 				text
+				createdAt
+				updatedAt
 				author {
 					id
 					email
@@ -115,6 +118,8 @@ func (fs *FullStackSuite) TestMutations() {
 	type PostWithAuthor struct {
 		Id     string
 		Text   string
+		CreatedAt time.Time
+		UpdatedAt time.Time
 		Author prisma.User
 		Likes  []prisma.Likes
 	}
@@ -125,6 +130,8 @@ func (fs *FullStackSuite) TestMutations() {
 
 	// var postD map[string]prisma.Post
 	requestedPost := newPostRespData["createPost"]
+	log.Printf("created at %v \n", requestedPost.CreatedAt)
+	log.Printf("updated at %v \n", requestedPost.UpdatedAt)
 	// postId := requestedPost.Id
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
