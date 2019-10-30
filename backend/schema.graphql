@@ -12,7 +12,7 @@ type Mutation {
   signin(email: String!, password: String!): User!
   signout: Message!
   createPost(pstinpt: PostInput!): Post!
-  updatePost(id: String): Post!
+  updatePost(id: String, text: String!): Post!
   deletePost(id: String): Post!
   upLike(user: String, quantity: Int): Like!
   downLike(user: String, quantity: Int): Like!

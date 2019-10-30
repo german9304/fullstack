@@ -97,7 +97,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 	return post, nil
 }
 
-func (r *mutationResolver) UpdatePost(ctx context.Context, id *string) (*prisma.Post, error) {
+func (r *mutationResolver) UpdatePost(ctx context.Context, id *string, text string) (*prisma.Post, error) {
 	panic("not implemented")
 }
 

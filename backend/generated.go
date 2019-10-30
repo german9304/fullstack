@@ -67,7 +67,7 @@ type ComplexityRoot struct {
 		Signout    func(childComplexity int) int
 		Signup     func(childComplexity int, usrinpt UserInput) int
 		UpLike     func(childComplexity int, user *string, quantity *int) int
-		UpdatePost func(childComplexity int, id *string) int
+		UpdatePost func(childComplexity int, id *string, text string) int
 	}
 
 	Post struct {
@@ -110,7 +110,7 @@ type MutationResolver interface {
 	Signin(ctx context.Context, email string, password string) (*prisma.User, error)
 	Signout(ctx context.Context) (*Message, error)
 	CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error)
-	UpdatePost(ctx context.Context, id *string) (*prisma.Post, error)
+	UpdatePost(ctx context.Context, id *string, text string) (*prisma.Post, error)
 	DeletePost(ctx context.Context, id *string) (*prisma.Post, error)
 	UpLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error)
 	DownLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error)
@@ -281,7 +281,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(*string)), true
+		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(*string), args["text"].(string)), true
 
 	case "Post.author":
 		if e.complexity.Post.Author == nil {
@@ -507,7 +507,7 @@ type Mutation {
   signin(email: String!, password: String!): User!
   signout: Message!
   createPost(pstinpt: PostInput!): Post!
-  updatePost(id: String): Post!
+  updatePost(id: String, text: String!): Post!
   deletePost(id: String): Post!
   upLike(user: String, quantity: Int): Like!
   downLike(user: String, quantity: Int): Like!
@@ -687,6 +687,14 @@ func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["text"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["text"] = arg1
 	return args, nil
 }
 
@@ -1196,7 +1204,7 @@ func (ec *executionContext) _Mutation_updatePost(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(*string))
+		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(*string), args["text"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
