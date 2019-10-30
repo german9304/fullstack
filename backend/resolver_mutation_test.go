@@ -130,8 +130,6 @@ func (fs *FullStackSuite) TestMutations() {
 
 	// var postD map[string]prisma.Post
 	requestedPost := newPostRespData["createPost"]
-	log.Printf("created at %v \n", requestedPost.CreatedAt)
-	log.Printf("updated at %v \n", requestedPost.UpdatedAt)
 	// postId := requestedPost.Id
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
