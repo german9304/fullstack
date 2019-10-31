@@ -14,6 +14,7 @@ import (
 
 type FullStackSuite struct {
 	suite.Suite
+	postID string
 }
 
 var (
@@ -28,11 +29,22 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 	name := "John"
 	password := "293902122"
 
-	client.CreateUser(prisma.UserCreateInput{
+	usr, _ := client.CreateUser(prisma.UserCreateInput{
 		Email:    email,
 		Name:     name,
 		Password: password,
 	}).Exec(ctx)
+
+	post, _ := client.CreatePost(prisma.PostCreateInput{
+		Text: "testpost",
+		Author: &prisma.UserCreateOneWithoutPostsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &usr.ID,
+			},
+		},
+	}).Exec(ctx)
+
+	fs.postID = post.ID
 }
 
 func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
@@ -44,11 +56,14 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
 	}).Exec(ctx)
+	client.DeletePost(prisma.PostWhereUniqueInput{
+		ID: &fs.postID,
+	}).Exec(ctx)
 }
 
 // All methods that begin with "Test" are run as tests within a
 // suite.
-func (fs *FullStackSuite) TestMutations() {
+func (fs *FullStackSuite) TestMutationCreate() {
 
 	CREATE_USER := `
 		mutation signupMutation($userinput: UserInput!) {
@@ -116,12 +131,12 @@ func (fs *FullStackSuite) TestMutations() {
 	// run it and capture the response
 
 	type PostWithAuthor struct {
-		Id     string
-		Text   string
+		Id        string
+		Text      string
 		CreatedAt time.Time
 		UpdatedAt time.Time
-		Author prisma.User
-		Likes  []prisma.Likes
+		Author    prisma.User
+		Likes     []prisma.Likes
 	}
 	var newPostRespData map[string]PostWithAuthor
 	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
@@ -134,7 +149,7 @@ func (fs *FullStackSuite) TestMutations() {
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
 	authorLikes := requestedPost.Likes
-	
+
 	// testing author fields
 	fs.Assert().Equal(post.Text, postText)
 	fs.Assert().Equal(usr.Email, authorPost.Email)
@@ -142,8 +157,37 @@ func (fs *FullStackSuite) TestMutations() {
 
 }
 
-// In order for 'go test' to run this suite, we need to create
-// a normal test function and pass our suite to suite.Run
+func (fs *FullStackSuite) TestMutationUpdates() {
+	UPDATE_POST := `
+		mutation updatePostMutation($id: String, $text: String!) {
+			updatePost(id: $id, text: $text) {
+				id
+				text
+			}
+		}
+	
+	`
+	ctx := context.Background()
+
+	// Create a user
+	updatePostReq := graphql.NewRequest(UPDATE_POST)
+
+	updatePostReq.Var("id", fs.postID)
+	updatePostReq.Var("text", "edited post")
+
+	updatePostReq.Header.Set("Cache-Control", "no-cache")
+
+	// run it and capture the response
+	var newUpdatePostRespData map[string]prisma.Post
+	if err := clientGraphql.Run(ctx, updatePostReq, &newUpdatePostRespData); err != nil {
+		log.Fatal(err)
+	}
+
+	updatedPost := newUpdatePostRespData["updatePost"]
+	fs.Assert().Equal("edited post", updatedPost.Text)
+}
+
+
 func TestSetSuite(t *testing.T) {
 	suite.Run(t, new(FullStackSuite))
 }

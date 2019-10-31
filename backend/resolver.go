@@ -98,7 +98,20 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 }
 
 func (r *mutationResolver) UpdatePost(ctx context.Context, id *string, text string) (*prisma.Post, error) {
-	panic("not implemented")
+	updatedPost, err := client.UpdatePost(prisma.PostUpdateParams{
+		Where: prisma.PostWhereUniqueInput{
+			ID: id,
+		},
+		Data: prisma.PostUpdateInput{
+			Text: &text,
+		},
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedPost, nil
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, id *string) (*prisma.Post, error) {
@@ -118,7 +131,7 @@ type postResolver struct{ *Resolver }
 func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
 	createdAt := obj.CreatedAt
 	t, err := time.Parse(time.RFC3339, createdAt)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +141,7 @@ func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.T
 func (r *postResolver) UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
 	updatedAt := obj.UpdatedAt
 	t, err := time.Parse(time.RFC3339, updatedAt)
-	
+
 	if err != nil {
 		return nil, err
 	}
