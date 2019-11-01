@@ -4,11 +4,17 @@ import (
 	"log"
 	"testing"
 
+	// prisma "github.com/german9304/fullstack-backend/prisma-client"
+	// "github.com/machinebox/graphql"
 	"github.com/stretchr/testify/suite"
 )
 
 type FullstackSuiteQuery struct {
 	suite.Suite
+}
+
+func (fs *FullstackSuiteQuery) SetupTest() {
+	log.Println("Set up test runs once")
 }
 
 func (fs *FullstackSuiteQuery) BeforeTest(suiteName, testName string) {

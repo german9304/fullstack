@@ -1,7 +1,6 @@
 package fullstack_backend
 
 import (
-	"context"
 	"log"
 	"testing"
 	"time"
@@ -17,13 +16,6 @@ type FullstackSuiteMutation struct {
 	postID string
 	usrID  string
 }
-
-var (
-	// client        *prisma.Client  = prisma.New(nil)
-	ctx           context.Context = context.TODO()
-	email         string          = "John@mail.com"
-	clientGraphql *graphql.Client = graphql.NewClient("http://localhost:8000/")
-)
 
 func (fs *FullstackSuiteMutation) BeforeTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
