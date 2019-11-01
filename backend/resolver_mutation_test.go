@@ -15,6 +15,7 @@ import (
 type FullStackSuite struct {
 	suite.Suite
 	postID string
+	usrID  string
 }
 
 var (
@@ -44,6 +45,7 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 		},
 	}).Exec(ctx)
 
+	fs.usrID = usr.ID
 	fs.postID = post.ID
 }
 
@@ -94,8 +96,6 @@ func (fs *FullStackSuite) TestMutationCreate() {
 			}
 		}
 	`
-
-	ctx := context.Background()
 
 	// Create a user
 	signupReq := graphql.NewRequest(CREATE_USER)
@@ -167,13 +167,11 @@ func (fs *FullStackSuite) TestMutationUpdates() {
 		}
 	
 	`
-	ctx := context.Background()
-
 	// Create a user
 	updatePostReq := graphql.NewRequest(UPDATE_POST)
-
+	postText := "edited post"
 	updatePostReq.Var("id", fs.postID)
-	updatePostReq.Var("text", "edited post")
+	updatePostReq.Var("text", postText)
 
 	updatePostReq.Header.Set("Cache-Control", "no-cache")
 
@@ -184,9 +182,49 @@ func (fs *FullStackSuite) TestMutationUpdates() {
 	}
 
 	updatedPost := newUpdatePostRespData["updatePost"]
-	fs.Assert().Equal("edited post", updatedPost.Text)
+	fs.Assert().Equal(updatedPost.Text, postText)
 }
 
+func (fs *FullStackSuite) TestMutationDelete() {
+
+	post2, _ := client.CreatePost(prisma.PostCreateInput{
+		Text: "test2post",
+		Author: &prisma.UserCreateOneWithoutPostsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &fs.usrID,
+			},
+		},
+	}).Exec(ctx)
+
+	DELETE_POST := `
+		mutation deletePostMutation($id: String){
+			deletePost(id: $id) {
+				text
+			}
+		}
+	`
+
+	deletePostReq := graphql.NewRequest(DELETE_POST)
+	deletePostReq.Var("id", post2.ID)
+
+	deletePostReq.Header.Set("Cache-Control", "no-cache")
+
+	// run it and capture the response
+	var deletePostRespData map[string]prisma.Post
+	if err := clientGraphql.Run(ctx, deletePostReq, &deletePostRespData); err != nil {
+		log.Printf("error: %v \n", err)
+		log.Fatal(err)
+	}
+
+	p, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &post2.ID,
+	}).Exec(ctx)
+
+	deletePost := deletePostRespData["deletePost"]
+	fs.Assert().Equal(deletePost.Text, "test2post")
+	fs.Assert().Equal("query returned no result", err.Error())
+	fs.Assert().Nil(p)
+}
 
 func TestSetSuite(t *testing.T) {
 	suite.Run(t, new(FullStackSuite))

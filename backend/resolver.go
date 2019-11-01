@@ -115,7 +115,14 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, id *string, text stri
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, id *string) (*prisma.Post, error) {
-	panic("not implemented")
+	deletedPost, err := client.DeletePost(prisma.PostWhereUniqueInput{
+		ID: id,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return deletedPost, nil
 }
 
 func (r *mutationResolver) UpLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
