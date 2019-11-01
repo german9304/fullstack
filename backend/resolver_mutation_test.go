@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type FullStackSuite struct {
+type FullstackSuiteMutation struct {
 	suite.Suite
 	postID string
 	usrID  string
@@ -25,7 +25,7 @@ var (
 	clientGraphql *graphql.Client = graphql.NewClient("http://localhost:8000/")
 )
 
-func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
+func (fs *FullstackSuiteMutation) BeforeTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
 	name := "John"
 	password := "293902122"
@@ -49,7 +49,7 @@ func (fs *FullStackSuite) BeforeTest(suiteName, testName string) {
 	fs.postID = post.ID
 }
 
-func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
+func (fs *FullstackSuiteMutation) AfterTest(suiteName, testName string) {
 	log.Printf("s: %v, t: %v \n", suiteName, testName)
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &email,
@@ -65,7 +65,7 @@ func (fs *FullStackSuite) AfterTest(suiteName, testName string) {
 
 // All methods that begin with "Test" are run as tests within a
 // suite.
-func (fs *FullStackSuite) TestMutationCreate() {
+func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	CREATE_USER := `
 		mutation signupMutation($userinput: UserInput!) {
@@ -157,7 +157,7 @@ func (fs *FullStackSuite) TestMutationCreate() {
 
 }
 
-func (fs *FullStackSuite) TestMutationUpdates() {
+func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	UPDATE_POST := `
 		mutation updatePostMutation($id: String, $text: String!) {
 			updatePost(id: $id, text: $text) {
@@ -185,7 +185,7 @@ func (fs *FullStackSuite) TestMutationUpdates() {
 	fs.Assert().Equal(updatedPost.Text, postText)
 }
 
-func (fs *FullStackSuite) TestMutationDelete() {
+func (fs *FullstackSuiteMutation) TestMutationDelete() {
 
 	post2, _ := client.CreatePost(prisma.PostCreateInput{
 		Text: "test2post",
@@ -227,5 +227,5 @@ func (fs *FullStackSuite) TestMutationDelete() {
 }
 
 func TestSetSuite(t *testing.T) {
-	suite.Run(t, new(FullStackSuite))
+	suite.Run(t, new(FullstackSuiteMutation))
 }
