@@ -3,8 +3,9 @@
 package fullstack_backend
 
 type LikeInput struct {
-	User string `json:"user"`
-	Post string `json:"post"`
+	User     string `json:"user"`
+	Post     string `json:"post"`
+	Quantity int    `json:"quantity"`
 }
 
 type Message struct {

@@ -49,6 +49,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Like struct {
 		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
 		Post      func(childComplexity int) int
 		Quantity  func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -60,14 +61,13 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateLike func(childComplexity int, likeInput LikeInput) int
 		CreatePost func(childComplexity int, pstinpt PostInput) int
-		DeletePost func(childComplexity int, id *string) int
-		DownLike   func(childComplexity int, user *string, quantity *int) int
+		DeletePost func(childComplexity int, id string) int
 		Signin     func(childComplexity int, email string, password string) int
 		Signout    func(childComplexity int) int
 		Signup     func(childComplexity int, usrinpt UserInput) int
-		UpLike     func(childComplexity int, user *string, quantity *int) int
-		UpdatePost func(childComplexity int, id *string, text string) int
+		UpdatePost func(childComplexity int, id string, text string) int
 	}
 
 	Post struct {
@@ -110,10 +110,9 @@ type MutationResolver interface {
 	Signin(ctx context.Context, email string, password string) (*prisma.User, error)
 	Signout(ctx context.Context) (*Message, error)
 	CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error)
-	UpdatePost(ctx context.Context, id *string, text string) (*prisma.Post, error)
-	DeletePost(ctx context.Context, id *string) (*prisma.Post, error)
-	UpLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error)
-	DownLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error)
+	UpdatePost(ctx context.Context, id string, text string) (*prisma.Post, error)
+	DeletePost(ctx context.Context, id string) (*prisma.Post, error)
+	CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Likes, error)
 }
 type PostResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
@@ -157,6 +156,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Like.CreatedAt(childComplexity), true
 
+	case "Like.id":
+		if e.complexity.Like.ID == nil {
+			break
+		}
+
+		return e.complexity.Like.ID(childComplexity), true
+
 	case "Like.post":
 		if e.complexity.Like.Post == nil {
 			break
@@ -192,6 +198,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Message.Message(childComplexity), true
 
+	case "Mutation.createLike":
+		if e.complexity.Mutation.CreateLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLike(childComplexity, args["likeInput"].(LikeInput)), true
+
 	case "Mutation.createPost":
 		if e.complexity.Mutation.CreatePost == nil {
 			break
@@ -214,19 +232,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeletePost(childComplexity, args["id"].(*string)), true
-
-	case "Mutation.downLike":
-		if e.complexity.Mutation.DownLike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_downLike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DownLike(childComplexity, args["user"].(*string), args["quantity"].(*int)), true
+		return e.complexity.Mutation.DeletePost(childComplexity, args["id"].(string)), true
 
 	case "Mutation.signin":
 		if e.complexity.Mutation.Signin == nil {
@@ -259,18 +265,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Signup(childComplexity, args["usrinpt"].(UserInput)), true
 
-	case "Mutation.upLike":
-		if e.complexity.Mutation.UpLike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_upLike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpLike(childComplexity, args["user"].(*string), args["quantity"].(*int)), true
-
 	case "Mutation.updatePost":
 		if e.complexity.Mutation.UpdatePost == nil {
 			break
@@ -281,7 +275,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(*string), args["text"].(string)), true
+		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(string), args["text"].(string)), true
 
 	case "Post.author":
 		if e.complexity.Post.Author == nil {
@@ -507,10 +501,9 @@ type Mutation {
   signin(email: String!, password: String!): User!
   signout: Message!
   createPost(pstinpt: PostInput!): Post!
-  updatePost(id: String, text: String!): Post!
-  deletePost(id: String): Post!
-  upLike(user: String, quantity: Int): Like!
-  downLike(user: String, quantity: Int): Like!
+  updatePost(id: String!, text: String!): Post!
+  deletePost(id: String!): Post!
+  createLike(likeInput: LikeInput!): Like!
 }
 
 type Message {
@@ -531,6 +524,7 @@ input PostInput {
 input LikeInput {
   user: String!
   post: String!
+  quantity: Int!
 }
 
 type User {
@@ -553,6 +547,7 @@ type Post {
 }
 
 type Like {
+  id: ID!
   user: User!
   post: Post!
   createdAt: Time!
@@ -567,6 +562,20 @@ scalar Time
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 LikeInput
+	if tmp, ok := rawArgs["likeInput"]; ok {
+		arg0, err = ec.unmarshalNLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["likeInput"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -585,36 +594,14 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deletePost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_downLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["user"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["user"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["quantity"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["quantity"] = arg1
 	return args, nil
 }
 
@@ -654,34 +641,12 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_upLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["user"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["user"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["quantity"]; ok {
-		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["quantity"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -789,6 +754,43 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Like_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Like",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Like_user(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -1204,7 +1206,7 @@ func (ec *executionContext) _Mutation_updatePost(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(*string), args["text"].(string))
+		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(string), args["text"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1248,7 +1250,7 @@ func (ec *executionContext) _Mutation_deletePost(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeletePost(rctx, args["id"].(*string))
+		return ec.resolvers.Mutation().DeletePost(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1266,7 +1268,7 @@ func (ec *executionContext) _Mutation_deletePost(ctx context.Context, field grap
 	return ec.marshalNPost2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_upLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1283,7 +1285,7 @@ func (ec *executionContext) _Mutation_upLike(ctx context.Context, field graphql.
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_upLike_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createLike_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1292,51 +1294,7 @@ func (ec *executionContext) _Mutation_upLike(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpLike(rctx, args["user"].(*string), args["quantity"].(*int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*prisma.Likes)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_downLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_downLike_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DownLike(rctx, args["user"].(*string), args["quantity"].(*int))
+		return ec.resolvers.Mutation().CreateLike(rctx, args["likeInput"].(LikeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3310,6 +3268,12 @@ func (ec *executionContext) unmarshalInputLikeInput(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
+		case "quantity":
+			var err error
+			it.Quantity, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3389,6 +3353,11 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Like")
+		case "id":
+			out.Values[i] = ec._Like_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "user":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -3530,13 +3499,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "upLike":
-			out.Values[i] = ec._Mutation_upLike(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "downLike":
-			out.Values[i] = ec._Mutation_downLike(ctx, field)
+		case "createLike":
+			out.Values[i] = ec._Mutation_createLike(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4098,6 +4062,20 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v prisma.Likes) graphql.Marshaler {
 	return ec._Like(ctx, sel, &v)
 }
@@ -4147,6 +4125,10 @@ func (ec *executionContext) marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstac
 		return graphql.Null
 	}
 	return ec._Like(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx context.Context, v interface{}) (LikeInput, error) {
+	return ec.unmarshalInputLikeInput(ctx, v)
 }
 
 func (ec *executionContext) marshalNMessage2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐMessage(ctx context.Context, sel ast.SelectionSet, v Message) graphql.Marshaler {
@@ -4568,35 +4550,12 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
-	return graphql.UnmarshalInt(v)
-}
-
-func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	return graphql.MarshalInt(v)
-}
-
 func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
 	return graphql.UnmarshalInt32(v)
 }
 
 func (ec *executionContext) marshalOInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
 	return graphql.MarshalInt32(v)
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOInt2int(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v interface{}) (*int32, error) {

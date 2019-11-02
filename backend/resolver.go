@@ -2,7 +2,6 @@ package fullstack_backend
 
 import (
 	"context"
-	// "log"
 	"time"
 
 	models "github.com/german9304/fullstack-backend/models"
@@ -97,10 +96,10 @@ func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*
 	return post, nil
 }
 
-func (r *mutationResolver) UpdatePost(ctx context.Context, id *string, text string) (*prisma.Post, error) {
+func (r *mutationResolver) UpdatePost(ctx context.Context, id string, text string) (*prisma.Post, error) {
 	updatedPost, err := client.UpdatePost(prisma.PostUpdateParams{
 		Where: prisma.PostWhereUniqueInput{
-			ID: id,
+			ID: &id,
 		},
 		Data: prisma.PostUpdateInput{
 			Text: &text,
@@ -114,9 +113,9 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, id *string, text stri
 	return updatedPost, nil
 }
 
-func (r *mutationResolver) DeletePost(ctx context.Context, id *string) (*prisma.Post, error) {
+func (r *mutationResolver) DeletePost(ctx context.Context, id string) (*prisma.Post, error) {
 	deletedPost, err := client.DeletePost(prisma.PostWhereUniqueInput{
-		ID: id,
+		ID: &id,
 	}).Exec(ctx)
 
 	if err != nil {
@@ -125,12 +124,31 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id *string) (*prisma.
 	return deletedPost, nil
 }
 
-func (r *mutationResolver) UpLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
-	panic("not implemented likes")
-}
+func (r *mutationResolver) CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Likes, error) {
+	userID := likeInput.User
+	postID := likeInput.Post
+	quantity := int32(likeInput.Quantity)
 
-func (r *mutationResolver) DownLike(ctx context.Context, user *string, quantity *int) (*prisma.Likes, error) {
-	panic("not implemented likes")
+	like, err := client.CreateLikes(prisma.LikesCreateInput{
+		Quantity: &quantity,
+		User: prisma.UserCreateOneWithoutLikesInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &userID,
+			},
+		},
+		Post: prisma.PostCreateOneWithoutLikesInput{
+			Connect: &prisma.PostWhereUniqueInput{
+				ID: &postID,
+			},
+		},
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return like, nil
+
 }
 
 type postResolver struct{ *Resolver }

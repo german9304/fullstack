@@ -12,10 +12,9 @@ type Mutation {
   signin(email: String!, password: String!): User!
   signout: Message!
   createPost(pstinpt: PostInput!): Post!
-  updatePost(id: String, text: String!): Post!
-  deletePost(id: String): Post!
-  upLike(user: String, quantity: Int): Like!
-  downLike(user: String, quantity: Int): Like!
+  updatePost(id: String!, text: String!): Post!
+  deletePost(id: String!): Post!
+  createLike(likeInput: LikeInput!): Like!
 }
 
 type Message {
@@ -36,6 +35,7 @@ input PostInput {
 input LikeInput {
   user: String!
   post: String!
+  quantity: Int!
 }
 
 type User {
@@ -58,6 +58,7 @@ type Post {
 }
 
 type Like {
+  id: ID!
   user: User!
   post: Post!
   createdAt: Time!

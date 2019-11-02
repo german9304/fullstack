@@ -89,6 +89,15 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 		}
 	`
 
+	CREATE_LIKE := `
+		mutation likeMutation($likeinput: LikeInput!) {
+			createLike(likeInput: $likeinput) {
+				id
+				quantity
+			}
+		}
+	`
+
 	// Create a user
 	signupReq := graphql.NewRequest(CREATE_USER)
 
@@ -137,7 +146,7 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	// var postD map[string]prisma.Post
 	requestedPost := newPostRespData["createPost"]
-	// postId := requestedPost.Id
+	postId := requestedPost.Id
 	postText := requestedPost.Text
 	authorPost := requestedPost.Author
 	authorLikes := requestedPost.Likes
@@ -147,11 +156,30 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 	fs.Assert().Equal(usr.Email, authorPost.Email)
 	fs.Assert().Equal(0, len(authorLikes))
 
+	// Create a like
+
+	likesReq := graphql.NewRequest(CREATE_LIKE)
+
+	likeInput := LikeInput{newUserId, postId, 1}
+
+	likesReq.Var("likeinput", likeInput)
+
+	likesReq.Header.Set("Cache-Control", "no-cache")
+
+	// run it and capture the response
+	var newLikesRespData map[string]prisma.Likes
+	if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
+		log.Fatal(err)
+	}
+
+	likesResp := newLikesRespData["createLike"]
+	likesQuantity := *likesResp.Quantity
+	fs.Assert().Equal(int32(1), likesQuantity)
 }
 
 func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	UPDATE_POST := `
-		mutation updatePostMutation($id: String, $text: String!) {
+		mutation updatePostMutation($id: String!, $text: String!) {
 			updatePost(id: $id, text: $text) {
 				id
 				text
@@ -189,7 +217,7 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 	}).Exec(ctx)
 
 	DELETE_POST := `
-		mutation deletePostMutation($id: String){
+		mutation deletePostMutation($id: String!){
 			deletePost(id: $id) {
 				text
 			}
