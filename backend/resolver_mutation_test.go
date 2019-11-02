@@ -3,7 +3,6 @@ package fullstack_backend
 import (
 	"log"
 	"testing"
-	"time"
 
 	// "github.com/stretchr/testify/assert"
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
@@ -55,8 +54,13 @@ func (fs *FullstackSuiteMutation) TearDownSuite() {
 	}).Exec(ctx)
 }
 
-// All methods that begin with "Test" are run as tests within a
-// suite.
+/**
+*
+* 
+*
+*
+*/
+
 func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	CREATE_USER := `
@@ -75,16 +79,6 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 			createPost (pstinpt: $postinput) {
 				id
 				text
-				createdAt
-				updatedAt
-				author {
-					id
-					email
-					password
-				}
-				likes {
-					createdAt
-				}
 			}
 		}
 	`
@@ -98,8 +92,12 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 		}
 	`
 
-	// Create a user
+	// Create a user request
 	signupReq := graphql.NewRequest(CREATE_USER)
+	// Create a post request
+	newPostReq := graphql.NewRequest(CREATE_POST)
+	// Create a like request
+	likesReq := graphql.NewRequest(CREATE_LIKE)
 
 	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
 
@@ -116,49 +114,20 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	newUserId := newUser.ID
 
-	fs.Assert().Equal(usr.Email, newUser.Email)
-	fs.Assert().Equal(usr.Name, newUser.Name)
-	fs.Assert().Equal(usr.Password, newUser.Password)
-
-	// Create a post
-	newPostReq := graphql.NewRequest(CREATE_POST)
-
 	post := PostInput{"first", newUserId}
 
 	newPostReq.Var("postinput", post)
 
 	newPostReq.Header.Set("Cache-Control", "no-cache")
 
-	// run it and capture the response
-
-	type PostWithAuthor struct {
-		Id        string
-		Text      string
-		CreatedAt time.Time
-		UpdatedAt time.Time
-		Author    prisma.User
-		Likes     []prisma.Likes
-	}
-	var newPostRespData map[string]PostWithAuthor
+	var newPostRespData map[string]prisma.Post
 	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
 		log.Fatal(err)
 	}
 
-	// var postD map[string]prisma.Post
 	requestedPost := newPostRespData["createPost"]
-	postId := requestedPost.Id
+	postId := requestedPost.ID
 	postText := requestedPost.Text
-	authorPost := requestedPost.Author
-	authorLikes := requestedPost.Likes
-
-	// testing author fields
-	fs.Assert().Equal(post.Text, postText)
-	fs.Assert().Equal(usr.Email, authorPost.Email)
-	fs.Assert().Equal(0, len(authorLikes))
-
-	// Create a like
-
-	likesReq := graphql.NewRequest(CREATE_LIKE)
 
 	likeInput := LikeInput{newUserId, postId, 1}
 
@@ -166,7 +135,6 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	likesReq.Header.Set("Cache-Control", "no-cache")
 
-	// run it and capture the response
 	var newLikesRespData map[string]prisma.Likes
 	if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
 		log.Fatal(err)
@@ -174,6 +142,12 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	likesResp := newLikesRespData["createLike"]
 	likesQuantity := *likesResp.Quantity
+
+
+	fs.Assert().Equal(usr.Email, newUser.Email)
+	fs.Assert().Equal(usr.Name, newUser.Name)
+	fs.Assert().Equal(usr.Password, newUser.Password)
+	fs.Assert().Equal(post.Text, postText)
 	fs.Assert().Equal(int32(1), likesQuantity)
 }
 
