@@ -17,10 +17,10 @@ type FullstackSuiteMutation struct {
 	usrID  string
 }
 
-func (fs *FullstackSuiteMutation) BeforeTest(suiteName, testName string) {
-	log.Printf("s: %v, t: %v \n", suiteName, testName)
+func (fs *FullstackSuiteMutation) SetupSuite() {
 	name := "John"
 	password := "293902122"
+	email := "John@mail.com"
 
 	usr, _ := client.CreateUser(prisma.UserCreateInput{
 		Email:    email,
@@ -41,8 +41,8 @@ func (fs *FullstackSuiteMutation) BeforeTest(suiteName, testName string) {
 	fs.postID = post.ID
 }
 
-func (fs *FullstackSuiteMutation) AfterTest(suiteName, testName string) {
-	log.Printf("s: %v, t: %v \n", suiteName, testName)
+func (fs *FullstackSuiteMutation) TearDownSuite() {
+	email := "John@mail.com"
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &email,
 	}).Exec(ctx)
@@ -218,6 +218,6 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 	fs.Assert().Nil(p)
 }
 
-func TestSetSuite(t *testing.T) {
+func TestMutaion(t *testing.T) {
 	suite.Run(t, new(FullstackSuiteMutation))
 }
