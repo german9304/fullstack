@@ -5,7 +5,6 @@ import (
 	// "log"
 	"time"
 
-	models "github.com/german9304/fullstack-backend/models"
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
 )
 
@@ -15,9 +14,7 @@ var (
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-type Resolver struct {
-	postModel *models.PostModel
-}
+type Resolver struct{}
 
 func (r *Resolver) Like() LikeResolver {
 	return &likeResolver{r}
@@ -205,16 +202,30 @@ type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
 	users, err := client.Users(nil).Exec(ctx)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return users, nil
 }
 func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
-	panic("not implemented")
+	posts, err := client.Posts(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Likes, error) {
-	panic("not implemented")
+	likes, err := client.Likeses(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return likes, nil
 }
 func (r *queryResolver) User(ctx context.Context, id *string) (*prisma.User, error) {
 	panic("not implemented")
@@ -239,7 +250,7 @@ func (r *userResolver) CreatedAt(ctx context.Context, obj *prisma.User) (*time.T
 	return &t, nil
 }
 func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error) {
-	posts, err := client.User(prisma.UserWhereUniqueInput{
+	userPosts, err := client.User(prisma.UserWhereUniqueInput{
 		ID: &obj.ID,
 	}).Posts(nil).Exec(ctx)
 
@@ -247,8 +258,16 @@ func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Po
 		return nil, err
 	}
 
-	return posts, nil
+	return userPosts, nil
 }
 func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]prisma.Likes, error) {
-	panic("not implemented user")
+	userLikes, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &obj.ID,
+	}).Likes(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return userLikes, nil
 }

@@ -116,6 +116,10 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 					id
 					text
 				}
+				likes {
+					id
+					quantity
+				}
 			}
 		}
 	`
@@ -133,12 +137,71 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 	for _, v := range users {
 		fs.Assert().NotEmpty(v.Id)
 		fs.Assert().Len(v.Posts, 1)
+		fs.Assert().Len(v.Likes, 1)
 		fs.Assert().NotEmpty(v.Posts[0].Text)
+		fs.Assert().Equal(int32(0), *v.Likes[0].Quantity)
 	}
 }
 
 func (fs *FullstackSuiteQuery) TestQueryPosts() {
+	POSTS := `
+		query queryPosts {
+			posts {
+				id
+				text
+				author {
+					email
+					name
+				}
+				likes {
+					quantity
+				}
+			}
+		}
+	`
+	postsReq := graphql.NewRequest(POSTS)
 
+	postsReq.Header.Set("Cache-Control", "no-cache")
+
+	var postsRespData map[string][]models.Post
+	if err := clientGraphql.Run(ctx, postsReq, &postsRespData); err != nil {
+		log.Printf("error: %v \n", err)
+		log.Fatal(err)
+	}
+
+	posts := postsRespData["posts"]
+	for _, v := range posts {
+		fs.Assert().NotEmpty(v.Id)
+		fs.Assert().Len(v.Likes, 1)
+		fs.Assert().NotEmpty(v.Author)
+		fs.Assert().Equal(int32(0), *v.Likes[0].Quantity)
+	}
+}
+
+func (fs *FullstackSuiteQuery) TestQueryLikes() {
+	LIKES := `
+		query queryLikes {
+			likes {
+				id
+				quantity
+			}
+		}
+	`
+	likesReq := graphql.NewRequest(LIKES)
+
+	likesReq.Header.Set("Cache-Control", "no-cache")
+
+	var likesRespData map[string][]models.Like
+	if err := clientGraphql.Run(ctx, likesReq, &likesRespData); err != nil {
+		log.Printf("error: %v \n", err)
+		log.Fatal(err)
+	}
+
+	likes := likesRespData["likes"]
+	for _, v := range likes {
+		fs.Assert().NotEmpty(v.Id)
+		log.Printf("quantity %v \n", v.Quantity)
+	}
 }
 
 func TestQuery(t *testing.T) {
