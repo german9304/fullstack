@@ -1,7 +1,7 @@
 package models
 
 import (
-	"time"
+	prisma "github.com/german9304/fullstack-backend/prisma-client"
 )
 
 type User struct {
@@ -9,10 +9,8 @@ type User struct {
 	Email     string
 	Name      string
 	Password  string
-	Age       int
-	CreatedAt *time.Time
-	// Posts     []*Post
-	// likes     []*Like
+	CreatedAt string
+	UpdatedAt string
+	Posts     []prisma.Post
+	Likes     []prisma.Likes
 }
-
-

@@ -204,7 +204,11 @@ func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Li
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
-	panic("not implemented")
+	users, err := client.Users(nil).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
 	panic("not implemented")
