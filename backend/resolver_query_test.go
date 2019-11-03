@@ -14,6 +14,7 @@ type FullstackSuiteQuery struct {
 	suite.Suite
 	queryUsers    []prisma.UserCreateInput
 	clientGraphql *graphql.Client
+	userIds       []string
 }
 
 var (
@@ -82,7 +83,9 @@ func (fs *FullstackSuiteQuery) SetupSuite() {
 
 	for i := 0; i < len(fs.queryUsers); i++ {
 		user := fs.queryUsers[i]
-		_, err := client.CreateUser(user).Exec(ctx)
+		newUser, err := client.CreateUser(user).Exec(ctx)
+		fs.userIds = append(fs.userIds, newUser.ID)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -123,13 +126,13 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 			}
 		}
 	`
+
 	usersReq := graphql.NewRequest(USERS)
 
 	usersReq.Header.Set("Cache-Control", "no-cache")
 
 	var usersRespData map[string][]models.User
 	if err := clientGraphql.Run(ctx, usersReq, &usersRespData); err != nil {
-		log.Printf("error: %v \n", err)
 		log.Fatal(err)
 	}
 
@@ -141,6 +144,60 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 		fs.Assert().NotEmpty(v.Posts[0].Text)
 		fs.Assert().Equal(int32(0), *v.Likes[0].Quantity)
 	}
+}
+
+func (fs *FullstackSuiteQuery) TestQueryUserByIdEmail() {
+	USERBYID := `
+		query UserID($id: String!) {
+			userById(id: $id) {
+				id
+				name
+				email
+			}
+		}
+	`
+
+	USERBYEMAIL := `
+		query UserEmail($email: String!) {
+			userByEmail(email: $email) {
+				id
+				name
+				email
+			}
+		}
+	`
+
+	clientReq := func(request, reqValue, reqVar string) *graphql.Request {
+		clientRequest := graphql.NewRequest(request)
+		clientRequest.Var(reqVar, reqValue)
+		clientRequest.Header.Set("Cache-Control", "no-cache")
+		return clientRequest
+	}
+
+	userByIdReq := clientReq(USERBYID, fs.userIds[0], "id")
+	userByEmailReq := clientReq(USERBYEMAIL, "pepe@mail.com", "email")
+
+	var userRespDataById map[string]models.User
+	if err := clientGraphql.Run(ctx, userByIdReq, &userRespDataById); err != nil {
+		log.Fatal(err)
+	}
+
+	var userRespDataByEmail map[string]models.User
+	if err := clientGraphql.Run(ctx, userByEmailReq, &userRespDataByEmail); err != nil {
+		log.Fatal(err)
+	}
+
+	userById := userRespDataById["userById"]
+	userByEmail := userRespDataByEmail["userByEmail"]
+
+	userTest := func(user models.User) {
+		fs.Assert().NotEmpty(user.Id)
+		fs.Assert().Equal("pepe", user.Name)
+		fs.Assert().Equal("pepe@mail.com", user.Email)
+	}
+
+	userTest(userById)
+	userTest(userByEmail)
 }
 
 func (fs *FullstackSuiteQuery) TestQueryPosts() {

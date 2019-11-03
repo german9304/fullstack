@@ -52,8 +52,6 @@ func (r *likeResolver) Post(ctx context.Context, obj *prisma.Like) (*prisma.Post
 		return nil, err
 	}
 
-
-
 	return post, nil
 }
 func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error) {
@@ -257,13 +255,34 @@ func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Like, error) {
 
 	return likes, nil
 }
-func (r *queryResolver) User(ctx context.Context, id *string) (*prisma.User, error) {
+
+func (r *queryResolver) UserByID(ctx context.Context, id string) (*prisma.User, error) {
+	user, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &id,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*prisma.User, error) {
+	user, err := client.User(prisma.UserWhereUniqueInput{
+		Email: &email,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Post(ctx context.Context, id *string) (*prisma.Post, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) Like(ctx context.Context, id *string) (*prisma.Like, error) {
+func (r *queryResolver) Like(ctx context.Context, id string) (*prisma.Like, error) {
 	panic("not implemented")
 }
 
