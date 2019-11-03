@@ -280,10 +280,26 @@ func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*prisma.
 	return user, nil
 }
 func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, error) {
-	panic("not implemented")
+	post, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &id,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return post, nil
 }
 func (r *queryResolver) Like(ctx context.Context, id string) (*prisma.Like, error) {
-	panic("not implemented")
+	like, err := client.Like(prisma.LikeWhereUniqueInput{
+		ID: &id,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return like, nil
 }
 
 type userResolver struct{ *Resolver }

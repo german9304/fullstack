@@ -93,6 +93,13 @@ func (fs *FullstackSuiteQuery) SetupSuite() {
 
 }
 
+func clientReq(request, reqValue, reqVar string) *graphql.Request {
+	clientRequest := graphql.NewRequest(request)
+	clientRequest.Var(reqVar, reqValue)
+	clientRequest.Header.Set("Cache-Control", "no-cache")
+	return clientRequest
+}
+
 func (fs *FullstackSuiteQuery) TearDownSuite() {
 
 	for i := 0; i < len(fs.queryUsers); i++ {
@@ -215,7 +222,8 @@ func (fs *FullstackSuiteQuery) TestQueryLikes() {
 	}
 }
 
-func (fs *FullstackSuiteQuery) TestQueryUserByIdEmail() {
+
+func (fs *FullstackSuiteQuery) TestQuerySingle() {
 	USERBYID := `
 		query UserID($id: String!) {
 			userById(id: $id) {
@@ -252,12 +260,39 @@ func (fs *FullstackSuiteQuery) TestQueryUserByIdEmail() {
 		}
 	`
 
-	clientReq := func(request, reqValue, reqVar string) *graphql.Request {
-		clientRequest := graphql.NewRequest(request)
-		clientRequest.Var(reqVar, reqValue)
-		clientRequest.Header.Set("Cache-Control", "no-cache")
-		return clientRequest
-	}
+	POST := `
+		query postQuery($id: String!) {
+			post(id: $id) {
+				id
+				text
+				author {
+					id
+					email
+				}
+				likes {
+					id
+					quantity
+				}
+			}
+		}
+	`
+
+	LIKE := `
+		query likeQuery($id: String!) {
+		    like(id: $id) {
+				id
+				quantity
+				user {
+					id
+					email
+				}
+				post {
+					id
+					text
+				}
+			}
+		}
+	`
 
 	userByIdReq := clientReq(USERBYID, fs.userIds[0], "id")
 	userByEmailReq := clientReq(USERBYEMAIL, "pepe@mail.com", "email")
@@ -286,6 +321,33 @@ func (fs *FullstackSuiteQuery) TestQueryUserByIdEmail() {
 
 	userTest(userById)
 	userTest(userByEmail)
+
+	postId := userById.Posts[0].ID
+	likeId := userById.Likes[0].ID
+	postReq := clientReq(POST, postId, "id")
+	likeReq := clientReq(LIKE, likeId, "id")
+
+	var postReqData map[string]models.Post
+	if err := clientGraphql.Run(ctx, postReq, &postReqData); err != nil {
+		log.Fatal(err)
+	}
+
+	var likeReqData map[string]models.Like
+	if err := clientGraphql.Run(ctx, likeReq, &likeReqData); err != nil {
+		log.Fatal(err)
+	}
+
+	postById := postReqData["post"]
+	likeById := likeReqData["like"]
+
+
+	fs.Assert().NotEmpty(postById.Id)
+	fs.Assert().NotEmpty(likeById.Id)
+	fs.Assert().Equal("pepe@mail.com", likeById.User.Email)
+	fs.Assert().Equal("pepe@mail.com", postById.Author.Email)
+	fs.Assert().Equal(int32(0), int32(*postById.Likes[0].Quantity))
+	fs.Assert().Equal(0, likeById.Quantity)
+
 }
 
 func TestQuery(t *testing.T) {
