@@ -10,9 +10,9 @@ import (
 type Like struct {
 	Id        string
 	Quantity  int
-	user      prisma.User
-	post      prisma.Post
-	createdAt time.Time
-	updatedAt time.Time
+	User      prisma.User
+	Post      prisma.Post
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	
 }

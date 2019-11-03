@@ -184,6 +184,12 @@ func (fs *FullstackSuiteQuery) TestQueryLikes() {
 			likes {
 				id
 				quantity
+				user {
+					id
+				}
+				post {
+					id
+				}
 			}
 		}
 	`
@@ -200,7 +206,9 @@ func (fs *FullstackSuiteQuery) TestQueryLikes() {
 	likes := likesRespData["likes"]
 	for _, v := range likes {
 		fs.Assert().NotEmpty(v.Id)
-		log.Printf("quantity %v \n", v.Quantity)
+		fs.Assert().Equal(0, v.Quantity)
+		fs.Assert().NotEmpty(v.User.ID)
+		fs.Assert().NotEmpty(v.Post.ID)
 	}
 }
 

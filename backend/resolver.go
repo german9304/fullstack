@@ -12,7 +12,6 @@ var (
 	client *prisma.Client = prisma.New(nil)
 )
 
-
 type Resolver struct{}
 
 func (r *Resolver) Like() LikeResolver {
@@ -34,16 +33,48 @@ func (r *Resolver) User() UserResolver {
 type likeResolver struct{ *Resolver }
 
 func (r *likeResolver) User(ctx context.Context, obj *prisma.Like) (*prisma.User, error) {
-	panic("not implemented likes")
+	user, err := client.Like(prisma.LikeWhereUniqueInput{
+		ID: &obj.ID,
+	}).User().Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 func (r *likeResolver) Post(ctx context.Context, obj *prisma.Like) (*prisma.Post, error) {
-	panic("not implemented likes")
+	post, err := client.Like(prisma.LikeWhereUniqueInput{
+		ID: &obj.ID,
+	}).Post().Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+
+
+	return post, nil
 }
 func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error) {
-	panic("not implemented likes")
+	createdAt := obj.CreatedAt
+	t, err := time.Parse(time.RFC3339, createdAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error) {
-	panic("not implemented likes")
+	createdAt := obj.CreatedAt
+	t, err := time.Parse(time.RFC3339, createdAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 
 type mutationResolver struct{ *Resolver }
