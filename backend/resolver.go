@@ -1,8 +1,8 @@
 package fullstack_backend
 
 import (
-	// "log"
 	"context"
+	// "log"
 	"time"
 
 	models "github.com/german9304/fullstack-backend/models"
@@ -229,10 +229,25 @@ func (r *queryResolver) Like(ctx context.Context, id *string) (*prisma.Likes, er
 type userResolver struct{ *Resolver }
 
 func (r *userResolver) CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error) {
-	panic("not implemented user")
+	createdAt := obj.CreatedAt
+	t, err := time.Parse(time.RFC3339, createdAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error) {
-	panic("not implemented user")
+	posts, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &obj.ID,
+	}).Posts(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]prisma.Likes, error) {
 	panic("not implemented user")

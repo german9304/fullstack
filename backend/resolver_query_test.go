@@ -112,6 +112,10 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 				email
 				name
 				password
+				posts {
+					id
+					text
+				}
 			}
 		}
 	`
@@ -126,11 +130,10 @@ func (fs *FullstackSuiteQuery) TestQueryUsers() {
 	}
 
 	users := usersRespData["users"]
-	for k, v := range users {
+	for _, v := range users {
 		fs.Assert().NotEmpty(v.Id)
-		fs.Assert().Equal(testingModelUsers[k].Email, v.Email)
-		fs.Assert().Equal(testingModelUsers[k].Name, v.Name)
-		fs.Assert().Equal(testingModelUsers[k].Password, v.Password)
+		fs.Assert().Len(v.Posts, 1)
+		fs.Assert().NotEmpty(v.Posts[0].Text)
 	}
 }
 
