@@ -12,5 +12,5 @@ type User struct {
 	CreatedAt string
 	UpdatedAt string
 	Posts     []prisma.Post
-	Likes     []prisma.Likes
+	Likes     []prisma.Like
 }

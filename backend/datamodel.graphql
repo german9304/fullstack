@@ -5,7 +5,7 @@ type User {
   password: String!
   createdAt: DateTime! @createdAt
   posts: [Post] @relation(name: "PostsByUser", onDelete: CASCADE)
-  likes: [Likes] @relation(name: "LikesByUser", onDelete: CASCADE)
+  likes: [Like] @relation(name: "LikesByUser", onDelete: CASCADE)
 }
 
 type Post {
@@ -14,10 +14,10 @@ type Post {
   createdAt: DateTime! @createdAt
   updatedAt: DateTime! @updatedAt
   author: User @relation(name: "PostsByUser", link: INLINE)
-  likes: [Likes] @relation(name: "LikesByPost", onDelete: CASCADE)
+  likes: [Like] @relation(name: "LikesByPost", onDelete: CASCADE)
 }
 
-type Likes {
+type Like {
   id: ID! @id
   user: User! @relation(name: "LikesByUser", link: INLINE)
   post: Post! @relation(name: "LikesByPost", link: INLINE)

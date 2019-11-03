@@ -11,5 +11,5 @@ type Post struct {
 	CreatedAt string
 	UpdatedAt string
 	Author    prisma.User
-	Likes     []prisma.Likes
+	Likes     []prisma.Like
 }

@@ -135,7 +135,7 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
 	likesReq.Header.Set("Cache-Control", "no-cache")
 
-	var newLikesRespData map[string]prisma.Likes
+	var newLikesRespData map[string]prisma.Like
 	if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
 		log.Fatal(err)
 	}

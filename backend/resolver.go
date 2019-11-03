@@ -12,7 +12,6 @@ var (
 	client *prisma.Client = prisma.New(nil)
 )
 
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct{}
 
@@ -34,16 +33,16 @@ func (r *Resolver) User() UserResolver {
 
 type likeResolver struct{ *Resolver }
 
-func (r *likeResolver) User(ctx context.Context, obj *prisma.Likes) (*prisma.User, error) {
+func (r *likeResolver) User(ctx context.Context, obj *prisma.Like) (*prisma.User, error) {
 	panic("not implemented likes")
 }
-func (r *likeResolver) Post(ctx context.Context, obj *prisma.Likes) (*prisma.Post, error) {
+func (r *likeResolver) Post(ctx context.Context, obj *prisma.Like) (*prisma.Post, error) {
 	panic("not implemented likes")
 }
-func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error) {
+func (r *likeResolver) CreatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error) {
 	panic("not implemented likes")
 }
-func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error) {
+func (r *likeResolver) UpdatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error) {
 	panic("not implemented likes")
 }
 
@@ -122,12 +121,12 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (*prisma.P
 	return deletedPost, nil
 }
 
-func (r *mutationResolver) CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Likes, error) {
+func (r *mutationResolver) CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Like, error) {
 	userID := likeInput.User
 	postID := likeInput.Post
 	quantity := int32(likeInput.Quantity)
 
-	like, err := client.CreateLikes(prisma.LikesCreateInput{
+	like, err := client.CreateLike(prisma.LikeCreateInput{
 		Quantity: &quantity,
 		User: prisma.UserCreateOneWithoutLikesInput{
 			Connect: &prisma.UserWhereUniqueInput{
@@ -184,7 +183,7 @@ func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.Us
 
 	return postAuthor, nil
 }
-func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Likes, error) {
+func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Like, error) {
 	postID := obj.ID
 
 	postLikes, err := client.Post(prisma.PostWhereUniqueInput{
@@ -218,8 +217,8 @@ func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
 
 	return posts, nil
 }
-func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Likes, error) {
-	likes, err := client.Likeses(nil).Exec(ctx)
+func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Like, error) {
+	likes, err := client.Likes(nil).Exec(ctx)
 
 	if err != nil {
 		return nil, err
@@ -233,7 +232,7 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*prisma.User, err
 func (r *queryResolver) Post(ctx context.Context, id *string) (*prisma.Post, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Like(ctx context.Context, id *string) (*prisma.Likes, error) {
+func (r *queryResolver) Like(ctx context.Context, id *string) (*prisma.Like, error) {
 	panic("not implemented")
 }
 
@@ -260,7 +259,7 @@ func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Po
 
 	return userPosts, nil
 }
-func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]prisma.Likes, error) {
+func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]prisma.Like, error) {
 	userLikes, err := client.User(prisma.UserWhereUniqueInput{
 		ID: &obj.ID,
 	}).Likes(nil).Exec(ctx)

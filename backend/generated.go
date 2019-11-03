@@ -100,10 +100,10 @@ type ComplexityRoot struct {
 }
 
 type LikeResolver interface {
-	User(ctx context.Context, obj *prisma.Likes) (*prisma.User, error)
-	Post(ctx context.Context, obj *prisma.Likes) (*prisma.Post, error)
-	CreatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error)
-	UpdatedAt(ctx context.Context, obj *prisma.Likes) (*time.Time, error)
+	User(ctx context.Context, obj *prisma.Like) (*prisma.User, error)
+	Post(ctx context.Context, obj *prisma.Like) (*prisma.Post, error)
+	CreatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error)
+	UpdatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error)
 }
 type MutationResolver interface {
 	Signup(ctx context.Context, usrinpt UserInput) (*prisma.User, error)
@@ -112,26 +112,26 @@ type MutationResolver interface {
 	CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error)
 	UpdatePost(ctx context.Context, id string, text string) (*prisma.Post, error)
 	DeletePost(ctx context.Context, id string) (*prisma.Post, error)
-	CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Likes, error)
+	CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Like, error)
 }
 type PostResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
 	UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
 	Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error)
-	Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Likes, error)
+	Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Like, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]prisma.User, error)
 	Posts(ctx context.Context) ([]prisma.Post, error)
-	Likes(ctx context.Context) ([]prisma.Likes, error)
+	Likes(ctx context.Context) ([]prisma.Like, error)
 	User(ctx context.Context, id *string) (*prisma.User, error)
 	Post(ctx context.Context, id *string) (*prisma.Post, error)
-	Like(ctx context.Context, id *string) (*prisma.Likes, error)
+	Like(ctx context.Context, id *string) (*prisma.Like, error)
 }
 type UserResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error)
 	Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error)
-	Likes(ctx context.Context, obj *prisma.User) ([]prisma.Likes, error)
+	Likes(ctx context.Context, obj *prisma.User) ([]prisma.Like, error)
 }
 
 type executableSchema struct {
@@ -755,7 +755,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Like_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -792,7 +792,7 @@ func (ec *executionContext) _Like_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_user(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_user(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -829,7 +829,7 @@ func (ec *executionContext) _Like_user(ctx context.Context, field graphql.Collec
 	return ec.marshalNUser2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_post(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_post(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -866,7 +866,7 @@ func (ec *executionContext) _Like_post(ctx context.Context, field graphql.Collec
 	return ec.marshalNPost2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -903,7 +903,7 @@ func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.C
 	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -940,7 +940,7 @@ func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.C
 	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_quantity(ctx context.Context, field graphql.CollectedField, obj *prisma.Likes) (ret graphql.Marshaler) {
+func (ec *executionContext) _Like_quantity(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1306,10 +1306,10 @@ func (ec *executionContext) _Mutation_createLike(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Likes)
+	res := resTmp.(*prisma.Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Post_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Post) (ret graphql.Marshaler) {
@@ -1525,10 +1525,10 @@ func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]prisma.Likes)
+	res := resTmp.([]prisma.Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1636,10 +1636,10 @@ func (ec *executionContext) _Query_likes(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]prisma.Likes)
+	res := resTmp.([]prisma.Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1759,10 +1759,10 @@ func (ec *executionContext) _Query_like(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Likes)
+	res := resTmp.(*prisma.Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
+	return ec.marshalOLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2093,10 +2093,10 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]prisma.Likes)
+	res := resTmp.([]prisma.Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3344,7 +3344,7 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 
 var likeImplementors = []string{"Like"}
 
-func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj *prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj *prisma.Like) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, likeImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4076,11 +4076,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v prisma.Like) graphql.Marshaler {
 	return ec._Like(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v []prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v []prisma.Like) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4104,7 +4104,7 @@ func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstac
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx, sel, v[i])
+			ret[i] = ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4117,7 +4117,7 @@ func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstac
 	return ret
 }
 
-func (ec *executionContext) marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v *prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v *prisma.Like) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4573,11 +4573,11 @@ func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.Se
 	return ec.marshalOInt2int32(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) marshalOLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v prisma.Like) graphql.Marshaler {
 	return ec._Like(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLikes(ctx context.Context, sel ast.SelectionSet, v *prisma.Likes) graphql.Marshaler {
+func (ec *executionContext) marshalOLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v *prisma.Like) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

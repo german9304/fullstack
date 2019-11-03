@@ -61,9 +61,9 @@ func (fs *FullstackSuiteQuery) SetupSuite() {
 				Create: []prisma.PostCreateWithoutAuthorInput{
 					prisma.PostCreateWithoutAuthorInput{
 						Text: testingPostsNames[i],
-						Likes: &prisma.LikesCreateManyWithoutPostInput{
-							Create: []prisma.LikesCreateWithoutPostInput{
-								prisma.LikesCreateWithoutPostInput{
+						Likes: &prisma.LikeCreateManyWithoutPostInput{
+							Create: []prisma.LikeCreateWithoutPostInput{
+								prisma.LikeCreateWithoutPostInput{
 									User: prisma.UserCreateOneWithoutLikesInput{
 										Connect: &prisma.UserWhereUniqueInput{
 											Email: &user.Email,

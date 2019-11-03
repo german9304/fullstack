@@ -67,27 +67,27 @@ var DefaultEndpoint = "http://prisma:4466/fullstackapp/posts"
 var Secret          = ""
 
 
-      func (client *Client) Likes (params LikesWhereUniqueInput) *LikesExec {
+      func (client *Client) Like (params LikeWhereUniqueInput) *LikeExec {
         ret := client.Client.GetOne(
           nil,
           params,
-          [2]string{"LikesWhereUniqueInput!", "Likes"},
-          "likes",
+          [2]string{"LikeWhereUniqueInput!", "Like"},
+          "like",
           []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExec{ret}
+        return &LikeExec{ret}
       }
 
-      type LikesesParams struct {
-        Where *LikesWhereInput `json:"where,omitempty"`
-OrderBy *LikesOrderByInput `json:"orderBy,omitempty"`
+      type LikesParams struct {
+        Where *LikeWhereInput `json:"where,omitempty"`
+OrderBy *LikeOrderByInput `json:"orderBy,omitempty"`
 Skip *int32 `json:"skip,omitempty"`
 After *string `json:"after,omitempty"`
 Before *string `json:"before,omitempty"`
 First *int32 `json:"first,omitempty"`
 Last *int32 `json:"last,omitempty"`
       }
-      func (client *Client) Likeses (params *LikesesParams) *LikesExecArray {
+      func (client *Client) Likes (params *LikesParams) *LikeExecArray {
         var wparams *prisma.WhereParams
         if params != nil {
           wparams = &prisma.WhereParams{
@@ -104,16 +104,16 @@ Last *int32 `json:"last,omitempty"`
         ret := client.Client.GetMany(
           nil,
           wparams,
-          [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
-          "likeses",
+          [3]string{"LikeWhereInput", "LikeOrderByInput", "Like"},
+          "likes",
           []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExecArray{ret}
+        return &LikeExecArray{ret}
       }
 
-      type LikesesConnectionParams struct {
-        Where *LikesWhereInput `json:"where,omitempty"`
-OrderBy *LikesOrderByInput `json:"orderBy,omitempty"`
+      type LikesConnectionParams struct {
+        Where *LikeWhereInput `json:"where,omitempty"`
+OrderBy *LikeOrderByInput `json:"orderBy,omitempty"`
 Skip *int32 `json:"skip,omitempty"`
 After *string `json:"after,omitempty"`
 Before *string `json:"before,omitempty"`
@@ -121,8 +121,8 @@ First *int32 `json:"first,omitempty"`
 Last *int32 `json:"last,omitempty"`
       }
       // Nodes return just nodes without cursors. It uses the already fetched edges.
-      func (s *LikesConnection) Nodes() []Likes {
-        var nodes []Likes
+      func (s *LikeConnection) Nodes() []Like {
+        var nodes []Like
         for _, edge := range s.Edges {
           nodes = append(nodes, edge.Node)
         }
@@ -130,8 +130,8 @@ Last *int32 `json:"last,omitempty"`
       }
 
       // Nodes return just nodes without cursors, but as a slice of pointers. It uses the already fetched edges.
-      func (s *LikesConnection) NodesPtr() []*Likes {
-        var nodes []*Likes
+      func (s *LikeConnection) NodesPtr() []*Like {
+        var nodes []*Like
         for _, edge := range s.Edges {
           item := edge
           nodes = append(nodes, &item.Node)
@@ -139,7 +139,7 @@ Last *int32 `json:"last,omitempty"`
         return nodes
       }
 
-      func (client *Client) LikesesConnection (params *LikesesConnectionParams) (*LikesConnectionExec) {
+      func (client *Client) LikesConnection (params *LikesConnectionParams) (*LikeConnectionExec) {
         var wparams *prisma.WhereParams
         if params != nil {
           wparams = &prisma.WhereParams{
@@ -156,11 +156,11 @@ Last *int32 `json:"last,omitempty"`
         ret := client.Client.GetMany(
           nil,
           wparams,
-          [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
-          "likesesConnection",
+          [3]string{"LikeWhereInput", "LikeOrderByInput", "Like"},
+          "likesConnection",
           []string{"edges", "pageInfo"})
 
-        return &LikesConnectionExec{ret}
+        return &LikeConnectionExec{ret}
       }
 
       func (client *Client) Post (params PostWhereUniqueInput) *PostExec {
@@ -357,54 +357,54 @@ Last *int32 `json:"last,omitempty"`
 
 
 
-      func (client *Client) CreateLikes (params LikesCreateInput) *LikesExec {
+      func (client *Client) CreateLike (params LikeCreateInput) *LikeExec {
         ret := client.Client.Create(
           params,
-          [2]string{"LikesCreateInput!", "Likes"},
-          "createLikes",
+          [2]string{"LikeCreateInput!", "Like"},
+          "createLike",
           []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExec{ret}
+        return &LikeExec{ret}
       }
 
-      type LikesUpdateParams struct {
-        Data LikesUpdateInput `json:"data"`
-Where LikesWhereUniqueInput `json:"where"`
+      type LikeUpdateParams struct {
+        Data LikeUpdateInput `json:"data"`
+Where LikeWhereUniqueInput `json:"where"`
       }
-      func (client *Client) UpdateLikes (params LikesUpdateParams) *LikesExec {
+      func (client *Client) UpdateLike (params LikeUpdateParams) *LikeExec {
         ret := client.Client.Update(
                  prisma.UpdateParams{
                    Data: params.Data,
                    Where: params.Where,
                  },
-                 [3]string{"LikesUpdateInput!", "LikesWhereUniqueInput!", "Likes"},
-                 "updateLikes",
+                 [3]string{"LikeUpdateInput!", "LikeWhereUniqueInput!", "Like"},
+                 "updateLike",
                  []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExec{ret}
+        return &LikeExec{ret}
       }
 
-      type LikesUpdateManyParams struct {
-        Data LikesUpdateManyMutationInput `json:"data"`
-Where *LikesWhereInput `json:"where,omitempty"`
+      type LikeUpdateManyParams struct {
+        Data LikeUpdateManyMutationInput `json:"data"`
+Where *LikeWhereInput `json:"where,omitempty"`
       }
-      func (client *Client) UpdateManyLikeses (params LikesUpdateManyParams) *BatchPayloadExec {
+      func (client *Client) UpdateManyLikes (params LikeUpdateManyParams) *BatchPayloadExec {
         exec := client.Client.UpdateMany(
           prisma.UpdateParams{
             Data: params.Data,
             Where: params.Where,
           },
-          [2]string{"LikesUpdateManyMutationInput!", "LikesWhereInput"},
-          "updateManyLikeses")
+          [2]string{"LikeUpdateManyMutationInput!", "LikeWhereInput"},
+          "updateManyLikes")
         return &BatchPayloadExec{exec}
       }
 
-      type LikesUpsertParams struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Create LikesCreateInput `json:"create"`
-Update LikesUpdateInput `json:"update"`
+      type LikeUpsertParams struct {
+        Where LikeWhereUniqueInput `json:"where"`
+Create LikeCreateInput `json:"create"`
+Update LikeUpdateInput `json:"update"`
       }
-      func (client *Client) UpsertLikes (params LikesUpsertParams) *LikesExec {
+      func (client *Client) UpsertLike (params LikeUpsertParams) *LikeExec {
         uparams := &prisma.UpsertParams{
           Where:  params.Where,
           Create: params.Create,
@@ -412,25 +412,25 @@ Update LikesUpdateInput `json:"update"`
         }
         ret := client.Client.Upsert(
           uparams,
-          [4]string{"LikesWhereUniqueInput!", "LikesCreateInput!", "LikesUpdateInput!","Likes"},
-          "upsertLikes",
+          [4]string{"LikeWhereUniqueInput!", "LikeCreateInput!", "LikeUpdateInput!","Like"},
+          "upsertLike",
           []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExec{ret}
+        return &LikeExec{ret}
       }
 
-      func (client *Client) DeleteLikes (params LikesWhereUniqueInput) *LikesExec {
+      func (client *Client) DeleteLike (params LikeWhereUniqueInput) *LikeExec {
         ret := client.Client.Delete(
           params,
-          [2]string{"LikesWhereUniqueInput!", "Likes"},
-          "deleteLikes",
+          [2]string{"LikeWhereUniqueInput!", "Like"},
+          "deleteLike",
           []string{"id","createdAt","updatedAt","quantity"})
 
-        return &LikesExec{ret}
+        return &LikeExec{ret}
       }
 
-      func (client *Client) DeleteManyLikeses (params *LikesWhereInput) *BatchPayloadExec {
-        exec := client.Client.DeleteMany(params, "LikesWhereInput", "deleteManyLikeses")
+      func (client *Client) DeleteManyLikes (params *LikeWhereInput) *BatchPayloadExec {
+        exec := client.Client.DeleteMany(params, "LikeWhereInput", "deleteManyLikes")
         return &BatchPayloadExec{exec}
       }
 
@@ -601,16 +601,16 @@ PostOrderByInputUpdatedAtAsc PostOrderByInput = "updatedAt_ASC"
 PostOrderByInputUpdatedAtDesc PostOrderByInput = "updatedAt_DESC"
           )
 
-        type LikesOrderByInput string
+        type LikeOrderByInput string
         const (
-          LikesOrderByInputIDAsc LikesOrderByInput = "id_ASC"
-LikesOrderByInputIDDesc LikesOrderByInput = "id_DESC"
-LikesOrderByInputCreatedAtAsc LikesOrderByInput = "createdAt_ASC"
-LikesOrderByInputCreatedAtDesc LikesOrderByInput = "createdAt_DESC"
-LikesOrderByInputUpdatedAtAsc LikesOrderByInput = "updatedAt_ASC"
-LikesOrderByInputUpdatedAtDesc LikesOrderByInput = "updatedAt_DESC"
-LikesOrderByInputQuantityAsc LikesOrderByInput = "quantity_ASC"
-LikesOrderByInputQuantityDesc LikesOrderByInput = "quantity_DESC"
+          LikeOrderByInputIDAsc LikeOrderByInput = "id_ASC"
+LikeOrderByInputIDDesc LikeOrderByInput = "id_DESC"
+LikeOrderByInputCreatedAtAsc LikeOrderByInput = "createdAt_ASC"
+LikeOrderByInputCreatedAtDesc LikeOrderByInput = "createdAt_DESC"
+LikeOrderByInputUpdatedAtAsc LikeOrderByInput = "updatedAt_ASC"
+LikeOrderByInputUpdatedAtDesc LikeOrderByInput = "updatedAt_DESC"
+LikeOrderByInputQuantityAsc LikeOrderByInput = "quantity_ASC"
+LikeOrderByInputQuantityDesc LikeOrderByInput = "quantity_DESC"
           )
 
         type UserOrderByInput string
@@ -646,20 +646,20 @@ DeleteMany []PostScalarWhereInput `json:"deleteMany,omitempty"`
 UpdateMany []PostUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
           }
 
-      type LikesWhereUniqueInput struct {
+      type LikeWhereUniqueInput struct {
         ID *string `json:"id,omitempty"`
           }
 
-      type LikesUpdateManyWithoutPostInput struct {
-        Create []LikesCreateWithoutPostInput `json:"create,omitempty"`
-Delete []LikesWhereUniqueInput `json:"delete,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
-Set []LikesWhereUniqueInput `json:"set,omitempty"`
-Disconnect []LikesWhereUniqueInput `json:"disconnect,omitempty"`
-Update []LikesUpdateWithWhereUniqueWithoutPostInput `json:"update,omitempty"`
-Upsert []LikesUpsertWithWhereUniqueWithoutPostInput `json:"upsert,omitempty"`
-DeleteMany []LikesScalarWhereInput `json:"deleteMany,omitempty"`
-UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
+      type LikeUpdateManyWithoutPostInput struct {
+        Create []LikeCreateWithoutPostInput `json:"create,omitempty"`
+Delete []LikeWhereUniqueInput `json:"delete,omitempty"`
+Connect []LikeWhereUniqueInput `json:"connect,omitempty"`
+Set []LikeWhereUniqueInput `json:"set,omitempty"`
+Disconnect []LikeWhereUniqueInput `json:"disconnect,omitempty"`
+Update []LikeUpdateWithWhereUniqueWithoutPostInput `json:"update,omitempty"`
+Upsert []LikeUpsertWithWhereUniqueWithoutPostInput `json:"upsert,omitempty"`
+DeleteMany []LikeScalarWhereInput `json:"deleteMany,omitempty"`
+UpdateMany []LikeUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
           }
 
       type PostWhereInput struct {
@@ -708,20 +708,20 @@ UpdatedAtLte *string `json:"updatedAt_lte,omitempty"`
 UpdatedAtGt *string `json:"updatedAt_gt,omitempty"`
 UpdatedAtGte *string `json:"updatedAt_gte,omitempty"`
 Author *UserWhereInput `json:"author,omitempty"`
-LikesEvery *LikesWhereInput `json:"likes_every,omitempty"`
-LikesSome *LikesWhereInput `json:"likes_some,omitempty"`
-LikesNone *LikesWhereInput `json:"likes_none,omitempty"`
+LikesEvery *LikeWhereInput `json:"likes_every,omitempty"`
+LikesSome *LikeWhereInput `json:"likes_some,omitempty"`
+LikesNone *LikeWhereInput `json:"likes_none,omitempty"`
 And []PostWhereInput `json:"AND,omitempty"`
 Or []PostWhereInput `json:"OR,omitempty"`
 Not []PostWhereInput `json:"NOT,omitempty"`
           }
 
-      type LikesUpdateWithWhereUniqueWithoutPostInput struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Data LikesUpdateWithoutPostDataInput `json:"data"`
+      type LikeUpdateWithWhereUniqueWithoutPostInput struct {
+        Where LikeWhereUniqueInput `json:"where"`
+Data LikeUpdateWithoutPostDataInput `json:"data"`
           }
 
-      type LikesWhereInput struct {
+      type LikeWhereInput struct {
         ID *string `json:"id,omitempty"`
 IDNot *string `json:"id_not,omitempty"`
 IDIn []string `json:"id_in,omitempty"`
@@ -762,9 +762,9 @@ QuantityLt *int32 `json:"quantity_lt,omitempty"`
 QuantityLte *int32 `json:"quantity_lte,omitempty"`
 QuantityGt *int32 `json:"quantity_gt,omitempty"`
 QuantityGte *int32 `json:"quantity_gte,omitempty"`
-And []LikesWhereInput `json:"AND,omitempty"`
-Or []LikesWhereInput `json:"OR,omitempty"`
-Not []LikesWhereInput `json:"NOT,omitempty"`
+And []LikeWhereInput `json:"AND,omitempty"`
+Or []LikeWhereInput `json:"OR,omitempty"`
+Not []LikeWhereInput `json:"NOT,omitempty"`
           }
 
       type UserCreateOneWithoutPostsInput struct {
@@ -776,7 +776,7 @@ Connect *UserWhereUniqueInput `json:"connect,omitempty"`
         Email *string `json:"email,omitempty"`
 Name *string `json:"name,omitempty"`
 Password *string `json:"password,omitempty"`
-Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
+Likes *LikeUpdateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
       type UserCreateWithoutPostsInput struct {
@@ -784,17 +784,17 @@ Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
 Email string `json:"email"`
 Name string `json:"name"`
 Password string `json:"password"`
-Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
+Likes *LikeCreateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
-      type LikesUpdateWithoutPostDataInput struct {
+      type LikeUpdateWithoutPostDataInput struct {
         User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
-      type LikesCreateManyWithoutUserInput struct {
-        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+      type LikeCreateManyWithoutUserInput struct {
+        Create []LikeCreateWithoutUserInput `json:"create,omitempty"`
+Connect []LikeWhereUniqueInput `json:"connect,omitempty"`
           }
 
       type PostSubscriptionWhereInput struct {
@@ -808,7 +808,7 @@ Or []PostSubscriptionWhereInput `json:"OR,omitempty"`
 Not []PostSubscriptionWhereInput `json:"NOT,omitempty"`
           }
 
-      type LikesCreateWithoutUserInput struct {
+      type LikeCreateWithoutUserInput struct {
         ID *string `json:"id,omitempty"`
 Post PostCreateOneWithoutLikesInput `json:"post"`
 Quantity *int32 `json:"quantity,omitempty"`
@@ -820,7 +820,7 @@ Name *string `json:"name,omitempty"`
 Password *string `json:"password,omitempty"`
           }
 
-      type LikesUpdateInput struct {
+      type LikeUpdateInput struct {
         User *UserUpdateOneRequiredWithoutLikesInput `json:"user,omitempty"`
 Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
@@ -832,7 +832,7 @@ Email string `json:"email"`
 Name string `json:"name"`
 Password string `json:"password"`
 Posts *PostCreateManyWithoutAuthorInput `json:"posts,omitempty"`
-Likes *LikesCreateManyWithoutUserInput `json:"likes,omitempty"`
+Likes *LikeCreateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
       type UserUpdateOneRequiredWithoutLikesInput struct {
@@ -857,15 +857,15 @@ Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
         ID *string `json:"id,omitempty"`
 Text string `json:"text"`
 Author *UserCreateOneWithoutPostsInput `json:"author,omitempty"`
-Likes *LikesCreateManyWithoutPostInput `json:"likes,omitempty"`
+Likes *LikeCreateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
-      type LikesUpdateWithoutUserDataInput struct {
+      type LikeUpdateWithoutUserDataInput struct {
         Post *PostUpdateOneRequiredWithoutLikesInput `json:"post,omitempty"`
 Quantity *int32 `json:"quantity,omitempty"`
           }
 
-      type LikesUpdateManyMutationInput struct {
+      type LikeUpdateManyMutationInput struct {
         Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -881,7 +881,7 @@ Create UserCreateWithoutPostsInput `json:"create"`
 
       type PostUpdateWithoutAuthorDataInput struct {
         Text *string `json:"text,omitempty"`
-Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
+Likes *LikeUpdateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
       type UserCreateOneWithoutLikesInput struct {
@@ -957,9 +957,9 @@ CreatedAtGte *string `json:"createdAt_gte,omitempty"`
 PostsEvery *PostWhereInput `json:"posts_every,omitempty"`
 PostsSome *PostWhereInput `json:"posts_some,omitempty"`
 PostsNone *PostWhereInput `json:"posts_none,omitempty"`
-LikesEvery *LikesWhereInput `json:"likes_every,omitempty"`
-LikesSome *LikesWhereInput `json:"likes_some,omitempty"`
-LikesNone *LikesWhereInput `json:"likes_none,omitempty"`
+LikesEvery *LikeWhereInput `json:"likes_every,omitempty"`
+LikesSome *LikeWhereInput `json:"likes_some,omitempty"`
+LikesNone *LikeWhereInput `json:"likes_none,omitempty"`
 And []UserWhereInput `json:"AND,omitempty"`
 Or []UserWhereInput `json:"OR,omitempty"`
 Not []UserWhereInput `json:"NOT,omitempty"`
@@ -970,26 +970,26 @@ Not []UserWhereInput `json:"NOT,omitempty"`
 Connect []PostWhereUniqueInput `json:"connect,omitempty"`
           }
 
-      type LikesUpdateWithWhereUniqueWithoutUserInput struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Data LikesUpdateWithoutUserDataInput `json:"data"`
+      type LikeUpdateWithWhereUniqueWithoutUserInput struct {
+        Where LikeWhereUniqueInput `json:"where"`
+Data LikeUpdateWithoutUserDataInput `json:"data"`
           }
 
-      type LikesCreateManyWithoutPostInput struct {
-        Create []LikesCreateWithoutPostInput `json:"create,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
+      type LikeCreateManyWithoutPostInput struct {
+        Create []LikeCreateWithoutPostInput `json:"create,omitempty"`
+Connect []LikeWhereUniqueInput `json:"connect,omitempty"`
           }
 
-      type LikesUpdateManyWithoutUserInput struct {
-        Create []LikesCreateWithoutUserInput `json:"create,omitempty"`
-Delete []LikesWhereUniqueInput `json:"delete,omitempty"`
-Connect []LikesWhereUniqueInput `json:"connect,omitempty"`
-Set []LikesWhereUniqueInput `json:"set,omitempty"`
-Disconnect []LikesWhereUniqueInput `json:"disconnect,omitempty"`
-Update []LikesUpdateWithWhereUniqueWithoutUserInput `json:"update,omitempty"`
-Upsert []LikesUpsertWithWhereUniqueWithoutUserInput `json:"upsert,omitempty"`
-DeleteMany []LikesScalarWhereInput `json:"deleteMany,omitempty"`
-UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
+      type LikeUpdateManyWithoutUserInput struct {
+        Create []LikeCreateWithoutUserInput `json:"create,omitempty"`
+Delete []LikeWhereUniqueInput `json:"delete,omitempty"`
+Connect []LikeWhereUniqueInput `json:"connect,omitempty"`
+Set []LikeWhereUniqueInput `json:"set,omitempty"`
+Disconnect []LikeWhereUniqueInput `json:"disconnect,omitempty"`
+Update []LikeUpdateWithWhereUniqueWithoutUserInput `json:"update,omitempty"`
+Upsert []LikeUpsertWithWhereUniqueWithoutUserInput `json:"upsert,omitempty"`
+DeleteMany []LikeScalarWhereInput `json:"deleteMany,omitempty"`
+UpdateMany []LikeUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
           }
 
       type PostCreateOneWithoutLikesInput struct {
@@ -997,10 +997,10 @@ UpdateMany []LikesUpdateManyWithWhereNestedInput `json:"updateMany,omitempty"`
 Connect *PostWhereUniqueInput `json:"connect,omitempty"`
           }
 
-      type LikesUpsertWithWhereUniqueWithoutPostInput struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Update LikesUpdateWithoutPostDataInput `json:"update"`
-Create LikesCreateWithoutPostInput `json:"create"`
+      type LikeUpsertWithWhereUniqueWithoutPostInput struct {
+        Where LikeWhereUniqueInput `json:"where"`
+Update LikeUpdateWithoutPostDataInput `json:"update"`
+Create LikeCreateWithoutPostInput `json:"create"`
           }
 
       type UserSubscriptionWhereInput struct {
@@ -1014,7 +1014,7 @@ Or []UserSubscriptionWhereInput `json:"OR,omitempty"`
 Not []UserSubscriptionWhereInput `json:"NOT,omitempty"`
           }
 
-      type LikesScalarWhereInput struct {
+      type LikeScalarWhereInput struct {
         ID *string `json:"id,omitempty"`
 IDNot *string `json:"id_not,omitempty"`
 IDIn []string `json:"id_in,omitempty"`
@@ -1053,9 +1053,9 @@ QuantityLt *int32 `json:"quantity_lt,omitempty"`
 QuantityLte *int32 `json:"quantity_lte,omitempty"`
 QuantityGt *int32 `json:"quantity_gt,omitempty"`
 QuantityGte *int32 `json:"quantity_gte,omitempty"`
-And []LikesScalarWhereInput `json:"AND,omitempty"`
-Or []LikesScalarWhereInput `json:"OR,omitempty"`
-Not []LikesScalarWhereInput `json:"NOT,omitempty"`
+And []LikeScalarWhereInput `json:"AND,omitempty"`
+Or []LikeScalarWhereInput `json:"OR,omitempty"`
+Not []LikeScalarWhereInput `json:"NOT,omitempty"`
           }
 
       type UserUpdateInput struct {
@@ -1063,21 +1063,21 @@ Not []LikesScalarWhereInput `json:"NOT,omitempty"`
 Name *string `json:"name,omitempty"`
 Password *string `json:"password,omitempty"`
 Posts *PostUpdateManyWithoutAuthorInput `json:"posts,omitempty"`
-Likes *LikesUpdateManyWithoutUserInput `json:"likes,omitempty"`
+Likes *LikeUpdateManyWithoutUserInput `json:"likes,omitempty"`
           }
 
-      type LikesUpdateManyWithWhereNestedInput struct {
-        Where LikesScalarWhereInput `json:"where"`
-Data LikesUpdateManyDataInput `json:"data"`
+      type LikeUpdateManyWithWhereNestedInput struct {
+        Where LikeScalarWhereInput `json:"where"`
+Data LikeUpdateManyDataInput `json:"data"`
           }
 
       type PostUpdateInput struct {
         Text *string `json:"text,omitempty"`
 Author *UserUpdateOneWithoutPostsInput `json:"author,omitempty"`
-Likes *LikesUpdateManyWithoutPostInput `json:"likes,omitempty"`
+Likes *LikeUpdateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
-      type LikesUpdateManyDataInput struct {
+      type LikeUpdateManyDataInput struct {
         Quantity *int32 `json:"quantity,omitempty"`
           }
 
@@ -1092,7 +1092,7 @@ Update PostUpdateWithoutAuthorDataInput `json:"update"`
 Create PostCreateWithoutAuthorInput `json:"create"`
           }
 
-      type LikesCreateInput struct {
+      type LikeCreateInput struct {
         ID *string `json:"id,omitempty"`
 User UserCreateOneWithoutLikesInput `json:"user"`
 Post PostCreateOneWithoutLikesInput `json:"post"`
@@ -1152,7 +1152,7 @@ Not []PostScalarWhereInput `json:"NOT,omitempty"`
       type PostCreateWithoutAuthorInput struct {
         ID *string `json:"id,omitempty"`
 Text string `json:"text"`
-Likes *LikesCreateManyWithoutPostInput `json:"likes,omitempty"`
+Likes *LikeCreateManyWithoutPostInput `json:"likes,omitempty"`
           }
 
       type PostUpdateManyWithWhereNestedInput struct {
@@ -1205,18 +1205,18 @@ Create UserCreateWithoutLikesInput `json:"create"`
 Email *string `json:"email,omitempty"`
           }
 
-      type LikesSubscriptionWhereInput struct {
+      type LikeSubscriptionWhereInput struct {
         MutationIn []MutationType `json:"mutation_in,omitempty"`
 UpdatedFieldsContains *string `json:"updatedFields_contains,omitempty"`
 UpdatedFieldsContainsEvery []string `json:"updatedFields_contains_every,omitempty"`
 UpdatedFieldsContainsSome []string `json:"updatedFields_contains_some,omitempty"`
-Node *LikesWhereInput `json:"node,omitempty"`
-And []LikesSubscriptionWhereInput `json:"AND,omitempty"`
-Or []LikesSubscriptionWhereInput `json:"OR,omitempty"`
-Not []LikesSubscriptionWhereInput `json:"NOT,omitempty"`
+Node *LikeWhereInput `json:"node,omitempty"`
+And []LikeSubscriptionWhereInput `json:"AND,omitempty"`
+Or []LikeSubscriptionWhereInput `json:"OR,omitempty"`
+Not []LikeSubscriptionWhereInput `json:"NOT,omitempty"`
           }
 
-      type LikesCreateWithoutPostInput struct {
+      type LikeCreateWithoutPostInput struct {
         ID *string `json:"id,omitempty"`
 User UserCreateOneWithoutLikesInput `json:"user"`
 Quantity *int32 `json:"quantity,omitempty"`
@@ -1230,10 +1230,10 @@ Password string `json:"password"`
 Posts *PostCreateManyWithoutAuthorInput `json:"posts,omitempty"`
           }
 
-      type LikesUpsertWithWhereUniqueWithoutUserInput struct {
-        Where LikesWhereUniqueInput `json:"where"`
-Update LikesUpdateWithoutUserDataInput `json:"update"`
-Create LikesCreateWithoutUserInput `json:"create"`
+      type LikeUpsertWithWhereUniqueWithoutUserInput struct {
+        Where LikeWhereUniqueInput `json:"where"`
+Update LikeUpdateWithoutUserDataInput `json:"update"`
+Create LikeCreateWithoutUserInput `json:"create"`
           }
 
 
@@ -1299,15 +1299,15 @@ CreatedAt string `json:"createdAt"`
                 }
 
                 type LikesParamsExec struct {
-                  Where *LikesWhereInput
-OrderBy *LikesOrderByInput
+                  Where *LikeWhereInput
+OrderBy *LikeOrderByInput
 Skip *int32
 After *string
 Before *string
 First *int32
 Last *int32
                 }
-                func (instance *PostExec) Likes(params *LikesParamsExec) *LikesExecArray {
+                func (instance *PostExec) Likes(params *LikesParamsExec) *LikeExecArray {
                   var wparams *prisma.WhereParams
                   if params != nil {
                     wparams = &prisma.WhereParams{
@@ -1324,11 +1324,11 @@ Last *int32
                   ret := instance.exec.Client.GetMany(
                     instance.exec,
                     wparams,
-                    [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
+                    [3]string{"LikeWhereInput", "LikeOrderByInput", "Like"},
                     "likes",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesExecArray{ret}
+                  return &LikeExecArray{ret}
                 }
 
           
@@ -1455,12 +1455,12 @@ UpdatedAt string `json:"updatedAt"`
 Edges []PostEdge `json:"edges"`
         }
 
-        type LikesConnectionExec struct {
+        type LikeConnectionExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *LikesConnectionExec) PageInfo() *PageInfoExec {
+                func (instance *LikeConnectionExec) PageInfo() *PageInfoExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
@@ -1471,29 +1471,29 @@ Edges []PostEdge `json:"edges"`
                   return &PageInfoExec{ret}
                 }
 
-                  func (instance *LikesConnectionExec) Edges() *LikesEdgeExecArray {
+                  func (instance *LikeConnectionExec) Edges() *LikeEdgeExecArray {
                     edges := instance.exec.Client.GetMany(
                       instance.exec,
                       nil,
-                      [3]string{"LikesWhereInput", "LikesOrderByInput", "LikesEdge"},
+                      [3]string{"LikeWhereInput", "LikeOrderByInput", "LikeEdge"},
                       "edges",
                       []string{"cursor"})
 
                     nodes := edges.Client.GetOne(
                       edges,
                       nil,
-                      [2]string{"", "Likes"},
+                      [2]string{"", "Like"},
                       "node",
-                      LikesFields)
+                      LikeFields)
 
-                    return &LikesEdgeExecArray{nodes}
+                    return &LikeEdgeExecArray{nodes}
                   }
 
-                  func (instance *LikesConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
+                  func (instance *LikeConnectionExec) Aggregate(ctx context.Context) (*Aggregate, error) {
                     ret := instance.exec.Client.GetOne(
                       instance.exec,
                       nil,
-                      [2]string{"", "AggregateLikes"},
+                      [2]string{"", "AggregateLike"},
                       "aggregate",
                       []string{"count"})
 
@@ -1503,7 +1503,7 @@ Edges []PostEdge `json:"edges"`
                   }
 
           
-                func (instance LikesConnectionExec) Exec(ctx context.Context) (*LikesConnection, error) {
+                func (instance LikeConnectionExec) Exec(ctx context.Context) (*LikeConnection, error) {
                   edges, err := instance.Edges().Exec(ctx)
                   if err != nil {
                     return nil, err
@@ -1514,32 +1514,32 @@ Edges []PostEdge `json:"edges"`
                     return nil, err
                   }
 
-                  return &LikesConnection{
+                  return &LikeConnection{
                     Edges:    edges,
                     PageInfo: *pageInfo,
                   }, nil
                 }
               
 
-          func (instance LikesConnectionExec) Exists(ctx context.Context) (bool, error) {
+          func (instance LikeConnectionExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesConnectionExecArray struct {
+          type LikeConnectionExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesConnectionExecArray) Exec(ctx context.Context) ([]LikesConnection, error) {
-            var v []LikesConnection
+          func (instance LikeConnectionExecArray) Exec(ctx context.Context) ([]LikeConnection, error) {
+            var v []LikeConnection
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesConnectionFields = []string{}
+        var LikeConnectionFields = []string{}
 
-        type LikesConnection struct {
+        type LikeConnection struct {
           PageInfo PageInfo `json:"pageInfo"`
-Edges []LikesEdge `json:"edges"`
+Edges []LikeEdge `json:"edges"`
         }
 
         type PostPreviousValuesExec struct {
@@ -1585,25 +1585,25 @@ CreatedAt string `json:"createdAt"`
 UpdatedAt string `json:"updatedAt"`
         }
 
-        type LikesEdgeExec struct {
+        type LikeEdgeExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *LikesEdgeExec) Node() *LikesExec {
+                func (instance *LikeEdgeExec) Node() *LikeExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
-                    [2]string{"", "Likes"},
+                    [2]string{"", "Like"},
                     "node",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesExec{ret}
+                  return &LikeExec{ret}
                 }
 
           
-                func (instance LikesEdgeExec) Exec(ctx context.Context) (*LikesEdge, error) {
-                  var v LikesEdge
+                func (instance LikeEdgeExec) Exec(ctx context.Context) (*LikeEdge, error) {
+                  var v LikeEdge
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1615,24 +1615,24 @@ UpdatedAt string `json:"updatedAt"`
                 }
               
 
-          func (instance LikesEdgeExec) Exists(ctx context.Context) (bool, error) {
+          func (instance LikeEdgeExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesEdgeExecArray struct {
+          type LikeEdgeExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesEdgeExecArray) Exec(ctx context.Context) ([]LikesEdge, error) {
-            var v []LikesEdge
+          func (instance LikeEdgeExecArray) Exec(ctx context.Context) ([]LikeEdge, error) {
+            var v []LikeEdge
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesEdgeFields = []string{"cursor"}
+        var LikeEdgeFields = []string{"cursor"}
 
-        type LikesEdge struct {
-          Node Likes `json:"node"`
+        type LikeEdge struct {
+          Node Like `json:"node"`
 Cursor string `json:"cursor"`
         }
 
@@ -1789,15 +1789,15 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
 
 
 
-        type LikesPreviousValuesExec struct {
+        type LikePreviousValuesExec struct {
           exec *prisma.Exec
         }
 
         
 
           
-                func (instance LikesPreviousValuesExec) Exec(ctx context.Context) (*LikesPreviousValues, error) {
-                  var v LikesPreviousValues
+                func (instance LikePreviousValuesExec) Exec(ctx context.Context) (*LikePreviousValues, error) {
+                  var v LikePreviousValues
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1809,59 +1809,59 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
                 }
               
 
-          func (instance LikesPreviousValuesExec) Exists(ctx context.Context) (bool, error) {
+          func (instance LikePreviousValuesExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesPreviousValuesExecArray struct {
+          type LikePreviousValuesExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesPreviousValuesExecArray) Exec(ctx context.Context) ([]LikesPreviousValues, error) {
-            var v []LikesPreviousValues
+          func (instance LikePreviousValuesExecArray) Exec(ctx context.Context) ([]LikePreviousValues, error) {
+            var v []LikePreviousValues
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesPreviousValuesFields = []string{"id", "createdAt", "updatedAt", "quantity"}
+        var LikePreviousValuesFields = []string{"id", "createdAt", "updatedAt", "quantity"}
 
-        type LikesPreviousValues struct {
+        type LikePreviousValues struct {
           ID string `json:"id"`
 CreatedAt string `json:"createdAt"`
 UpdatedAt string `json:"updatedAt"`
 Quantity *int32 `json:"quantity,omitempty"`
         }
 
-        type LikesSubscriptionPayloadExec struct {
+        type LikeSubscriptionPayloadExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *LikesSubscriptionPayloadExec) Node() *LikesExec {
+                func (instance *LikeSubscriptionPayloadExec) Node() *LikeExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
-                    [2]string{"", "Likes"},
+                    [2]string{"", "Like"},
                     "node",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesExec{ret}
+                  return &LikeExec{ret}
                 }
 
-                func (instance *LikesSubscriptionPayloadExec) PreviousValues() *LikesPreviousValuesExec {
+                func (instance *LikeSubscriptionPayloadExec) PreviousValues() *LikePreviousValuesExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
-                    [2]string{"", "LikesPreviousValues"},
+                    [2]string{"", "LikePreviousValues"},
                     "previousValues",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesPreviousValuesExec{ret}
+                  return &LikePreviousValuesExec{ret}
                 }
 
           
-                func (instance LikesSubscriptionPayloadExec) Exec(ctx context.Context) (*LikesSubscriptionPayload, error) {
-                  var v LikesSubscriptionPayload
+                func (instance LikeSubscriptionPayloadExec) Exec(ctx context.Context) (*LikeSubscriptionPayload, error) {
+                  var v LikeSubscriptionPayload
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1873,34 +1873,34 @@ Quantity *int32 `json:"quantity,omitempty"`
                 }
               
 
-          func (instance LikesSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
+          func (instance LikeSubscriptionPayloadExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesSubscriptionPayloadExecArray struct {
+          type LikeSubscriptionPayloadExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]LikesSubscriptionPayload, error) {
-            var v []LikesSubscriptionPayload
+          func (instance LikeSubscriptionPayloadExecArray) Exec(ctx context.Context) ([]LikeSubscriptionPayload, error) {
+            var v []LikeSubscriptionPayload
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
+        var LikeSubscriptionPayloadFields = []string{"mutation", "updatedFields"}
 
-        type LikesSubscriptionPayload struct {
+        type LikeSubscriptionPayload struct {
           Mutation MutationType `json:"mutation"`
-Node *Likes `json:"node,omitempty"`
+Node *Like `json:"node,omitempty"`
 UpdatedFields []string `json:"updatedFields,omitempty"`
         }
 
-        type LikesExec struct {
+        type LikeExec struct {
           exec *prisma.Exec
         }
 
         
-                func (instance *LikesExec) User() *UserExec {
+                func (instance *LikeExec) User() *UserExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
@@ -1911,7 +1911,7 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
                   return &UserExec{ret}
                 }
 
-                func (instance *LikesExec) Post() *PostExec {
+                func (instance *LikeExec) Post() *PostExec {
                   ret := instance.exec.Client.GetOne(
                     instance.exec,
                     nil,
@@ -1923,8 +1923,8 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
                 }
 
           
-                func (instance LikesExec) Exec(ctx context.Context) (*Likes, error) {
-                  var v Likes
+                func (instance LikeExec) Exec(ctx context.Context) (*Like, error) {
+                  var v Like
                   ok, err := instance.exec.Exec(ctx, &v)
                   if err != nil {
                     return nil, err
@@ -1936,23 +1936,23 @@ UpdatedFields []string `json:"updatedFields,omitempty"`
                 }
               
 
-          func (instance LikesExec) Exists(ctx context.Context) (bool, error) {
+          func (instance LikeExec) Exists(ctx context.Context) (bool, error) {
             return instance.exec.Exists(ctx)
           }
 
-          type LikesExecArray struct {
+          type LikeExecArray struct {
             exec *prisma.Exec
           }
 
-          func (instance LikesExecArray) Exec(ctx context.Context) ([]Likes, error) {
-            var v []Likes
+          func (instance LikeExecArray) Exec(ctx context.Context) ([]Like, error) {
+            var v []Like
             err := instance.exec.ExecArray(ctx, &v)
             return v, err
           }
 
-        var LikesFields = []string{"id", "createdAt", "updatedAt", "quantity"}
+        var LikeFields = []string{"id", "createdAt", "updatedAt", "quantity"}
 
-        type Likes struct {
+        type Like struct {
           ID string `json:"id"`
 CreatedAt string `json:"createdAt"`
 UpdatedAt string `json:"updatedAt"`
@@ -2154,7 +2154,7 @@ Last *int32
                   return &PostExecArray{ret}
                 }
 
-                func (instance *UserExec) Likes(params *LikesParamsExec) *LikesExecArray {
+                func (instance *UserExec) Likes(params *LikesParamsExec) *LikeExecArray {
                   var wparams *prisma.WhereParams
                   if params != nil {
                     wparams = &prisma.WhereParams{
@@ -2171,11 +2171,11 @@ Last *int32
                   ret := instance.exec.Client.GetMany(
                     instance.exec,
                     wparams,
-                    [3]string{"LikesWhereInput", "LikesOrderByInput", "Likes"},
+                    [3]string{"LikeWhereInput", "LikeOrderByInput", "Like"},
                     "likes",
                     []string{"id","createdAt","updatedAt","quantity"})
 
-                  return &LikesExecArray{ret}
+                  return &LikeExecArray{ret}
                 }
 
           
