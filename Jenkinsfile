@@ -7,7 +7,7 @@ pipeline {
                 stage('Build') {
                    steps {
                         echo "check docker compose"
-                        step([$class: 'DockerComposeBuilder', dockerComposeFile: 'docker-compose.yml', option: [$class: 'StartAllServices'], useCustomDockerComposeFile: true])
+                        step([$class: 'DockerComposeBuilder', dockerComposeFile: '/var/jenkins_home/workspace/fullstack-application/docker-compose.yml', option: [$class: 'StartAllServices'], useCustomDockerComposeFile: true])
                    }
                 }
             }
@@ -18,7 +18,7 @@ pipeline {
             stages {
                 stage('Build') {
                     steps {
-                        step([$class: 'DockerComposeBuilder', dockerComposeFile: 'docker-compose.yml', option: [$class: 'StopAllServices'], useCustomDockerComposeFile: true])
+                        step([$class: 'DockerComposeBuilder', dockerComposeFile: '/var/jenkins_home/workspace/fullstack-application/docker-compose.yml', option: [$class: 'StopAllServices'], useCustomDockerComposeFile: true])
                     }
                 }
             }
