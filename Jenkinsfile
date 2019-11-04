@@ -2,11 +2,7 @@ pipeline {
     agent none
     stages {
         stage('Back-end') {
-            agent {
-                docker {
-                    image 'golang:1.12'
-                }
-            }
+            agent any
             stages {
                 stage('Build') {
                    steps {
