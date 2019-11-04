@@ -11,9 +11,9 @@ pipeline {
                 stage('Build') {
                    steps {
                         echo "check docker compose"
-                        sh 'docker-compose start'
-                        sh 'docker-compose stop'
-                   } 
+                        step([$class: 'DockerComposeBuilder', dockerComposeFile: 'docker-compose.yml', option: [$class: 'StartAllServices'], useCustomDockerComposeFile: true])
+                        step([$class: 'DockerComposeBuilder', dockerComposeFile: 'docker-compose.yml', option: [$class: 'StopAllServices'], useCustomDockerComposeFile: true])
+                   }
                 }
             }
         }
