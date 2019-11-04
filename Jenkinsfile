@@ -11,6 +11,7 @@ pipeline {
                 stage('Build') {
                    steps {
                         echo "check docker compose"
+                        sh 'docker-compose start'
                    } 
                 }
             }
