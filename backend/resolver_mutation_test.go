@@ -213,12 +213,20 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 	fs.Assert().Nil(p)
 }
 
-func (fs *FullstackSuiteMutation) TestMutationSignIn() {
+func (fs *FullstackSuiteMutation) TestMutationSignInSignOut() {
 	const SIGNIN string = `
 		mutation userSignin($email: String!, $password: String!) {
 			signin(email: $email, password: $password) {
 				id
 				email
+			}
+		}
+	`
+
+	const SIGNOUT string = `
+		mutation userSignOut {
+			signout {
+				message
 			}
 		}
 	`
@@ -249,6 +257,7 @@ func (fs *FullstackSuiteMutation) TestMutationSignIn() {
 
 	passwordDoesNotExists := clientReq(SIGNIN, paramsWrongPassword)
 	passwordDoesExists := clientReq(SIGNIN, paramsCorrectPassword)
+	signoutReq := clientReq(SIGNOUT, []reqParams{})
 
 	var signinRespDataInCorrectPswd map[string]prisma.User
 	err := clientGraphql.Run(ctx, passwordDoesNotExists, &signinRespDataInCorrectPswd)
@@ -259,9 +268,19 @@ func (fs *FullstackSuiteMutation) TestMutationSignIn() {
 		log.Fatal(err)
 	}
 
-	fs.Assert().EqualError(err, "graphql: incorrect password, please try again")
+	var signOutResp map[string]Message
+	if err := clientGraphql.Run(ctx, signoutReq, &signOutResp); err != nil {
+		log.Printf("error: %v \n", err)
+		log.Fatal(err)
+	}
+
 	signUser := signinRespDataCorrectPswd["signin"]
+	signOutMessage := signOutResp["signout"]
+
+	fs.Assert().EqualError(err, "graphql: incorrect password, please try again")
 	fs.Assert().NotEmpty(signUser.ID)
+
+	log.Printf("Message: %v \n", signOutMessage.Message)
 }
 
 func TestMutaion(t *testing.T) {

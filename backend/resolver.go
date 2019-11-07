@@ -124,7 +124,8 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 }
 
 func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
-	panic("not implemented")
+	message := Message{"Sign out success"}
+	return &message, nil
 }
 func (r *mutationResolver) CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error) {
 	text := pstinpt.Text
