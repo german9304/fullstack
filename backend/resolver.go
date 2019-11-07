@@ -3,6 +3,9 @@ package fullstack_backend
 import (
 	"context"
 	// "log"
+	"fmt"
+	// "errors"
+	"net/http"
 	"time"
 
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
@@ -95,8 +98,31 @@ func (r *mutationResolver) Signup(ctx context.Context, usrinpt UserInput) (*pris
 	return user, nil
 }
 func (r *mutationResolver) Signin(ctx context.Context, email string, password string) (*prisma.User, error) {
-	panic("not implemented")
+	signedUser, err := client.User(prisma.UserWhereUniqueInput{
+		Email: &email,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	signedUserPassword := signedUser.Password
+
+	if signedUserPassword == password {
+		// set cookie to save session
+		w := ctx.Value("response").(http.ResponseWriter)
+		cookie := http.Cookie{
+			Name:     "mycookie",
+			Value:    "cookievalue",
+			HttpOnly: true,
+		}
+		http.SetCookie(w, &cookie)
+		return signedUser, nil
+	}
+
+	return nil, fmt.Errorf("incorrect password, please try again")
 }
+
 func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
 	panic("not implemented")
 }

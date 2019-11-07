@@ -12,19 +12,21 @@ import (
 
 type FullstackSuiteMutation struct {
 	suite.Suite
-	postID string
-	usrID  string
+	postID       string
+	usrID        string
+	userEmail    string
+	userPassword string
 }
 
 func (fs *FullstackSuiteMutation) SetupSuite() {
 	name := "John"
-	password := "293902122"
-	email := "John@mail.com"
+	fs.userPassword = "293902122"
+	fs.userEmail = "John@mail.com"
 
 	usr, _ := client.CreateUser(prisma.UserCreateInput{
-		Email:    email,
+		Email:    fs.userEmail,
 		Name:     name,
-		Password: password,
+		Password: fs.userPassword,
 	}).Exec(ctx)
 
 	post, _ := client.CreatePost(prisma.PostCreateInput{
@@ -41,9 +43,8 @@ func (fs *FullstackSuiteMutation) SetupSuite() {
 }
 
 func (fs *FullstackSuiteMutation) TearDownSuite() {
-	email := "John@mail.com"
 	client.DeleteUser(prisma.UserWhereUniqueInput{
-		Email: &email,
+		Email: &fs.userEmail,
 	}).Exec(ctx)
 	userEmail := "mark@mail.com"
 	client.DeleteUser(prisma.UserWhereUniqueInput{
@@ -53,13 +54,6 @@ func (fs *FullstackSuiteMutation) TearDownSuite() {
 		ID: &fs.postID,
 	}).Exec(ctx)
 }
-
-/**
-*
-* 
-*
-*
-*/
 
 func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
@@ -143,7 +137,6 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 	likesResp := newLikesRespData["createLike"]
 	likesQuantity := *likesResp.Quantity
 
-
 	fs.Assert().Equal(usr.Email, newUser.Email)
 	fs.Assert().Equal(usr.Name, newUser.Name)
 	fs.Assert().Equal(usr.Password, newUser.Password)
@@ -218,6 +211,57 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 	fs.Assert().Equal(deletePost.Text, "test2post")
 	fs.Assert().Equal("query returned no result", err.Error())
 	fs.Assert().Nil(p)
+}
+
+func (fs *FullstackSuiteMutation) TestMutationSignIn() {
+	const SIGNIN string = `
+		mutation userSignin($email: String!, $password: String!) {
+			signin(email: $email, password: $password) {
+				id
+				email
+			}
+		}
+	`
+
+	type reqParams struct {
+		reqVar   string
+		reqValue string
+	}
+
+	clientReq := func(request string, params []reqParams) *graphql.Request {
+		clientRequest := graphql.NewRequest(request)
+		for _, v := range params {
+			clientRequest.Var(v.reqVar, v.reqValue)
+		}
+		clientRequest.Header.Set("Cache-Control", "no-cache")
+		return clientRequest
+	}
+
+	paramsWrongPassword := []reqParams{
+		reqParams{"email", fs.userEmail},
+		reqParams{"password", "user1234"},
+	}
+
+	paramsCorrectPassword := []reqParams{
+		reqParams{"email", fs.userEmail},
+		reqParams{"password", fs.userPassword},
+	}
+
+	passwordDoesNotExists := clientReq(SIGNIN, paramsWrongPassword)
+	passwordDoesExists := clientReq(SIGNIN, paramsCorrectPassword)
+
+	var signinRespDataInCorrectPswd map[string]prisma.User
+	err := clientGraphql.Run(ctx, passwordDoesNotExists, &signinRespDataInCorrectPswd)
+
+	var signinRespDataCorrectPswd map[string]prisma.User
+	if err := clientGraphql.Run(ctx, passwordDoesExists, &signinRespDataCorrectPswd); err != nil {
+		log.Printf("error: %v \n", err)
+		log.Fatal(err)
+	}
+
+	fs.Assert().EqualError(err, "graphql: incorrect password, please try again")
+	signUser := signinRespDataCorrectPswd["signin"]
+	fs.Assert().NotEmpty(signUser.ID)
 }
 
 func TestMutaion(t *testing.T) {

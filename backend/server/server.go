@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -19,9 +20,18 @@ func main() {
 
 	h := handler.GraphQL(fullstack_backend.NewExecutableSchema(fullstack_backend.Config{Resolvers: &fullstack_backend.Resolver{}}))
 
+	handleCtx := func(k string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			newContext := context.WithValue(ctx, k, w)
+			cr := r.WithContext(newContext)
+			h.ServeHTTP(w, cr)
+		}
+	}
+
 	http.Handle("/playground", handler.Playground("GraphQL playground", "/query"))
 	http.Handle("/query", h)
-	http.Handle("/", h)
+	http.Handle("/", handleCtx("response"))
 
 	log.Printf("connect to http://localhost:%s/playground for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
