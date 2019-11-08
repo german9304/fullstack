@@ -267,6 +267,26 @@ func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Li
 
 type queryResolver struct{ *Resolver }
 
+func (r *queryResolver) Me(ctx context.Context) (*prisma.User, error) {
+	w := ctx.Value("response").(Auth)
+	cookie, err := w.RQ.Cookie("user")
+	if err != nil {
+		return nil, err
+	}
+
+	value := cookie.Value
+
+	currentUser, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &value,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return currentUser, nil
+}
+
 func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
 	users, err := client.Users(nil).Exec(ctx)
 

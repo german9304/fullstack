@@ -6,6 +6,7 @@ type Query {
   userByEmail(email: String!): User
   post(id: String!): Post
   like(id: String!): Like
+  me: User!
 }
 
 type Mutation {
