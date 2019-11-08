@@ -279,8 +279,7 @@ func (fs *FullstackSuiteMutation) TestMutationSignInSignOut() {
 
 	fs.Assert().EqualError(err, "graphql: incorrect password, please try again")
 	fs.Assert().NotEmpty(signUser.ID)
-
-	log.Printf("Message: %v \n", signOutMessage.Message)
+	fs.Assert().Equal("Sign out success", signOutMessage.Message)
 }
 
 func TestMutaion(t *testing.T) {

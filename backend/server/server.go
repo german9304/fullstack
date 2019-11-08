@@ -12,6 +12,8 @@ import (
 
 const defaultPort = "8000"
 
+
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -23,7 +25,8 @@ func main() {
 	handleCtx := func(k string) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			newContext := context.WithValue(ctx, k, w)
+			auth := fullstack_backend.Auth{w, r}
+			newContext := context.WithValue(ctx, k, auth)
 			cr := r.WithContext(newContext)
 			h.ServeHTTP(w, cr)
 		}

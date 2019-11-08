@@ -2,8 +2,8 @@ package fullstack_backend
 
 import (
 	"context"
-	// "log"
 	"fmt"
+	// "log"
 	// "errors"
 	"net/http"
 	"time"
@@ -110,13 +110,13 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 
 	if signedUserPassword == password {
 		// set cookie to save session
-		w := ctx.Value("response").(http.ResponseWriter)
+		w := ctx.Value("response").(Auth)
 		cookie := http.Cookie{
-			Name:     "mycookie",
-			Value:    "cookievalue",
+			Name:     "user",
+			Value:    signedUser.ID,
 			HttpOnly: true,
 		}
-		http.SetCookie(w, &cookie)
+		http.SetCookie(w.RW, &cookie)
 		return signedUser, nil
 	}
 
@@ -124,6 +124,18 @@ func (r *mutationResolver) Signin(ctx context.Context, email string, password st
 }
 
 func (r *mutationResolver) Signout(ctx context.Context) (*Message, error) {
+	w := ctx.Value("response").(Auth)
+	cookie, err := w.RQ.Cookie("user")
+	if err != nil {
+		return nil, err
+	}
+	ck := http.Cookie{
+		Name:     "user",
+		Value:    cookie.Value,
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+	http.SetCookie(w.RW, &ck)
 	message := Message{"Sign out success"}
 	return &message, nil
 }
