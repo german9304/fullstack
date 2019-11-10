@@ -33,6 +33,25 @@ func (r *Resolver) User() UserResolver {
 	return &userResolver{r}
 }
 
+type commentResolver struct{ *Resolver }
+
+func (r *commentResolver) CreatedAt(ctx context.Context, obj *prisma.Comment) (*time.Time, error) {
+	panic("not implemented")
+}
+func (r *commentResolver) UpdatedAt(ctx context.Context, obj *prisma.Comment) (*time.Time, error) {
+	panic("not implemented")
+}
+func (r *commentResolver) Author(ctx context.Context, obj *prisma.Comment) (*prisma.User, error) {
+	panic("not implemented")
+}
+func (r *commentResolver) Post(ctx context.Context, obj *prisma.Comment) (*prisma.Post, error) {
+	panic("not implemented")
+}
+func (r *commentResolver) Likes(ctx context.Context, obj *prisma.Comment) (*prisma.Like, error) {
+	panic("not implemented")
+}
+
+
 type likeResolver struct{ *Resolver }
 
 func (r *likeResolver) User(ctx context.Context, obj *prisma.Like) (*prisma.User, error) {
