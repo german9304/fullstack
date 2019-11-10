@@ -17,6 +17,10 @@ var (
 
 type Resolver struct{}
 
+func (r *Resolver) Comment() CommentResolver {
+	return &commentResolver{r}
+}
+
 func (r *Resolver) Like() LikeResolver {
 	return &likeResolver{r}
 }
@@ -208,34 +212,23 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (*prisma.P
 	return deletedPost, nil
 }
 
-func (r *mutationResolver) CreateLike(ctx context.Context, likeInput LikeInput) (*prisma.Like, error) {
-	userID := likeInput.User
-	postID := likeInput.Post
-	quantity := int32(likeInput.Quantity)
-
-	like, err := client.CreateLike(prisma.LikeCreateInput{
-		Quantity: &quantity,
-		User: prisma.UserCreateOneWithoutLikesInput{
-			Connect: &prisma.UserWhereUniqueInput{
-				ID: &userID,
-			},
-		},
-		Post: prisma.PostCreateOneWithoutLikesInput{
-			Connect: &prisma.PostWhereUniqueInput{
-				ID: &postID,
-			},
-		},
-	}).Exec(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return like, nil
+func (r *mutationResolver) updatePostLike(ctx context.Context, likeInput PostLikeInput) (*prisma.Like, error) {
+	panic("not implemented")
 
 }
 
+
+func (r *mutationResolver) UpdateCommentLike(ctx context.Context, likeInput CommentLikeInput) (*prisma.Like, error) {
+	panic("not implemented")
+}
+
 type postResolver struct{ *Resolver }
+
+
+func (r *postResolver) Picture(ctx context.Context, obj *prisma.Post) (*graphql.Upload, error){
+	panic("not implemented")
+}
+
 
 func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
 	createdAt := obj.CreatedAt
@@ -285,6 +278,7 @@ func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.Li
 }
 
 type queryResolver struct{ *Resolver }
+
 
 func (r *queryResolver) Me(ctx context.Context) (*prisma.User, error) {
 	w := ctx.Value("response").(Auth)
@@ -388,6 +382,7 @@ func (r *queryResolver) Comments(ctx context.Context) ([]prisma.Comment, error) 
 func (r *queryResolver) Comment(ctx context.Context, id string) (*prisma.Comment, error) {
 	panic("not implemeneted")
 }
+
 
 type userResolver struct{ *Resolver }
 

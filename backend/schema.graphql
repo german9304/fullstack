@@ -93,30 +93,14 @@ type Comment {
   likes: Like!
 }
 
-interface Like {
+type Like {
   id: ID!
-  user: User!
-  createdAt: Time!
-  updatedAt: Time!
   quantity: Int
-}
-
-type PostLike implements Like {
-  id: ID!
   user: User!
   post: Post!
-  createdAt: Time!
-  updatedAt: Time!
-  quantity: Int
-}
-
-type CommentLike implements Like {
-  id: ID!
-  user: User!
   comment: Comment!
   createdAt: Time!
   updatedAt: Time!
-  quantity: Int
 }
 
 scalar Time
