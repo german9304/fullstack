@@ -18,6 +18,8 @@ models:
     model: github.com/german9304/fullstack-backend/prisma-client.Post
   Like:
     model: github.com/german9304/fullstack-backend/prisma-client.Like
+  Comment:
+    model: github.com/german9304/fullstack-backend/prisma-client.Comment
 resolver:
   filename: resolver.go
   type: Resolver

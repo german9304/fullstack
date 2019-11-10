@@ -2,10 +2,12 @@ type Query {
   users: [User!]!
   posts: [Post!]!
   likes: [Like!]!
-  userById(id: String!): User
-  userByEmail(email: String!): User
-  post(id: String!): Post
-  like(id: String!): Like
+  comments: [Comment!]!
+  userById(id: String!): User!
+  userByEmail(email: String!): User!
+  post(id: String!): Post!
+  Like(id: String!, commentType: String!): Like!
+  comment(id: String!): Comment!
   me: User!
 }
 
@@ -16,7 +18,11 @@ type Mutation {
   createPost(pstinpt: PostInput!): Post!
   updatePost(id: String!, text: String!): Post!
   deletePost(id: String!): Post!
-  createLike(likeInput: LikeInput!): Like!
+  createComment(commentinput: CommentInput!): Comment!
+  updateComment(id: String!, body: String!): Comment!
+  deleteComment(id: String!): Comment!
+  updatePostLike(likeInput: PostLikeInput!): Like!
+  updateCommentLike(likeInput: CommentLikeInput!): Like!
 }
 
 type Message {
@@ -36,8 +42,23 @@ input PostInput {
 
 input LikeInput {
   user: String!
-  post: String!
   quantity: Int!
+}
+
+input CommentLikeInput {
+  like: LikeInput!
+  comment: String!
+}
+
+input PostLikeInput {
+  like: LikeInput!
+  post: String!
+}
+
+input CommentInput {
+  body: String!
+  user: String!
+  post: String!
 }
 
 type User {
@@ -52,14 +73,35 @@ type User {
 
 type Post {
   id: ID!
-  text: String!
+  header: String!
+  picture: Upload
+  body: String!
   createdAt: Time!
   updatedAt: Time!
-  author: User
-  likes: [Like!]!
+  author: User!
+  comments: [Comment!]!
+  likes: Like!
 }
 
-type Like {
+type Comment {
+  id: ID!
+  body: String!
+  createdAt: Time!
+  updatedAt: Time!
+  author: User!
+  post: Post!
+  likes: Like!
+}
+
+interface Like {
+  id: ID!
+  user: User!
+  createdAt: Time!
+  updatedAt: Time!
+  quantity: Int
+}
+
+type PostLike implements Like {
   id: ID!
   user: User!
   post: Post!
@@ -68,4 +110,15 @@ type Like {
   quantity: Int
 }
 
+type CommentLike implements Like {
+  id: ID!
+  user: User!
+  comment: Comment!
+  createdAt: Time!
+  updatedAt: Time!
+  quantity: Int
+}
+
 scalar Time
+
+scalar Upload

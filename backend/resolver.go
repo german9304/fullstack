@@ -349,6 +349,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, erro
 
 	return post, nil
 }
+
 func (r *queryResolver) Like(ctx context.Context, id string) (*prisma.Like, error) {
 	like, err := client.Like(prisma.LikeWhereUniqueInput{
 		ID: &id,
@@ -359,6 +360,14 @@ func (r *queryResolver) Like(ctx context.Context, id string) (*prisma.Like, erro
 	}
 
 	return like, nil
+}
+
+func (r *queryResolver) Comments(ctx context.Context) ([]prisma.Comment, error) {
+	panic("not implemeneted")
+}
+
+func (r *queryResolver) Comment(ctx context.Context, id string) (*prisma.Comment, error) {
+	panic("not implemeneted")
 }
 
 type userResolver struct{ *Resolver }

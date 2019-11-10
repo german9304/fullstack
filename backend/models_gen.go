@@ -2,9 +2,36 @@
 
 package fullstack_backend
 
+import (
+	"time"
+
+	prisma "github.com/german9304/fullstack-backend/prisma-client"
+)
+
+type CommentInput struct {
+	Body string `json:"body"`
+	User string `json:"user"`
+	Post string `json:"post"`
+}
+
+type CommentLike struct {
+	ID        string          `json:"id"`
+	User      *prisma.User    `json:"user"`
+	Comment   *prisma.Comment `json:"comment"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	Quantity  *int            `json:"quantity"`
+}
+
+func (CommentLike) IsLike() {}
+
+type CommentLikeInput struct {
+	Like    *LikeInput `json:"like"`
+	Comment string     `json:"comment"`
+}
+
 type LikeInput struct {
 	User     string `json:"user"`
-	Post     string `json:"post"`
 	Quantity int    `json:"quantity"`
 }
 
@@ -15,6 +42,22 @@ type Message struct {
 type PostInput struct {
 	Text   string `json:"text"`
 	Author string `json:"author"`
+}
+
+type PostLike struct {
+	ID        string       `json:"id"`
+	User      *prisma.User `json:"user"`
+	Post      *prisma.Post `json:"post"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
+	Quantity  *int         `json:"quantity"`
+}
+
+func (PostLike) IsLike() {}
+
+type PostLikeInput struct {
+	Like *LikeInput `json:"like"`
+	Post string     `json:"post"`
 }
 
 type UserInput struct {
