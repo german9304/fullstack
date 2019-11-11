@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	// "github.com/stretchr/testify/assert"
+	// gqlgengraphql "github.com/99designs/gqlgen/graphql"
 	prisma "github.com/german9304/fullstack-backend/prisma-client"
 	"github.com/machinebox/graphql"
 	"github.com/stretchr/testify/suite"
@@ -23,23 +24,23 @@ func (fs *FullstackSuiteMutation) SetupSuite() {
 	fs.userPassword = "293902122"
 	fs.userEmail = "John@mail.com"
 
-	usr, _ := client.CreateUser(prisma.UserCreateInput{
+	client.CreateUser(prisma.UserCreateInput{
 		Email:    fs.userEmail,
 		Name:     name,
 		Password: fs.userPassword,
 	}).Exec(ctx)
 
-	post, _ := client.CreatePost(prisma.PostCreateInput{
-		Text: "testpost",
-		Author: &prisma.UserCreateOneWithoutPostsInput{
-			Connect: &prisma.UserWhereUniqueInput{
-				ID: &usr.ID,
-			},
-		},
-	}).Exec(ctx)
+	// post, _ := client.CreatePost(prisma.PostCreateInput{
+	// 	Text: "testpost",
+	// 	Author: &prisma.UserCreateOneWithoutPostsInput{
+	// 		Connect: &prisma.UserWhereUniqueInput{
+	// 			ID: &usr.ID,
+	// 		},
+	// 	},
+	// }).Exec(ctx)
 
-	fs.usrID = usr.ID
-	fs.postID = post.ID
+	// fs.usrID = usr.ID
+	// fs.postID = post.ID
 }
 
 func (fs *FullstackSuiteMutation) TearDownSuite() {
@@ -50,14 +51,33 @@ func (fs *FullstackSuiteMutation) TearDownSuite() {
 	client.DeleteUser(prisma.UserWhereUniqueInput{
 		Email: &userEmail,
 	}).Exec(ctx)
-	client.DeletePost(prisma.PostWhereUniqueInput{
-		ID: &fs.postID,
-	}).Exec(ctx)
+	// client.DeletePost(prisma.PostWhereUniqueInput{
+	// 	ID: &fs.postID,
+	// }).Exec(ctx)
+}
+
+type RequestParams struct {
+	key   string
+	value interface{}
+}
+
+
+func clientRequests(request string, reqParams []RequestParams) map[string]interface{} {
+	clientRequest := graphql.NewRequest(request)
+	for _, v := range reqParams {
+		clientRequest.Var(v.key, v.value)
+	}
+	clientRequest.Header.Set("Cache-Control", "no-cache")
+	var newRespData map[string]interface{}
+	if err := clientGraphql.Run(ctx, clientRequest, &newRespData); err != nil {
+		log.Fatal(err)
+	}
+	return newRespData
 }
 
 func (fs *FullstackSuiteMutation) TestMutationCreate() {
 
-	CREATE_USER := `
+	const CREATEUSER string = `
 		mutation signupMutation($userinput: UserInput!) {
 			signup (usrinpt: $userinput) {
 				id
@@ -68,16 +88,26 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 		}
 	`
 
-	CREATE_POST := `
-		mutation postMutation($postinput: PostInput!) {
-			createPost (pstinpt: $postinput) {
+	const CREATEPOST string = `
+		mutation postMutation($postinput: PostInput!, $pic: Upload) {
+			createPost (pstinpt: $postinput, picture: $pic) {
 				id
-				text
+				body
+				header
 			}
 		}
 	`
 
-	CREATE_LIKE := `
+	const CREATECOMMENT string = `
+		mutation createCommentMutation($commentinput: CommentInput!) {
+			createComment(commentinput: $commentinput) {
+				id
+				body
+			}
+		}
+	`
+
+	const CREATELIKE string = `
 		mutation likeMutation($likeinput: LikeInput!) {
 			createLike(likeInput: $likeinput) {
 				id
@@ -86,132 +116,129 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 		}
 	`
 
-	// Create a user request
-	signupReq := graphql.NewRequest(CREATE_USER)
-	// Create a post request
-	newPostReq := graphql.NewRequest(CREATE_POST)
-	// Create a like request
-	likesReq := graphql.NewRequest(CREATE_LIKE)
-
-	usr := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
-
-	signupReq.Var("userinput", usr)
-
-	signupReq.Header.Set("Cache-Control", "no-cache")
-
-	// run it and capture the response
-	var newUserRespData map[string]prisma.User
-	if err := clientGraphql.Run(ctx, signupReq, &newUserRespData); err != nil {
-		log.Fatal(err)
+	signUpParams := []RequestParams{
+		RequestParams{"userinput", UserInput{"mark@mail.com", "Mark", "2923ij3j3"}},
 	}
-	newUser := newUserRespData["signup"]
+	signupReq := clientRequests(CREATEUSER, signUpParams)
 
-	newUserId := newUser.ID
+	newUser := signupReq["signup"].(map[string]interface{})
 
-	post := PostInput{"first", newUserId}
+	log.Printf("%v \n", newUser)
 
-	newPostReq.Var("postinput", post)
+	newUserId := newUser["id"].(string)
 
-	newPostReq.Header.Set("Cache-Control", "no-cache")
-
-	var newPostRespData map[string]prisma.Post
-	if err := clientGraphql.Run(ctx, newPostReq, &newPostRespData); err != nil {
-		log.Fatal(err)
+	createPostParams := []RequestParams{
+		RequestParams{"postinput", PostInput{newUserId, "header1", "body1"}},
+		RequestParams{"pic", nil},
 	}
 
-	requestedPost := newPostRespData["createPost"]
-	postId := requestedPost.ID
-	postText := requestedPost.Text
+	createPostReq := clientRequests(CREATEPOST, createPostParams)
 
-	likeInput := LikeInput{newUserId, postId, 1}
+	newPost := createPostReq["createPost"].(map[string]interface{})
 
-	likesReq.Var("likeinput", likeInput)
+	log.Printf("Created post %v \n", newPost)
 
-	likesReq.Header.Set("Cache-Control", "no-cache")
+	newPostId := newPost["id"].(string)
 
-	var newLikesRespData map[string]prisma.Like
-	if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
-		log.Fatal(err)
+	createCommentParams := []RequestParams{
+		RequestParams{"commentinput", CommentInput{"This is a paragraph", newUserId, newPostId}},
 	}
-
-	likesResp := newLikesRespData["createLike"]
-	likesQuantity := *likesResp.Quantity
-
-	fs.Assert().Equal(usr.Email, newUser.Email)
-	fs.Assert().Equal(usr.Name, newUser.Name)
-	fs.Assert().Equal(usr.Password, newUser.Password)
-	fs.Assert().Equal(post.Text, postText)
-	fs.Assert().Equal(int32(1), likesQuantity)
-}
-
-func (fs *FullstackSuiteMutation) TestMutationUpdates() {
-	UPDATE_POST := `
-		mutation updatePostMutation($id: String!, $text: String!) {
-			updatePost(id: $id, text: $text) {
-				id
-				text
-			}
-		}
 	
-	`
-	// Create a user
-	updatePostReq := graphql.NewRequest(UPDATE_POST)
-	postText := "edited post"
-	updatePostReq.Var("id", fs.postID)
-	updatePostReq.Var("text", postText)
+	createCommentReq := clientRequests(CREATECOMMENT, createCommentParams)
 
-	updatePostReq.Header.Set("Cache-Control", "no-cache")
+	newComment := createCommentReq["createComment"].(map[string]interface{})
 
-	// run it and capture the response
-	var newUpdatePostRespData map[string]prisma.Post
-	if err := clientGraphql.Run(ctx, updatePostReq, &newUpdatePostRespData); err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("Created comment %v \n", newComment)
 
-	updatedPost := newUpdatePostRespData["updatePost"]
-	fs.Assert().Equal(updatedPost.Text, postText)
+	// likeInput := LikeInput{newUserId, postId, 1}
+
+	// likesReq.Var("likeinput", likeInput)
+
+	// likesReq.Header.Set("Cache-Control", "no-cache")
+
+	// var newLikesRespData map[string]prisma.Like
+	// if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// likesResp := newLikesRespData["createLike"]
+	// likesQuantity := *likesResp.Quantity
+
+	// fs.Assert().Equal(usr.Email, newUser.Email)
+	// fs.Assert().Equal(usr.Name, newUser.Name)
+	// fs.Assert().Equal(usr.Password, newUser.Password)
+	// fs.Assert().Equal(post.Text, postText)
+	// fs.Assert().Equal(int32(1), likesQuantity)
 }
 
-func (fs *FullstackSuiteMutation) TestMutationDelete() {
+// func (fs *FullstackSuiteMutation) TestMutationUpdates() {
+// 	UPDATE_POST := `
+// 		mutation updatePostMutation($id: String!, $text: String!) {
+// 			updatePost(id: $id, text: $text) {
+// 				id
+// 				text
+// 			}
+// 		}
 
-	post2, _ := client.CreatePost(prisma.PostCreateInput{
-		Text: "test2post",
-		Author: &prisma.UserCreateOneWithoutPostsInput{
-			Connect: &prisma.UserWhereUniqueInput{
-				ID: &fs.usrID,
-			},
-		},
-	}).Exec(ctx)
+// 	`
+// 	// Create a user
+// 	updatePostReq := graphql.NewRequest(UPDATE_POST)
+// 	postText := "edited post"
+// 	updatePostReq.Var("id", fs.postID)
+// 	updatePostReq.Var("text", postText)
 
-	DELETE_POST := `
-		mutation deletePostMutation($id: String!){
-			deletePost(id: $id) {
-				text
-			}
-		}
-	`
+// 	updatePostReq.Header.Set("Cache-Control", "no-cache")
 
-	deletePostReq := graphql.NewRequest(DELETE_POST)
-	deletePostReq.Var("id", post2.ID)
+// 	// run it and capture the response
+// 	var newUpdatePostRespData map[string]prisma.Post
+// 	if err := clientGraphql.Run(ctx, updatePostReq, &newUpdatePostRespData); err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	deletePostReq.Header.Set("Cache-Control", "no-cache")
+// 	updatedPost := newUpdatePostRespData["updatePost"]
+// 	fs.Assert().Equal(updatedPost.Text, postText)
+// }
 
-	// run it and capture the response
-	var deletePostRespData map[string]prisma.Post
-	if err := clientGraphql.Run(ctx, deletePostReq, &deletePostRespData); err != nil {
-		log.Printf("error: %v \n", err)
-		log.Fatal(err)
-	}
+// func (fs *FullstackSuiteMutation) TestMutationDelete() {
 
-	p, err := client.Post(prisma.PostWhereUniqueInput{
-		ID: &post2.ID,
-	}).Exec(ctx)
+// 	post2, _ := client.CreatePost(prisma.PostCreateInput{
+// 		Text: "test2post",
+// 		Author: &prisma.UserCreateOneWithoutPostsInput{
+// 			Connect: &prisma.UserWhereUniqueInput{
+// 				ID: &fs.usrID,
+// 			},
+// 		},
+// 	}).Exec(ctx)
 
-	deletePost := deletePostRespData["deletePost"]
-	fs.Assert().Equal(deletePost.Text, "test2post")
-	fs.Assert().Equal("query returned no result", err.Error())
-	fs.Assert().Nil(p)
-}
+// 	DELETE_POST := `
+// 		mutation deletePostMutation($id: String!){
+// 			deletePost(id: $id) {
+// 				text
+// 			}
+// 		}
+// 	`
+
+// 	deletePostReq := graphql.NewRequest(DELETE_POST)
+// 	deletePostReq.Var("id", post2.ID)
+
+// 	deletePostReq.Header.Set("Cache-Control", "no-cache")
+
+// 	// run it and capture the response
+// 	var deletePostRespData map[string]prisma.Post
+// 	if err := clientGraphql.Run(ctx, deletePostReq, &deletePostRespData); err != nil {
+// 		log.Printf("error: %v \n", err)
+// 		log.Fatal(err)
+// 	}
+
+// 	p, err := client.Post(prisma.PostWhereUniqueInput{
+// 		ID: &post2.ID,
+// 	}).Exec(ctx)
+
+// 	deletePost := deletePostRespData["deletePost"]
+// 	fs.Assert().Equal(deletePost.Text, "test2post")
+// 	fs.Assert().Equal("query returned no result", err.Error())
+// 	fs.Assert().Nil(p)
+// }
 
 func TestMutaion(t *testing.T) {
 	suite.Run(t, new(FullstackSuiteMutation))

@@ -74,7 +74,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateComment     func(childComplexity int, commentinput CommentInput) int
-		CreatePost        func(childComplexity int, pstinpt PostInput) int
+		CreatePost        func(childComplexity int, pstinpt PostInput, picture *graphql.Upload) int
 		DeleteComment     func(childComplexity int, id string) int
 		DeletePost        func(childComplexity int, id string) int
 		Signin            func(childComplexity int, email string, password string) int
@@ -82,7 +82,7 @@ type ComplexityRoot struct {
 		Signup            func(childComplexity int, usrinpt UserInput) int
 		UpdateComment     func(childComplexity int, id string, body string) int
 		UpdateCommentLike func(childComplexity int, likeInput CommentLikeInput) int
-		UpdatePost        func(childComplexity int, id string, text string) int
+		UpdatePost        func(childComplexity int, id string, postinput UpdatePostInput, picture *graphql.Upload) int
 		UpdatePostLike    func(childComplexity int, likeInput PostLikeInput) int
 	}
 
@@ -112,6 +112,7 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
+		Comments  func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		Email     func(childComplexity int) int
 		ID        func(childComplexity int) int
@@ -140,8 +141,8 @@ type MutationResolver interface {
 	Signup(ctx context.Context, usrinpt UserInput) (*prisma.User, error)
 	Signin(ctx context.Context, email string, password string) (*prisma.User, error)
 	Signout(ctx context.Context) (*Message, error)
-	CreatePost(ctx context.Context, pstinpt PostInput) (*prisma.Post, error)
-	UpdatePost(ctx context.Context, id string, text string) (*prisma.Post, error)
+	CreatePost(ctx context.Context, pstinpt PostInput, picture *graphql.Upload) (*prisma.Post, error)
+	UpdatePost(ctx context.Context, id string, postinput UpdatePostInput, picture *graphql.Upload) (*prisma.Post, error)
 	DeletePost(ctx context.Context, id string) (*prisma.Post, error)
 	CreateComment(ctx context.Context, commentinput CommentInput) (*prisma.Comment, error)
 	UpdateComment(ctx context.Context, id string, body string) (*prisma.Comment, error)
@@ -174,6 +175,7 @@ type UserResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error)
 	Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error)
 	Likes(ctx context.Context, obj *prisma.User) ([]prisma.Like, error)
+	Comments(ctx context.Context, obj *prisma.User) ([]prisma.Comment, error)
 }
 
 type executableSchema struct {
@@ -318,7 +320,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePost(childComplexity, args["pstinpt"].(PostInput)), true
+		return e.complexity.Mutation.CreatePost(childComplexity, args["pstinpt"].(PostInput), args["picture"].(*graphql.Upload)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -409,7 +411,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(string), args["text"].(string)), true
+		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(string), args["postinput"].(UpdatePostInput), args["picture"].(*graphql.Upload)), true
 
 	case "Mutation.updatePostLike":
 		if e.complexity.Mutation.UpdatePostLike == nil {
@@ -581,6 +583,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Users(childComplexity), true
 
+	case "User.comments":
+		if e.complexity.User.Comments == nil {
+			break
+		}
+
+		return e.complexity.User.Comments(childComplexity), true
+
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
 			break
@@ -709,8 +718,8 @@ type Mutation {
   signup(usrinpt: UserInput!): User!
   signin(email: String!, password: String!): User!
   signout: Message!
-  createPost(pstinpt: PostInput!): Post!
-  updatePost(id: String!, text: String!): Post!
+  createPost(pstinpt: PostInput!, picture: Upload): Post!
+  updatePost(id: String!, postinput: UpdatePostInput!, picture: Upload): Post!
   deletePost(id: String!): Post!
   createComment(commentinput: CommentInput!): Comment!
   updateComment(id: String!, body: String!): Comment!
@@ -723,6 +732,11 @@ type Message {
   message: String!
 }
 
+input UpdatePostInput {
+  header: String!
+  body: String!
+}
+
 input UserInput {
   email: String!
   name: String!
@@ -730,8 +744,9 @@ input UserInput {
 }
 
 input PostInput {
-  text: String!
   author: String!
+  header: String!
+  body: String!
 }
 
 input LikeInput {
@@ -763,6 +778,7 @@ type User {
   createdAt: Time!
   posts: [Post!]!
   likes: [Like!]!
+  comments: [Comment!]!
 }
 
 type Post {
@@ -832,6 +848,14 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 		}
 	}
 	args["pstinpt"] = arg0
+	var arg1 *graphql.Upload
+	if tmp, ok := rawArgs["picture"]; ok {
+		arg1, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["picture"] = arg1
 	return args, nil
 }
 
@@ -960,14 +984,22 @@ func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["text"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg1 UpdatePostInput
+	if tmp, ok := rawArgs["postinput"]; ok {
+		arg1, err = ec.unmarshalNUpdatePostInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐUpdatePostInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["text"] = arg1
+	args["postinput"] = arg1
+	var arg2 *graphql.Upload
+	if tmp, ok := rawArgs["picture"]; ok {
+		arg2, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["picture"] = arg2
 	return args, nil
 }
 
@@ -1802,7 +1834,7 @@ func (ec *executionContext) _Mutation_createPost(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePost(rctx, args["pstinpt"].(PostInput))
+		return ec.resolvers.Mutation().CreatePost(rctx, args["pstinpt"].(PostInput), args["picture"].(*graphql.Upload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1846,7 +1878,7 @@ func (ec *executionContext) _Mutation_updatePost(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(string), args["text"].(string))
+		return ec.resolvers.Mutation().UpdatePost(rctx, args["id"].(string), args["postinput"].(UpdatePostInput), args["picture"].(*graphql.Upload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3197,6 +3229,43 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_comments(ctx context.Context, field graphql.CollectedField, obj *prisma.User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().Comments(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]prisma.Comment)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNComment2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐComment(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4432,15 +4501,21 @@ func (ec *executionContext) unmarshalInputPostInput(ctx context.Context, obj int
 
 	for k, v := range asMap {
 		switch k {
-		case "text":
-			var err error
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "author":
 			var err error
 			it.Author, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "header":
+			var err error
+			it.Header, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "body":
+			var err error
+			it.Body, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4465,6 +4540,30 @@ func (ec *executionContext) unmarshalInputPostLikeInput(ctx context.Context, obj
 		case "post":
 			var err error
 			it.Post, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatePostInput(ctx context.Context, obj interface{}) (UpdatePostInput, error) {
+	var it UpdatePostInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "header":
+			var err error
+			it.Header, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "body":
+			var err error
+			it.Body, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5182,6 +5281,20 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
+		case "comments":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_comments(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5719,6 +5832,10 @@ func (ec *executionContext) marshalNTime2ᚖtimeᚐTime(ctx context.Context, sel
 		return graphql.Null
 	}
 	return ec.marshalNTime2timeᚐTime(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalNUpdatePostInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐUpdatePostInput(ctx context.Context, v interface{}) (UpdatePostInput, error) {
+	return ec.unmarshalInputUpdatePostInput(ctx, v)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐUser(ctx context.Context, sel ast.SelectionSet, v prisma.User) graphql.Marshaler {

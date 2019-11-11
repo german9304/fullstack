@@ -23,13 +23,19 @@ type Message struct {
 }
 
 type PostInput struct {
-	Text   string `json:"text"`
 	Author string `json:"author"`
+	Header string `json:"header"`
+	Body   string `json:"body"`
 }
 
 type PostLikeInput struct {
 	Like *LikeInput `json:"like"`
 	Post string     `json:"post"`
+}
+
+type UpdatePostInput struct {
+	Header string `json:"header"`
+	Body   string `json:"body"`
 }
 
 type UserInput struct {
