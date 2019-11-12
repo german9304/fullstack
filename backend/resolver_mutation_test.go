@@ -61,7 +61,6 @@ type RequestParams struct {
 	value interface{}
 }
 
-
 func clientRequests(request string, reqParams []RequestParams) map[string]interface{} {
 	clientRequest := graphql.NewRequest(request)
 	for _, v := range reqParams {
@@ -107,68 +106,45 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 		}
 	`
 
-	const CREATELIKE string = `
-		mutation likeMutation($likeinput: LikeInput!) {
-			createLike(likeInput: $likeinput) {
-				id
-				quantity
-			}
-		}
-	`
-
+	userInput := UserInput{"mark@mail.com", "Mark", "2923ij3j3"}
 	signUpParams := []RequestParams{
-		RequestParams{"userinput", UserInput{"mark@mail.com", "Mark", "2923ij3j3"}},
+		RequestParams{"userinput", userInput},
 	}
 	signupReq := clientRequests(CREATEUSER, signUpParams)
-
 	newUser := signupReq["signup"].(map[string]interface{})
 
-	log.Printf("%v \n", newUser)
-
 	newUserId := newUser["id"].(string)
+	postInput := PostInput{newUserId, "header1", "body1"}
 
 	createPostParams := []RequestParams{
-		RequestParams{"postinput", PostInput{newUserId, "header1", "body1"}},
+		RequestParams{"postinput", postInput},
 		RequestParams{"pic", nil},
 	}
 
 	createPostReq := clientRequests(CREATEPOST, createPostParams)
-
 	newPost := createPostReq["createPost"].(map[string]interface{})
-
-	log.Printf("Created post %v \n", newPost)
-
 	newPostId := newPost["id"].(string)
 
+	commentInput := CommentInput{"Comment body", newUserId, newPostId}
 	createCommentParams := []RequestParams{
-		RequestParams{"commentinput", CommentInput{"This is a paragraph", newUserId, newPostId}},
+		RequestParams{"commentinput", commentInput},
 	}
-	
-	createCommentReq := clientRequests(CREATECOMMENT, createCommentParams)
 
+	createCommentReq := clientRequests(CREATECOMMENT, createCommentParams)
 	newComment := createCommentReq["createComment"].(map[string]interface{})
 
-	log.Printf("Created comment %v \n", newComment)
-
-	// likeInput := LikeInput{newUserId, postId, 1}
-
-	// likesReq.Var("likeinput", likeInput)
-
-	// likesReq.Header.Set("Cache-Control", "no-cache")
-
-	// var newLikesRespData map[string]prisma.Like
-	// if err := clientGraphql.Run(ctx, likesReq, &newLikesRespData); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// likesResp := newLikesRespData["createLike"]
-	// likesQuantity := *likesResp.Quantity
-
-	// fs.Assert().Equal(usr.Email, newUser.Email)
-	// fs.Assert().Equal(usr.Name, newUser.Name)
-	// fs.Assert().Equal(usr.Password, newUser.Password)
-	// fs.Assert().Equal(post.Text, postText)
-	// fs.Assert().Equal(int32(1), likesQuantity)
+	// User testing
+	fs.Assert().NotEmpty(newUserId)
+	fs.Assert().Equal(userInput.Email, newUser["email"].(string))
+	fs.Assert().Equal(userInput.Name, newUser["name"].(string))
+	fs.Assert().Equal(userInput.Password, newUser["password"].(string))
+	// Post testing
+	fs.Assert().NotEmpty(newPostId)
+	fs.Assert().Equal(postInput.Header, newPost["header"].(string))
+	fs.Assert().Equal(postInput.Body, newPost["body"].(string))
+	// Comment testing
+	fs.Assert().NotEmpty(newComment["id"].(string))
+	fs.Assert().Equal(commentInput.Body, newComment["body"].(string))
 }
 
 // func (fs *FullstackSuiteMutation) TestMutationUpdates() {
