@@ -24,23 +24,25 @@ func (fs *FullstackSuiteMutation) SetupSuite() {
 	fs.userPassword = "293902122"
 	fs.userEmail = "John@mail.com"
 
-	client.CreateUser(prisma.UserCreateInput{
+	user, _ := client.CreateUser(prisma.UserCreateInput{
 		Email:    fs.userEmail,
 		Name:     name,
 		Password: fs.userPassword,
 	}).Exec(ctx)
 
-	// post, _ := client.CreatePost(prisma.PostCreateInput{
-	// 	Text: "testpost",
-	// 	Author: &prisma.UserCreateOneWithoutPostsInput{
-	// 		Connect: &prisma.UserWhereUniqueInput{
-	// 			ID: &usr.ID,
-	// 		},
-	// 	},
-	// }).Exec(ctx)
+	post, _ := client.CreatePost(prisma.PostCreateInput{
+		Body:    "testbody",
+		Header:  "testpost",
+		Picture: nil,
+		Author: prisma.UserCreateOneWithoutPostsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &user.ID,
+			},
+		},
+	}).Exec(ctx)
 
-	// fs.usrID = usr.ID
-	// fs.postID = post.ID
+	fs.usrID = user.ID
+	fs.postID = post.ID
 }
 
 func (fs *FullstackSuiteMutation) TearDownSuite() {
@@ -147,33 +149,33 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 	fs.Assert().Equal(commentInput.Body, newComment["body"].(string))
 }
 
-// func (fs *FullstackSuiteMutation) TestMutationUpdates() {
-// 	UPDATE_POST := `
-// 		mutation updatePostMutation($id: String!, $text: String!) {
-// 			updatePost(id: $id, text: $text) {
-// 				id
-// 				text
-// 			}
-// 		}
+func (fs *FullstackSuiteMutation) TestMutationUpdates() {
+	UPDATEPOST := `
+		mutation updatePostMutation($id: String!, $postinput: UpdatePostInput!, $pic: Upload) {
+			updatePost(id: $id, postinput: $postinput, picture: $pic) {
+				id
+				header
+				body
+			}
+		}
 
-// 	`
-// 	// Create a user
-// 	updatePostReq := graphql.NewRequest(UPDATE_POST)
-// 	postText := "edited post"
-// 	updatePostReq.Var("id", fs.postID)
-// 	updatePostReq.Var("text", postText)
+	`
+	updatePostInput := UpdatePostInput{"updatedHeader", "updatedBody"}
+	updatePostParams := []RequestParams{
+		RequestParams{"id", fs.postID},
+		RequestParams{"postinput", updatePostInput},
+		RequestParams{"pic", nil},
+	}
 
-// 	updatePostReq.Header.Set("Cache-Control", "no-cache")
+	updatePostReq := clientRequests(UPDATEPOST, updatePostParams)
+	updatedPost := updatePostReq["updatePost"].(map[string]interface{})
 
-// 	// run it and capture the response
-// 	var newUpdatePostRespData map[string]prisma.Post
-// 	if err := clientGraphql.Run(ctx, updatePostReq, &newUpdatePostRespData); err != nil {
-// 		log.Fatal(err)
-// 	}
+	// Updated comment
+	fs.Assert().NotEmpty(updatedPost["id"].(string))
+	fs.Assert().Equal(updatePostInput.Body, updatedPost["body"].(string))
+	fs.Assert().Equal(updatePostInput.Header, updatedPost["header"].(string))
 
-// 	updatedPost := newUpdatePostRespData["updatePost"]
-// 	fs.Assert().Equal(updatedPost.Text, postText)
-// }
+}
 
 // func (fs *FullstackSuiteMutation) TestMutationDelete() {
 
