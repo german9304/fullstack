@@ -15,6 +15,7 @@ type FullstackSuiteMutation struct {
 	suite.Suite
 	postID       string
 	usrID        string
+	commentID    string
 	userEmail    string
 	userPassword string
 }
@@ -41,8 +42,24 @@ func (fs *FullstackSuiteMutation) SetupSuite() {
 		},
 	}).Exec(ctx)
 
+	comment, _ := client.CreateComment(prisma.CommentCreateInput{
+		Body: "commentBody",
+		Author: prisma.UserCreateOneWithoutCommentsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &user.ID,
+			},
+		},
+		Post: prisma.PostCreateOneWithoutCommentsInput{
+			Connect: &prisma.PostWhereUniqueInput{
+				ID: &post.ID,
+			},
+		},
+	},
+	).Exec(ctx)
+
 	fs.usrID = user.ID
 	fs.postID = post.ID
+	fs.commentID = comment.ID
 }
 
 func (fs *FullstackSuiteMutation) TearDownSuite() {
@@ -160,6 +177,16 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 		}
 
 	`
+	UPDATECOMMENT := `
+		mutation updateCommentMutation($id: String!, $body: String!) {
+			updateComment(id: $id, body: $body) {
+				id
+				body
+			}
+		}
+
+	`
+
 	updatePostInput := UpdatePostInput{"updatedHeader", "updatedBody"}
 	updatePostParams := []RequestParams{
 		RequestParams{"id", fs.postID},
@@ -170,11 +197,21 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	updatePostReq := clientRequests(UPDATEPOST, updatePostParams)
 	updatedPost := updatePostReq["updatePost"].(map[string]interface{})
 
-	// Updated comment
+	commentBody := "newbody"
+	updateCommentParams := []RequestParams{
+		RequestParams{"id", fs.commentID},
+		RequestParams{"body", commentBody},
+	}
+
+	updateCommentReq := clientRequests(UPDATECOMMENT, updateCommentParams)
+	updatedComment := updateCommentReq["updateComment"].(map[string]interface{})
+	// Updated Post
 	fs.Assert().NotEmpty(updatedPost["id"].(string))
 	fs.Assert().Equal(updatePostInput.Body, updatedPost["body"].(string))
 	fs.Assert().Equal(updatePostInput.Header, updatedPost["header"].(string))
-
+	// Updated comment
+	fs.Assert().NotEmpty(updatedComment["id"].(string))
+	fs.Assert().Equal(commentBody, updatedComment["body"].(string))
 }
 
 // func (fs *FullstackSuiteMutation) TestMutationDelete() {

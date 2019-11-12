@@ -266,7 +266,27 @@ func (r *mutationResolver) CreateComment(ctx context.Context, commentinput Comme
 	return newComment, nil
 }
 func (r *mutationResolver) UpdateComment(ctx context.Context, id string, body string) (*prisma.Comment, error) {
-	panic("not implemented")
+	if id == "" {
+		return nil, fmt.Errorf("please provide an id")
+	}
+
+	if body == "" {
+		return nil, fmt.Errorf("please provide a body")
+	}
+	updatedComment, err := client.UpdateComment(prisma.CommentUpdateParams{
+		Where: prisma.CommentWhereUniqueInput{
+			ID: &id,
+		},
+		Data: prisma.CommentUpdateInput{
+			Body: &body,
+		},
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedComment, nil
 }
 func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (*prisma.Comment, error) {
 	panic("not implemented")
