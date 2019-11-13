@@ -21,8 +21,8 @@ type Mutation {
   createComment(commentinput: CommentInput!): Comment!
   updateComment(id: String!, body: String!): Comment!
   deleteComment(id: String!): Comment!
-  createPostLike(likeinput: CommentLikeInput!): Like!
-  createCommentLike(likeinput: PostLikeInput!): Like!
+  createPostLike(likeinput: PostLikeInput!): Like!
+  createCommentLike(likeinput: CommentLikeInput!): Like!
   updateLike(id: String!): Like!
 }
 

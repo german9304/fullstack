@@ -20,11 +20,11 @@ type Resolver struct{}
 func (r *Resolver) Comment() CommentResolver {
 	return &commentResolver{r}
 }
-func (r *Resolver) LikeCommentResolver() LikeCommentResolver {
-	return &LikeCommentResolver{r}
+func (r *Resolver) LikeComment() LikeCommentResolver {
+	return &likeCommentResolver{r}
 }
-func (r *Resolver) LikePostResolver() LikePostResolver {
-	return &LikePostResolver{r}
+func (r *Resolver) LikePost() LikePostResolver {
+	return &likePostResolver{r}
 }
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
@@ -100,9 +100,9 @@ func (r *commentResolver) Likes(ctx context.Context, obj *prisma.Comment) ([]Lik
 	// return commentLikes, nil
 }
 
-type LikeCommentResolver struct{ *Resolver }
+type likeCommentResolver struct{ *Resolver }
 
-func (r *LikeCommentResolver) User(ctx context.Context, obj *prisma.LikeComment) (*prisma.User, error) {
+func (r *likeCommentResolver) User(ctx context.Context, obj *prisma.LikeComment) (*prisma.User, error) {
 	userLikes, err := client.LikeComment(prisma.LikeCommentWhereUniqueInput{
 		ID: &obj.ID,
 	}).User().Exec(ctx)
@@ -114,7 +114,7 @@ func (r *LikeCommentResolver) User(ctx context.Context, obj *prisma.LikeComment)
 	return userLikes, nil
 }
 
-func (r *LikeCommentResolver) Comment(ctx context.Context, obj *prisma.LikeComment) (*prisma.Comment, error) {
+func (r *likeCommentResolver) Comment(ctx context.Context, obj *prisma.LikeComment) (*prisma.Comment, error) {
 	commentLike, err := client.LikeComment(prisma.LikeCommentWhereUniqueInput{
 		ID: &obj.ID,
 	}).Comment().Exec(ctx)
@@ -125,7 +125,7 @@ func (r *LikeCommentResolver) Comment(ctx context.Context, obj *prisma.LikeComme
 
 	return commentLike, nil
 }
-func (r *LikeCommentResolver) CreatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error) {
+func (r *likeCommentResolver) CreatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error) {
 	createdAt := obj.CreatedAt
 	t, err := time.Parse(time.RFC3339, createdAt)
 
@@ -135,7 +135,7 @@ func (r *LikeCommentResolver) CreatedAt(ctx context.Context, obj *prisma.LikeCom
 
 	return &t, nil
 }
-func (r *LikeCommentResolver) UpdatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error) {
+func (r *likeCommentResolver) UpdatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error) {
 	UpdatedAt := obj.UpdatedAt
 	t, err := time.Parse(time.RFC3339, UpdatedAt)
 
@@ -146,9 +146,9 @@ func (r *LikeCommentResolver) UpdatedAt(ctx context.Context, obj *prisma.LikeCom
 	return &t, nil
 }
 
-type LikePostResolver struct{ *Resolver }
+type likePostResolver struct{ *Resolver }
 
-func (r *LikeCommentResolver) User(ctx context.Context, obj *prisma.LikePost) (*prisma.User, error) {
+func (r *likePostResolver) User(ctx context.Context, obj *prisma.LikePost) (*prisma.User, error) {
 	userLikes, err := client.LikePost(prisma.LikePostWhereUniqueInput{
 		ID: &obj.ID,
 	}).User().Exec(ctx)
@@ -159,7 +159,7 @@ func (r *LikeCommentResolver) User(ctx context.Context, obj *prisma.LikePost) (*
 
 	return userLikes, nil
 }
-func (r *LikePostResolver) Post(ctx context.Context, obj *prisma.LikePost) (*prisma.Post, error) {
+func (r *likePostResolver) Post(ctx context.Context, obj *prisma.LikePost) (*prisma.Post, error) {
 	postLike, err := client.LikePost(prisma.LikePostWhereUniqueInput{
 		ID: &obj.ID,
 	}).Post().Exec(ctx)
@@ -170,18 +170,8 @@ func (r *LikePostResolver) Post(ctx context.Context, obj *prisma.LikePost) (*pri
 
 	return postLike, nil
 }
-func (r *LikePostResolver) Comment(ctx context.Context, obj *prisma.LikePost) (*prisma.Comment, error) {
-	commentLike, err := client.LikePost(prisma.LikePostWhereUniqueInput{
-		ID: &obj.ID,
-	}).Comment().Exec(ctx)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return commentLike, nil
-}
-func (r *LikePostResolver) CreatedAt(ctx context.Context, obj *prisma.prisma.LikePost) (*time.Time, error) {
+func (r *likePostResolver) CreatedAt(ctx context.Context, obj *prisma.LikePost) (*time.Time, error) {
 	createdAt := obj.CreatedAt
 	t, err := time.Parse(time.RFC3339, createdAt)
 
@@ -191,7 +181,7 @@ func (r *LikePostResolver) CreatedAt(ctx context.Context, obj *prisma.prisma.Lik
 
 	return &t, nil
 }
-func (r *LikePostResolver) UpdatedAt(ctx context.Context, obj *prisma.LikePost) (*time.Time, error) {
+func (r *likePostResolver) UpdatedAt(ctx context.Context, obj *prisma.LikePost) (*time.Time, error) {
 	UpdatedAt := obj.UpdatedAt
 	t, err := time.Parse(time.RFC3339, UpdatedAt)
 
@@ -379,18 +369,51 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, id string, body st
 func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (*prisma.Comment, error) {
 	panic("not implemented")
 }
-func (r *mutationResolver) CreatePostLike(ctx context.Context, like PostLikeInput) (*prisma.LikePost, error) {
-	panic("not implemented")
+func (r *mutationResolver) CreatePostLike(ctx context.Context, likeinput PostLikeInput) (Like, error) {
+	likeinfo := likeinput.LikeInfo
+	postLike, err := client.CreateLikePost(prisma.LikePostCreateInput{
+		User: prisma.UserCreateOneWithoutPostLikesInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &likeinfo.User,
+			},
+		},
+		Post: prisma.PostCreateOneWithoutLikesInput{
+			Connect: &prisma.PostWhereUniqueInput{
+				ID: &likeinput.Post,
+			},
+		},
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postLike, nil
 }
 
-func (r *mutationResolver) CreateCommentLike(ctx context.Context, like CommentLikeInput) (*prisma.LikeComment, error) {
-	panic("not implemented")
+func (r *mutationResolver) CreateCommentLike(ctx context.Context, likeinput CommentLikeInput) (Like, error) {
+	likeinfo := likeinput.LikeInfo
+	commentLike, err := client.CreateLikeComment(prisma.LikeCommentCreateInput{
+		User: prisma.UserCreateOneWithoutCommentLikesInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &likeinfo.User,
+			},
+		},
+		Comment: prisma.CommentCreateOneWithoutLikesInput{
+			Connect: &prisma.CommentWhereUniqueInput{
+				ID: &likeinput.Comment,
+			},
+		},
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return commentLike, nil
 }
 
-func (r *mutationResolver) UpdateCommentLike(ctx context.Context, id string, quantity int, post string) (*prisma.LikeComment, error) {
-	panic("not implemented")
-}
-func (r *mutationResolver)	UpdatePostLike(ctx context.Context, id string, quantity int, comment string) (*prisma.LikePost, error) {
+func (r *mutationResolver) UpdateLike(ctx context.Context, id string) (Like, error) {
 	panic("not implemented")
 }
 
@@ -435,14 +458,15 @@ func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
 
 	return posts, nil
 }
-func (r *queryResolver) Likes(ctx context.Context) ([]prisma.Like, error) {
-	likes, err := client.Likes(nil).Exec(ctx)
+func (r *queryResolver) Likes(ctx context.Context) ([]Like, error) {
+	panic("not implemented")
+	// likes, err := client.Likes(nil).Exec(ctx)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return likes, nil
+	// return likes, nil
 }
 func (r *queryResolver) Comments(ctx context.Context) ([]prisma.Comment, error) {
 	comments, err := client.Comments(nil).Exec(ctx)
@@ -486,17 +510,8 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, erro
 
 	return post, nil
 }
-func (r *queryResolver) CommentLikes(ctx context.Context) ([]prisma.LikeComment, error) {
-	panic("not implemented")
-}
-func (r *queryResolver) PostLikes(ctx context.Context) ([]prisma.LikePost, error) {
-	panic("not implemented")
-}
 
-func (r *queryResolver) CommentLike(ctx context.Context, id string) (*prisma.LikeComment, error) {
-	panic("not implemented")
-}
-func (r *queryResolver)  PostLike(ctx context.Context, id string) (*prisma.LikePost, error) {
+func (r *queryResolver) Like(ctx context.Context, id string, typeArg string) (Like, error) {
 	panic("not implemented")
 }
 

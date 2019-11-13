@@ -84,9 +84,9 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateComment     func(childComplexity int, commentinput CommentInput) int
-		CreateCommentLike func(childComplexity int, likeinput PostLikeInput) int
+		CreateCommentLike func(childComplexity int, likeinput CommentLikeInput) int
 		CreatePost        func(childComplexity int, pstinpt PostInput, picture *graphql.Upload) int
-		CreatePostLike    func(childComplexity int, likeinput CommentLikeInput) int
+		CreatePostLike    func(childComplexity int, likeinput PostLikeInput) int
 		DeleteComment     func(childComplexity int, id string) int
 		DeletePost        func(childComplexity int, id string) int
 		Signin            func(childComplexity int, email string, password string) int
@@ -163,8 +163,8 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, commentinput CommentInput) (*prisma.Comment, error)
 	UpdateComment(ctx context.Context, id string, body string) (*prisma.Comment, error)
 	DeleteComment(ctx context.Context, id string) (*prisma.Comment, error)
-	CreatePostLike(ctx context.Context, likeinput CommentLikeInput) (Like, error)
-	CreateCommentLike(ctx context.Context, likeinput PostLikeInput) (Like, error)
+	CreatePostLike(ctx context.Context, likeinput PostLikeInput) (Like, error)
+	CreateCommentLike(ctx context.Context, likeinput CommentLikeInput) (Like, error)
 	UpdateLike(ctx context.Context, id string) (Like, error)
 }
 type PostResolver interface {
@@ -372,7 +372,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateCommentLike(childComplexity, args["likeinput"].(PostLikeInput)), true
+		return e.complexity.Mutation.CreateCommentLike(childComplexity, args["likeinput"].(CommentLikeInput)), true
 
 	case "Mutation.createPost":
 		if e.complexity.Mutation.CreatePost == nil {
@@ -396,7 +396,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePostLike(childComplexity, args["likeinput"].(CommentLikeInput)), true
+		return e.complexity.Mutation.CreatePostLike(childComplexity, args["likeinput"].(PostLikeInput)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -788,8 +788,8 @@ type Mutation {
   createComment(commentinput: CommentInput!): Comment!
   updateComment(id: String!, body: String!): Comment!
   deleteComment(id: String!): Comment!
-  createPostLike(likeinput: CommentLikeInput!): Like!
-  createCommentLike(likeinput: PostLikeInput!): Like!
+  createPostLike(likeinput: PostLikeInput!): Like!
+  createCommentLike(likeinput: CommentLikeInput!): Like!
   updateLike(id: String!): Like!
 }
 
@@ -907,9 +907,9 @@ scalar Upload
 func (ec *executionContext) field_Mutation_createCommentLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 PostLikeInput
+	var arg0 CommentLikeInput
 	if tmp, ok := rawArgs["likeinput"]; ok {
-		arg0, err = ec.unmarshalNPostLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐPostLikeInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCommentLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐCommentLikeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -935,9 +935,9 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_createPostLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 CommentLikeInput
+	var arg0 PostLikeInput
 	if tmp, ok := rawArgs["likeinput"]; ok {
-		arg0, err = ec.unmarshalNCommentLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐCommentLikeInput(ctx, tmp)
+		arg0, err = ec.unmarshalNPostLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐPostLikeInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2375,7 +2375,7 @@ func (ec *executionContext) _Mutation_createPostLike(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePostLike(rctx, args["likeinput"].(CommentLikeInput))
+		return ec.resolvers.Mutation().CreatePostLike(rctx, args["likeinput"].(PostLikeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2419,7 +2419,7 @@ func (ec *executionContext) _Mutation_createCommentLike(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateCommentLike(rctx, args["likeinput"].(PostLikeInput))
+		return ec.resolvers.Mutation().CreateCommentLike(rctx, args["likeinput"].(CommentLikeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
