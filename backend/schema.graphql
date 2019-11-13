@@ -6,8 +6,8 @@ type Query {
   userById(id: String!): User!
   userByEmail(email: String!): User!
   post(id: String!): Post!
-  Like(id: String!, commentType: String!): Like!
   comment(id: String!): Comment!
+  like(id: String!, type: String!): Like!
   me: User!
 }
 
@@ -21,8 +21,9 @@ type Mutation {
   createComment(commentinput: CommentInput!): Comment!
   updateComment(id: String!, body: String!): Comment!
   deleteComment(id: String!): Comment!
-  updatePostLike(likeInput: PostLikeInput!): Like!
-  updateCommentLike(likeInput: CommentLikeInput!): Like!
+  createPostLike(likeinput: CommentLikeInput!): Like!
+  createCommentLike(likeinput: PostLikeInput!): Like!
+  updateLike(id: String!): Like!
 }
 
 type Message {
@@ -47,17 +48,17 @@ input PostInput {
 }
 
 input LikeInput {
-  user: String!
   quantity: Int!
+  user: String!
 }
 
 input CommentLikeInput {
-  like: LikeInput!
+  likeInfo: LikeInput!
   comment: String!
 }
 
 input PostLikeInput {
-  like: LikeInput!
+  likeInfo: LikeInput!
   post: String!
 }
 
@@ -74,8 +75,8 @@ type User {
   password: String!
   createdAt: Time!
   posts: [Post!]!
-  likes: [Like!]!
   comments: [Comment!]!
+  likes: [Like!]!
 }
 
 type Post {
@@ -87,7 +88,7 @@ type Post {
   updatedAt: Time!
   author: User!
   comments: [Comment!]!
-  likes: Like!
+  likes: [Like!]!
 }
 
 type Comment {
@@ -97,15 +98,31 @@ type Comment {
   updatedAt: Time!
   author: User!
   post: Post!
-  likes: Like!
+  likes: [Like!]!
 }
 
-type Like {
+interface Like {
+  id: ID!
+  quantity: Int
+  user: User!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type LikeComment implements Like {
+  id: ID!
+  quantity: Int
+  user: User!
+  comment: Comment!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type LikePost implements Like {
   id: ID!
   quantity: Int
   user: User!
   post: Post!
-  comment: Comment!
   createdAt: Time!
   updatedAt: Time!
 }

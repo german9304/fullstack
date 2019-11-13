@@ -2,6 +2,10 @@
 
 package fullstack_backend
 
+type Like interface {
+	IsLike()
+}
+
 type CommentInput struct {
 	Body string `json:"body"`
 	User string `json:"user"`
@@ -9,13 +13,13 @@ type CommentInput struct {
 }
 
 type CommentLikeInput struct {
-	Like    *LikeInput `json:"like"`
-	Comment string     `json:"comment"`
+	LikeInfo *LikeInput `json:"likeInfo"`
+	Comment  string     `json:"comment"`
 }
 
 type LikeInput struct {
-	User     string `json:"user"`
 	Quantity int    `json:"quantity"`
+	User     string `json:"user"`
 }
 
 type Message struct {
@@ -29,8 +33,8 @@ type PostInput struct {
 }
 
 type PostLikeInput struct {
-	Like *LikeInput `json:"like"`
-	Post string     `json:"post"`
+	LikeInfo *LikeInput `json:"likeInfo"`
+	Post     string     `json:"post"`
 }
 
 type UpdatePostInput struct {

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -37,7 +38,8 @@ type Config struct {
 
 type ResolverRoot interface {
 	Comment() CommentResolver
-	Like() LikeResolver
+	LikeComment() LikeCommentResolver
+	LikePost() LikePostResolver
 	Mutation() MutationResolver
 	Post() PostResolver
 	Query() QueryResolver
@@ -58,8 +60,16 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
-	Like struct {
+	LikeComment struct {
 		Comment   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Quantity  func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		User      func(childComplexity int) int
+	}
+
+	LikePost struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Post      func(childComplexity int) int
@@ -74,16 +84,17 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateComment     func(childComplexity int, commentinput CommentInput) int
+		CreateCommentLike func(childComplexity int, likeinput PostLikeInput) int
 		CreatePost        func(childComplexity int, pstinpt PostInput, picture *graphql.Upload) int
+		CreatePostLike    func(childComplexity int, likeinput CommentLikeInput) int
 		DeleteComment     func(childComplexity int, id string) int
 		DeletePost        func(childComplexity int, id string) int
 		Signin            func(childComplexity int, email string, password string) int
 		Signout           func(childComplexity int) int
 		Signup            func(childComplexity int, usrinpt UserInput) int
 		UpdateComment     func(childComplexity int, id string, body string) int
-		UpdateCommentLike func(childComplexity int, likeInput CommentLikeInput) int
+		UpdateLike        func(childComplexity int, id string) int
 		UpdatePost        func(childComplexity int, id string, postinput UpdatePostInput, picture *graphql.Upload) int
-		UpdatePostLike    func(childComplexity int, likeInput PostLikeInput) int
 	}
 
 	Post struct {
@@ -101,7 +112,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Comment     func(childComplexity int, id string) int
 		Comments    func(childComplexity int) int
-		Like        func(childComplexity int, id string, commentType string) int
+		Like        func(childComplexity int, id string, typeArg string) int
 		Likes       func(childComplexity int) int
 		Me          func(childComplexity int) int
 		Post        func(childComplexity int, id string) int
@@ -128,14 +139,19 @@ type CommentResolver interface {
 	UpdatedAt(ctx context.Context, obj *prisma.Comment) (*time.Time, error)
 	Author(ctx context.Context, obj *prisma.Comment) (*prisma.User, error)
 	Post(ctx context.Context, obj *prisma.Comment) (*prisma.Post, error)
-	Likes(ctx context.Context, obj *prisma.Comment) (*prisma.Like, error)
+	Likes(ctx context.Context, obj *prisma.Comment) ([]Like, error)
 }
-type LikeResolver interface {
-	User(ctx context.Context, obj *prisma.Like) (*prisma.User, error)
-	Post(ctx context.Context, obj *prisma.Like) (*prisma.Post, error)
-	Comment(ctx context.Context, obj *prisma.Like) (*prisma.Comment, error)
-	CreatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error)
-	UpdatedAt(ctx context.Context, obj *prisma.Like) (*time.Time, error)
+type LikeCommentResolver interface {
+	User(ctx context.Context, obj *prisma.LikeComment) (*prisma.User, error)
+	Comment(ctx context.Context, obj *prisma.LikeComment) (*prisma.Comment, error)
+	CreatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error)
+	UpdatedAt(ctx context.Context, obj *prisma.LikeComment) (*time.Time, error)
+}
+type LikePostResolver interface {
+	User(ctx context.Context, obj *prisma.LikePost) (*prisma.User, error)
+	Post(ctx context.Context, obj *prisma.LikePost) (*prisma.Post, error)
+	CreatedAt(ctx context.Context, obj *prisma.LikePost) (*time.Time, error)
+	UpdatedAt(ctx context.Context, obj *prisma.LikePost) (*time.Time, error)
 }
 type MutationResolver interface {
 	Signup(ctx context.Context, usrinpt UserInput) (*prisma.User, error)
@@ -147,8 +163,9 @@ type MutationResolver interface {
 	CreateComment(ctx context.Context, commentinput CommentInput) (*prisma.Comment, error)
 	UpdateComment(ctx context.Context, id string, body string) (*prisma.Comment, error)
 	DeleteComment(ctx context.Context, id string) (*prisma.Comment, error)
-	UpdatePostLike(ctx context.Context, likeInput PostLikeInput) (*prisma.Like, error)
-	UpdateCommentLike(ctx context.Context, likeInput CommentLikeInput) (*prisma.Like, error)
+	CreatePostLike(ctx context.Context, likeinput CommentLikeInput) (Like, error)
+	CreateCommentLike(ctx context.Context, likeinput PostLikeInput) (Like, error)
+	UpdateLike(ctx context.Context, id string) (Like, error)
 }
 type PostResolver interface {
 	Picture(ctx context.Context, obj *prisma.Post) (*graphql.Upload, error)
@@ -157,25 +174,25 @@ type PostResolver interface {
 	UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error)
 	Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error)
 	Comments(ctx context.Context, obj *prisma.Post) ([]prisma.Comment, error)
-	Likes(ctx context.Context, obj *prisma.Post) (*prisma.Like, error)
+	Likes(ctx context.Context, obj *prisma.Post) ([]Like, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]prisma.User, error)
 	Posts(ctx context.Context) ([]prisma.Post, error)
-	Likes(ctx context.Context) ([]prisma.Like, error)
+	Likes(ctx context.Context) ([]Like, error)
 	Comments(ctx context.Context) ([]prisma.Comment, error)
 	UserByID(ctx context.Context, id string) (*prisma.User, error)
 	UserByEmail(ctx context.Context, email string) (*prisma.User, error)
 	Post(ctx context.Context, id string) (*prisma.Post, error)
-	Like(ctx context.Context, id string, commentType string) (*prisma.Like, error)
 	Comment(ctx context.Context, id string) (*prisma.Comment, error)
+	Like(ctx context.Context, id string, typeArg string) (Like, error)
 	Me(ctx context.Context) (*prisma.User, error)
 }
 type UserResolver interface {
 	CreatedAt(ctx context.Context, obj *prisma.User) (*time.Time, error)
 	Posts(ctx context.Context, obj *prisma.User) ([]prisma.Post, error)
-	Likes(ctx context.Context, obj *prisma.User) ([]prisma.Like, error)
 	Comments(ctx context.Context, obj *prisma.User) ([]prisma.Comment, error)
+	Likes(ctx context.Context, obj *prisma.User) ([]Like, error)
 }
 
 type executableSchema struct {
@@ -242,54 +259,89 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.UpdatedAt(childComplexity), true
 
-	case "Like.comment":
-		if e.complexity.Like.Comment == nil {
+	case "LikeComment.comment":
+		if e.complexity.LikeComment.Comment == nil {
 			break
 		}
 
-		return e.complexity.Like.Comment(childComplexity), true
+		return e.complexity.LikeComment.Comment(childComplexity), true
 
-	case "Like.createdAt":
-		if e.complexity.Like.CreatedAt == nil {
+	case "LikeComment.createdAt":
+		if e.complexity.LikeComment.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Like.CreatedAt(childComplexity), true
+		return e.complexity.LikeComment.CreatedAt(childComplexity), true
 
-	case "Like.id":
-		if e.complexity.Like.ID == nil {
+	case "LikeComment.id":
+		if e.complexity.LikeComment.ID == nil {
 			break
 		}
 
-		return e.complexity.Like.ID(childComplexity), true
+		return e.complexity.LikeComment.ID(childComplexity), true
 
-	case "Like.post":
-		if e.complexity.Like.Post == nil {
+	case "LikeComment.quantity":
+		if e.complexity.LikeComment.Quantity == nil {
 			break
 		}
 
-		return e.complexity.Like.Post(childComplexity), true
+		return e.complexity.LikeComment.Quantity(childComplexity), true
 
-	case "Like.quantity":
-		if e.complexity.Like.Quantity == nil {
+	case "LikeComment.updatedAt":
+		if e.complexity.LikeComment.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.Like.Quantity(childComplexity), true
+		return e.complexity.LikeComment.UpdatedAt(childComplexity), true
 
-	case "Like.updatedAt":
-		if e.complexity.Like.UpdatedAt == nil {
+	case "LikeComment.user":
+		if e.complexity.LikeComment.User == nil {
 			break
 		}
 
-		return e.complexity.Like.UpdatedAt(childComplexity), true
+		return e.complexity.LikeComment.User(childComplexity), true
 
-	case "Like.user":
-		if e.complexity.Like.User == nil {
+	case "LikePost.createdAt":
+		if e.complexity.LikePost.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Like.User(childComplexity), true
+		return e.complexity.LikePost.CreatedAt(childComplexity), true
+
+	case "LikePost.id":
+		if e.complexity.LikePost.ID == nil {
+			break
+		}
+
+		return e.complexity.LikePost.ID(childComplexity), true
+
+	case "LikePost.post":
+		if e.complexity.LikePost.Post == nil {
+			break
+		}
+
+		return e.complexity.LikePost.Post(childComplexity), true
+
+	case "LikePost.quantity":
+		if e.complexity.LikePost.Quantity == nil {
+			break
+		}
+
+		return e.complexity.LikePost.Quantity(childComplexity), true
+
+	case "LikePost.updatedAt":
+		if e.complexity.LikePost.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.LikePost.UpdatedAt(childComplexity), true
+
+	case "LikePost.user":
+		if e.complexity.LikePost.User == nil {
+			break
+		}
+
+		return e.complexity.LikePost.User(childComplexity), true
 
 	case "Message.message":
 		if e.complexity.Message.Message == nil {
@@ -310,6 +362,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateComment(childComplexity, args["commentinput"].(CommentInput)), true
 
+	case "Mutation.createCommentLike":
+		if e.complexity.Mutation.CreateCommentLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createCommentLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateCommentLike(childComplexity, args["likeinput"].(PostLikeInput)), true
+
 	case "Mutation.createPost":
 		if e.complexity.Mutation.CreatePost == nil {
 			break
@@ -321,6 +385,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreatePost(childComplexity, args["pstinpt"].(PostInput), args["picture"].(*graphql.Upload)), true
+
+	case "Mutation.createPostLike":
+		if e.complexity.Mutation.CreatePostLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createPostLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreatePostLike(childComplexity, args["likeinput"].(CommentLikeInput)), true
 
 	case "Mutation.deleteComment":
 		if e.complexity.Mutation.DeleteComment == nil {
@@ -389,17 +465,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateComment(childComplexity, args["id"].(string), args["body"].(string)), true
 
-	case "Mutation.updateCommentLike":
-		if e.complexity.Mutation.UpdateCommentLike == nil {
+	case "Mutation.updateLike":
+		if e.complexity.Mutation.UpdateLike == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateCommentLike_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateLike_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateCommentLike(childComplexity, args["likeInput"].(CommentLikeInput)), true
+		return e.complexity.Mutation.UpdateLike(childComplexity, args["id"].(string)), true
 
 	case "Mutation.updatePost":
 		if e.complexity.Mutation.UpdatePost == nil {
@@ -412,18 +488,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdatePost(childComplexity, args["id"].(string), args["postinput"].(UpdatePostInput), args["picture"].(*graphql.Upload)), true
-
-	case "Mutation.updatePostLike":
-		if e.complexity.Mutation.UpdatePostLike == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updatePostLike_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdatePostLike(childComplexity, args["likeInput"].(PostLikeInput)), true
 
 	case "Post.author":
 		if e.complexity.Post.Author == nil {
@@ -507,17 +571,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Comments(childComplexity), true
 
-	case "Query.Like":
+	case "Query.like":
 		if e.complexity.Query.Like == nil {
 			break
 		}
 
-		args, err := ec.field_Query_Like_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_like_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Like(childComplexity, args["id"].(string), args["commentType"].(string)), true
+		return e.complexity.Query.Like(childComplexity, args["id"].(string), args["type"].(string)), true
 
 	case "Query.likes":
 		if e.complexity.Query.Likes == nil {
@@ -709,8 +773,8 @@ var parsedSchema = gqlparser.MustLoadSchema(
   userById(id: String!): User!
   userByEmail(email: String!): User!
   post(id: String!): Post!
-  Like(id: String!, commentType: String!): Like!
   comment(id: String!): Comment!
+  like(id: String!, type: String!): Like!
   me: User!
 }
 
@@ -724,8 +788,9 @@ type Mutation {
   createComment(commentinput: CommentInput!): Comment!
   updateComment(id: String!, body: String!): Comment!
   deleteComment(id: String!): Comment!
-  updatePostLike(likeInput: PostLikeInput!): Like!
-  updateCommentLike(likeInput: CommentLikeInput!): Like!
+  createPostLike(likeinput: CommentLikeInput!): Like!
+  createCommentLike(likeinput: PostLikeInput!): Like!
+  updateLike(id: String!): Like!
 }
 
 type Message {
@@ -750,17 +815,17 @@ input PostInput {
 }
 
 input LikeInput {
-  user: String!
   quantity: Int!
+  user: String!
 }
 
 input CommentLikeInput {
-  like: LikeInput!
+  likeInfo: LikeInput!
   comment: String!
 }
 
 input PostLikeInput {
-  like: LikeInput!
+  likeInfo: LikeInput!
   post: String!
 }
 
@@ -777,8 +842,8 @@ type User {
   password: String!
   createdAt: Time!
   posts: [Post!]!
-  likes: [Like!]!
   comments: [Comment!]!
+  likes: [Like!]!
 }
 
 type Post {
@@ -790,7 +855,7 @@ type Post {
   updatedAt: Time!
   author: User!
   comments: [Comment!]!
-  likes: Like!
+  likes: [Like!]!
 }
 
 type Comment {
@@ -800,15 +865,31 @@ type Comment {
   updatedAt: Time!
   author: User!
   post: Post!
-  likes: Like!
+  likes: [Like!]!
 }
 
-type Like {
+interface Like {
+  id: ID!
+  quantity: Int
+  user: User!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type LikeComment implements Like {
+  id: ID!
+  quantity: Int
+  user: User!
+  comment: Comment!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type LikePost implements Like {
   id: ID!
   quantity: Int
   user: User!
   post: Post!
-  comment: Comment!
   createdAt: Time!
   updatedAt: Time!
 }
@@ -823,6 +904,20 @@ scalar Upload
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createCommentLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 PostLikeInput
+	if tmp, ok := rawArgs["likeinput"]; ok {
+		arg0, err = ec.unmarshalNPostLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐPostLikeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["likeinput"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -834,6 +929,20 @@ func (ec *executionContext) field_Mutation_createComment_args(ctx context.Contex
 		}
 	}
 	args["commentinput"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createPostLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 CommentLikeInput
+	if tmp, ok := rawArgs["likeinput"]; ok {
+		arg0, err = ec.unmarshalNCommentLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐCommentLikeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["likeinput"] = arg0
 	return args, nil
 }
 
@@ -923,20 +1032,6 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateCommentLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 CommentLikeInput
-	if tmp, ok := rawArgs["likeInput"]; ok {
-		arg0, err = ec.unmarshalNCommentLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐCommentLikeInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["likeInput"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_updateComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -959,17 +1054,17 @@ func (ec *executionContext) field_Mutation_updateComment_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updatePostLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 PostLikeInput
-	if tmp, ok := rawArgs["likeInput"]; ok {
-		arg0, err = ec.unmarshalNPostLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐPostLikeInput(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["likeInput"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1003,28 +1098,6 @@ func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_Like_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["commentType"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["commentType"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1050,6 +1123,28 @@ func (ec *executionContext) field_Query_comment_args(ctx context.Context, rawArg
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_like_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["type"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg1
 	return args, nil
 }
 
@@ -1384,13 +1479,13 @@ func (ec *executionContext) _Comment_likes(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Like)
+	res := resTmp.([]Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_id(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1400,7 +1495,7 @@ func (ec *executionContext) _Like_id(ctx context.Context, field graphql.Collecte
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1427,7 +1522,7 @@ func (ec *executionContext) _Like_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_quantity(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_quantity(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1437,7 +1532,7 @@ func (ec *executionContext) _Like_quantity(ctx context.Context, field graphql.Co
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1461,7 +1556,7 @@ func (ec *executionContext) _Like_quantity(ctx context.Context, field graphql.Co
 	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_user(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_user(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1471,7 +1566,7 @@ func (ec *executionContext) _Like_user(ctx context.Context, field graphql.Collec
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: true,
@@ -1480,7 +1575,7 @@ func (ec *executionContext) _Like_user(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Like().User(rctx, obj)
+		return ec.resolvers.LikeComment().User(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1498,7 +1593,7 @@ func (ec *executionContext) _Like_user(ctx context.Context, field graphql.Collec
 	return ec.marshalNUser2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_post(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_comment(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1508,7 +1603,7 @@ func (ec *executionContext) _Like_post(ctx context.Context, field graphql.Collec
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: true,
@@ -1517,44 +1612,7 @@ func (ec *executionContext) _Like_post(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Like().Post(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*prisma.Post)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNPost2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Like_comment(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Like",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Like().Comment(rctx, obj)
+		return ec.resolvers.LikeComment().Comment(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1572,7 +1630,7 @@ func (ec *executionContext) _Like_comment(ctx context.Context, field graphql.Col
 	return ec.marshalNComment2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐComment(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_createdAt(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1582,7 +1640,7 @@ func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.C
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: true,
@@ -1591,7 +1649,7 @@ func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Like().CreatedAt(rctx, obj)
+		return ec.resolvers.LikeComment().CreatedAt(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1609,7 +1667,7 @@ func (ec *executionContext) _Like_createdAt(ctx context.Context, field graphql.C
 	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.CollectedField, obj *prisma.Like) (ret graphql.Marshaler) {
+func (ec *executionContext) _LikeComment_updatedAt(ctx context.Context, field graphql.CollectedField, obj *prisma.LikeComment) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1619,7 +1677,7 @@ func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.C
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Like",
+		Object:   "LikeComment",
 		Field:    field,
 		Args:     nil,
 		IsMethod: true,
@@ -1628,7 +1686,226 @@ func (ec *executionContext) _Like_updatedAt(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Like().UpdatedAt(rctx, obj)
+		return ec.resolvers.LikeComment().UpdatedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_id(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_quantity(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Quantity, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int32)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_user(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LikePost().User(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*prisma.User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_post(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LikePost().Post(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*prisma.Post)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNPost2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_createdAt(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LikePost().CreatedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LikePost_updatedAt(ctx context.Context, field graphql.CollectedField, obj *prisma.LikePost) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "LikePost",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LikePost().UpdatedAt(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2072,7 +2349,7 @@ func (ec *executionContext) _Mutation_deleteComment(ctx context.Context, field g
 	return ec.marshalNComment2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐComment(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_updatePostLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createPostLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2089,7 +2366,7 @@ func (ec *executionContext) _Mutation_updatePostLike(ctx context.Context, field 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updatePostLike_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createPostLike_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2098,7 +2375,7 @@ func (ec *executionContext) _Mutation_updatePostLike(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdatePostLike(rctx, args["likeInput"].(PostLikeInput))
+		return ec.resolvers.Mutation().CreatePostLike(rctx, args["likeinput"].(CommentLikeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2110,13 +2387,13 @@ func (ec *executionContext) _Mutation_updatePostLike(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Like)
+	res := resTmp.(Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
+	return ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_updateCommentLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createCommentLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2133,7 +2410,7 @@ func (ec *executionContext) _Mutation_updateCommentLike(ctx context.Context, fie
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateCommentLike_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createCommentLike_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -2142,7 +2419,7 @@ func (ec *executionContext) _Mutation_updateCommentLike(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateCommentLike(rctx, args["likeInput"].(CommentLikeInput))
+		return ec.resolvers.Mutation().CreateCommentLike(rctx, args["likeinput"].(PostLikeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2154,10 +2431,54 @@ func (ec *executionContext) _Mutation_updateCommentLike(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Like)
+	res := resTmp.(Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
+	return ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateLike_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateLike(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Like)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Post_id(ctx context.Context, field graphql.CollectedField, obj *prisma.Post) (ret graphql.Marshaler) {
@@ -2484,10 +2805,10 @@ func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*prisma.Like)
+	res := resTmp.([]Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2595,10 +2916,10 @@ func (ec *executionContext) _Query_likes(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]prisma.Like)
+	res := resTmp.([]Like)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_comments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2770,50 +3091,6 @@ func (ec *executionContext) _Query_post(ctx context.Context, field graphql.Colle
 	return ec.marshalNPost2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_Like(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_Like_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Like(rctx, args["id"].(string), args["commentType"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*prisma.Like)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2856,6 +3133,50 @@ func (ec *executionContext) _Query_comment(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNComment2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_like(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_like_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Like(rctx, args["id"].(string), args["type"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Like)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3192,43 +3513,6 @@ func (ec *executionContext) _User_posts(ctx context.Context, field graphql.Colle
 	return ec.marshalNPost2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_likes(ctx context.Context, field graphql.CollectedField, obj *prisma.User) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Likes(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]prisma.Like)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _User_comments(ctx context.Context, field graphql.CollectedField, obj *prisma.User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -3264,6 +3548,43 @@ func (ec *executionContext) _User_comments(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNComment2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_likes(ctx context.Context, field graphql.CollectedField, obj *prisma.User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().Likes(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Like)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -4453,9 +4774,9 @@ func (ec *executionContext) unmarshalInputCommentLikeInput(ctx context.Context, 
 
 	for k, v := range asMap {
 		switch k {
-		case "like":
+		case "likeInfo":
 			var err error
-			it.Like, err = ec.unmarshalNLikeInput2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx, v)
+			it.LikeInfo, err = ec.unmarshalNLikeInput2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4477,15 +4798,15 @@ func (ec *executionContext) unmarshalInputLikeInput(ctx context.Context, obj int
 
 	for k, v := range asMap {
 		switch k {
-		case "user":
-			var err error
-			it.User, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "quantity":
 			var err error
 			it.Quantity, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "user":
+			var err error
+			it.User, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4531,9 +4852,9 @@ func (ec *executionContext) unmarshalInputPostLikeInput(ctx context.Context, obj
 
 	for k, v := range asMap {
 		switch k {
-		case "like":
+		case "likeInfo":
 			var err error
-			it.Like, err = ec.unmarshalNLikeInput2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx, v)
+			it.LikeInfo, err = ec.unmarshalNLikeInput2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4606,6 +4927,23 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
+
+func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj Like) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case prisma.LikeComment:
+		return ec._LikeComment(ctx, sel, &obj)
+	case *prisma.LikeComment:
+		return ec._LikeComment(ctx, sel, obj)
+	case prisma.LikePost:
+		return ec._LikePost(ctx, sel, &obj)
+	case *prisma.LikePost:
+		return ec._LikePost(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
 
 // endregion ************************** interface.gotpl ***************************
 
@@ -4713,24 +5051,24 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var likeImplementors = []string{"Like"}
+var likeCommentImplementors = []string{"LikeComment", "Like"}
 
-func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj *prisma.Like) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, likeImplementors)
+func (ec *executionContext) _LikeComment(ctx context.Context, sel ast.SelectionSet, obj *prisma.LikeComment) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, likeCommentImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Like")
+			out.Values[i] = graphql.MarshalString("LikeComment")
 		case "id":
-			out.Values[i] = ec._Like_id(ctx, field, obj)
+			out.Values[i] = ec._LikeComment_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "quantity":
-			out.Values[i] = ec._Like_quantity(ctx, field, obj)
+			out.Values[i] = ec._LikeComment_quantity(ctx, field, obj)
 		case "user":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4739,21 +5077,7 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Like_user(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "post":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Like_post(ctx, field, obj)
+				res = ec._LikeComment_user(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4767,7 +5091,7 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Like_comment(ctx, field, obj)
+				res = ec._LikeComment_comment(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4781,7 +5105,7 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Like_createdAt(ctx, field, obj)
+				res = ec._LikeComment_createdAt(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4795,7 +5119,92 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Like_updatedAt(ctx, field, obj)
+				res = ec._LikeComment_updatedAt(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var likePostImplementors = []string{"LikePost", "Like"}
+
+func (ec *executionContext) _LikePost(ctx context.Context, sel ast.SelectionSet, obj *prisma.LikePost) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, likePostImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LikePost")
+		case "id":
+			out.Values[i] = ec._LikePost_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "quantity":
+			out.Values[i] = ec._LikePost_quantity(ctx, field, obj)
+		case "user":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LikePost_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "post":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LikePost_post(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "createdAt":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LikePost_createdAt(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "updatedAt":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LikePost_updatedAt(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4899,13 +5308,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updatePostLike":
-			out.Values[i] = ec._Mutation_updatePostLike(ctx, field)
+		case "createPostLike":
+			out.Values[i] = ec._Mutation_createPostLike(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateCommentLike":
-			out.Values[i] = ec._Mutation_updateCommentLike(ctx, field)
+		case "createCommentLike":
+			out.Values[i] = ec._Mutation_createCommentLike(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateLike":
+			out.Values[i] = ec._Mutation_updateLike(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5151,20 +5565,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "Like":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_Like(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "comment":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5174,6 +5574,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_comment(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "like":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_like(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5267,20 +5681,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
-		case "likes":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_likes(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "comments":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5290,6 +5690,20 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_comments(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "likes":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_likes(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5652,11 +6066,17 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v prisma.Like) graphql.Marshaler {
-	return ec._Like(ctx, sel, &v)
+func (ec *executionContext) marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx context.Context, sel ast.SelectionSet, v Like) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Like(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v []prisma.Like) graphql.Marshaler {
+func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx context.Context, sel ast.SelectionSet, v []Like) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5680,7 +6100,7 @@ func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstac
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx, sel, v[i])
+			ret[i] = ec.marshalNLike2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLike(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5691,16 +6111,6 @@ func (ec *executionContext) marshalNLike2ᚕgithubᚗcomᚋgerman9304ᚋfullstac
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) marshalNLike2ᚖgithubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚋprismaᚑclientᚐLike(ctx context.Context, sel ast.SelectionSet, v *prisma.Like) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Like(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNLikeInput2githubᚗcomᚋgerman9304ᚋfullstackᚑbackendᚐLikeInput(ctx context.Context, v interface{}) (LikeInput, error) {

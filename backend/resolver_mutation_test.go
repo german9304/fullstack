@@ -167,7 +167,7 @@ func (fs *FullstackSuiteMutation) TestMutationCreate() {
 }
 
 func (fs *FullstackSuiteMutation) TestMutationUpdates() {
-	UPDATEPOST := `
+	const UPDATEPOST string = `
 		mutation updatePostMutation($id: String!, $postinput: UpdatePostInput!, $pic: Upload) {
 			updatePost(id: $id, postinput: $postinput, picture: $pic) {
 				id
@@ -177,14 +177,22 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 		}
 
 	`
-	UPDATECOMMENT := `
+	const UPDATECOMMENT string = `
 		mutation updateCommentMutation($id: String!, $body: String!) {
 			updateComment(id: $id, body: $body) {
 				id
 				body
 			}
 		}
+	`
 
+	const UPDATELIKE string = `
+		mutation updateLikeFromPost($id: String!, $quantity: Int!) {
+			updateLike(id: $id, quantity: $quantity) {
+				id
+				quantity
+			}
+		}
 	`
 
 	updatePostInput := UpdatePostInput{"updatedHeader", "updatedBody"}
@@ -205,6 +213,15 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 
 	updateCommentReq := clientRequests(UPDATECOMMENT, updateCommentParams)
 	updatedComment := updateCommentReq["updateComment"].(map[string]interface{})
+
+	likeInputParam := LikeInput{fs.usrID, 1}
+	postLikeparam := PostLikeInput{&likeInputParam, fs.postID}
+	updatePostLikeParams := []RequestParams{
+		RequestParams{"likeinput", postLikeparam},
+	}
+	updateLikeReq := clientRequests(UPDATELIKE, updatePostLikeParams)
+
+	log.Printf("like result => %v \n", updateLikeReq)
 	// Updated Post
 	fs.Assert().NotEmpty(updatedPost["id"].(string))
 	fs.Assert().Equal(updatePostInput.Body, updatedPost["body"].(string))
