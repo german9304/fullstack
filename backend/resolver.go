@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -413,8 +414,45 @@ func (r *mutationResolver) CreateCommentLike(ctx context.Context, likeinput Comm
 	return commentLike, nil
 }
 
-func (r *mutationResolver) UpdateLike(ctx context.Context, id string) (Like, error) {
-	panic("not implemented")
+func (r *mutationResolver) UpdateLike(ctx context.Context, id string, quantity int, liketype string) (Like, error) {
+	lowerType := strings.ToLower(liketype)
+	// updates like based on comment or post type
+	quant := int32(quantity)
+	switch lowerType {
+	case "post":
+		postLike, err := client.UpdateLikePost(prisma.LikePostUpdateParams{
+			Where: prisma.LikePostWhereUniqueInput{
+				ID: &id,
+			},
+			Data: prisma.LikePostUpdateInput{
+				Quantity: &quant,
+			},
+		}).Exec(ctx)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return postLike, nil
+	case "comment":
+		commentLike, err := client.UpdateLikeComment(prisma.LikeCommentUpdateParams{
+			Where: prisma.LikeCommentWhereUniqueInput{
+				ID: &id,
+			},
+			Data: prisma.LikeCommentUpdateInput{
+				Quantity: &quant,
+			},
+		}).Exec(ctx)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return commentLike, nil
+	default:
+		return nil, fmt.Errorf("type does not exists, please enter post or comment")
+	}
+
 }
 
 type postResolver struct{ *Resolver }

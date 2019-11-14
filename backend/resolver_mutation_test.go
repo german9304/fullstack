@@ -13,11 +13,13 @@ import (
 
 type FullstackSuiteMutation struct {
 	suite.Suite
-	postID       string
-	usrID        string
-	commentID    string
-	userEmail    string
-	userPassword string
+	postID        string
+	usrID         string
+	commentID     string
+	userEmail     string
+	userPassword  string
+	commentLikeID string
+	postLikeID    string
 }
 
 func (fs *FullstackSuiteMutation) SetupSuite() {
@@ -57,9 +59,37 @@ func (fs *FullstackSuiteMutation) SetupSuite() {
 	},
 	).Exec(ctx)
 
+	postLike, _ := client.CreateLikePost(prisma.LikePostCreateInput{
+		User: prisma.UserCreateOneWithoutPostLikesInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &user.ID,
+			},
+		},
+		Post: prisma.PostCreateOneWithoutLikesInput{
+			Connect: &prisma.PostWhereUniqueInput{
+				ID: &post.ID,
+			},
+		},
+	}).Exec(ctx)
+
+	commentLike, _ := client.CreateLikeComment(prisma.LikeCommentCreateInput{
+		User: prisma.UserCreateOneWithoutCommentLikesInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &user.ID,
+			},
+		},
+		Comment: prisma.CommentCreateOneWithoutLikesInput{
+			Connect: &prisma.CommentWhereUniqueInput{
+				ID: &comment.ID,
+			},
+		},
+	}).Exec(ctx)
+
 	fs.usrID = user.ID
 	fs.postID = post.ID
 	fs.commentID = comment.ID
+	fs.commentLikeID = commentLike.ID
+	fs.postLikeID = postLike.ID
 }
 
 func (fs *FullstackSuiteMutation) TearDownSuite() {
@@ -225,6 +255,24 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 		}
 	`
 
+	const UPDATELIKECOMMENT string = `
+		mutation updateLikeComment($id: String!, $quantity: Int!, $liketype: String!) {
+			updateLike(id: $id, quantity: $quantity, liketype: $liketype) {
+				id
+				quantity
+			}
+		}
+	`
+
+	const UPDATELIKEPOST string = `
+		mutation updateLikePost($id: String!, $quantity: Int!, $liketype: String!) {
+			updateLike(id: $id, quantity: $quantity, liketype: $liketype) {
+				id
+				quantity
+			}
+		}
+	`
+
 	updatePostInput := UpdatePostInput{"updatedHeader", "updatedBody"}
 	updatePostParams := []RequestParams{
 		RequestParams{"id", fs.postID},
@@ -244,6 +292,24 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	updateCommentReq := clientRequests(UPDATECOMMENT, updateCommentParams)
 	updatedComment := updateCommentReq["updateComment"].(map[string]interface{})
 
+	updatelikeParams := func(quantity int, id, liketype string) []RequestParams {
+		params := []RequestParams{
+			RequestParams{"id", id},
+			RequestParams{"quantity", quantity},
+			RequestParams{"liketype", liketype},
+		}
+		return params
+	}
+
+	updateLikeCommentParams := updatelikeParams(2, fs.commentLikeID, "comment")
+	updateLikePostParams := updatelikeParams(3, fs.postLikeID, "post")
+
+	updatedLikeCommentReq := clientRequests(UPDATELIKECOMMENT, updateLikeCommentParams)
+	updatedLikePostReq := clientRequests(UPDATELIKECOMMENT, updateLikePostParams)
+
+	updatedLikeComment := updatedLikeCommentReq["updateLike"].(map[string]interface{})
+	updatedLikePost := updatedLikePostReq["updateLike"].(map[string]interface{})
+
 	// Updated Post
 	fs.Assert().NotEmpty(updatedPost["id"].(string))
 	fs.Assert().Equal(updatePostInput.Body, updatedPost["body"].(string))
@@ -251,7 +317,9 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	// Updated comment
 	fs.Assert().NotEmpty(updatedComment["id"].(string))
 	fs.Assert().Equal(commentBody, updatedComment["body"].(string))
-
+	//Updated Likes
+	fs.Assert().Equal(float64(2), updatedLikeComment["quantity"].(float64))
+	fs.Assert().Equal(float64(3), updatedLikePost["quantity"].(float64))
 }
 
 // func (fs *FullstackSuiteMutation) TestMutationDelete() {

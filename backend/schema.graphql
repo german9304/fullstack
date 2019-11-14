@@ -23,7 +23,7 @@ type Mutation {
   deleteComment(id: String!): Comment!
   createPostLike(likeinput: PostLikeInput!): Like!
   createCommentLike(likeinput: CommentLikeInput!): Like!
-  updateLike(id: String!): Like!
+  updateLike(id: String!, quantity: Int!, liketype: String!): Like!
 }
 
 type Message {

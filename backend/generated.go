@@ -93,7 +93,7 @@ type ComplexityRoot struct {
 		Signout           func(childComplexity int) int
 		Signup            func(childComplexity int, usrinpt UserInput) int
 		UpdateComment     func(childComplexity int, id string, body string) int
-		UpdateLike        func(childComplexity int, id string) int
+		UpdateLike        func(childComplexity int, id string, quantity int, liketype string) int
 		UpdatePost        func(childComplexity int, id string, postinput UpdatePostInput, picture *graphql.Upload) int
 	}
 
@@ -165,7 +165,7 @@ type MutationResolver interface {
 	DeleteComment(ctx context.Context, id string) (*prisma.Comment, error)
 	CreatePostLike(ctx context.Context, likeinput PostLikeInput) (Like, error)
 	CreateCommentLike(ctx context.Context, likeinput CommentLikeInput) (Like, error)
-	UpdateLike(ctx context.Context, id string) (Like, error)
+	UpdateLike(ctx context.Context, id string, quantity int, liketype string) (Like, error)
 }
 type PostResolver interface {
 	Picture(ctx context.Context, obj *prisma.Post) (*graphql.Upload, error)
@@ -475,7 +475,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateLike(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.UpdateLike(childComplexity, args["id"].(string), args["quantity"].(int), args["liketype"].(string)), true
 
 	case "Mutation.updatePost":
 		if e.complexity.Mutation.UpdatePost == nil {
@@ -790,7 +790,7 @@ type Mutation {
   deleteComment(id: String!): Comment!
   createPostLike(likeinput: PostLikeInput!): Like!
   createCommentLike(likeinput: CommentLikeInput!): Like!
-  updateLike(id: String!): Like!
+  updateLike(id: String!, quantity: Int!, liketype: String!): Like!
 }
 
 type Message {
@@ -1065,6 +1065,22 @@ func (ec *executionContext) field_Mutation_updateLike_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["quantity"]; ok {
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["quantity"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["liketype"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["liketype"] = arg2
 	return args, nil
 }
 
@@ -2463,7 +2479,7 @@ func (ec *executionContext) _Mutation_updateLike(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateLike(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().UpdateLike(rctx, args["id"].(string), args["quantity"].(int), args["liketype"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
