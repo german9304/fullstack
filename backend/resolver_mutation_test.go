@@ -322,46 +322,78 @@ func (fs *FullstackSuiteMutation) TestMutationUpdates() {
 	fs.Assert().Equal(float64(3), updatedLikePost["quantity"].(float64))
 }
 
-// func (fs *FullstackSuiteMutation) TestMutationDelete() {
+func (fs *FullstackSuiteMutation) TestMutationDelete() {
 
-// 	post2, _ := client.CreatePost(prisma.PostCreateInput{
-// 		Text: "test2post",
-// 		Author: &prisma.UserCreateOneWithoutPostsInput{
-// 			Connect: &prisma.UserWhereUniqueInput{
-// 				ID: &fs.usrID,
-// 			},
-// 		},
-// 	}).Exec(ctx)
+	post2, _ := client.CreatePost(prisma.PostCreateInput{
+		Header:  "header from post2",
+		Picture: nil,
+		Body:    "body from post2",
+		Author: prisma.UserCreateOneWithoutPostsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &fs.usrID,
+			},
+		},
+	}).Exec(ctx)
 
-// 	DELETE_POST := `
-// 		mutation deletePostMutation($id: String!){
-// 			deletePost(id: $id) {
-// 				text
-// 			}
-// 		}
-// 	`
+	comment2, _ := client.CreateComment(prisma.CommentCreateInput{
+		Body:    "body from comment2",
+		Author: prisma.UserCreateOneWithoutCommentsInput{
+			Connect: &prisma.UserWhereUniqueInput{
+				ID: &fs.usrID,
+			},
+		},
+		Post: prisma.PostCreateOneWithoutCommentsInput{
+			Connect: &prisma.PostWhereUniqueInput{
+				ID: &post2.ID,
+			},
+		},
+	}).Exec(ctx)
 
-// 	deletePostReq := graphql.NewRequest(DELETE_POST)
-// 	deletePostReq.Var("id", post2.ID)
+	const DELETEPOST string = `
+		mutation deletePostMutation($id: String!){
+			deletePost(id: $id) {
+				id
+				header
+			}
+		}
+	`
+	const DELETECOMMENT string = `
+		mutation deleteCommentMutation($id: String!){
+			deleteComment(id: $id) {
+				id
+				body
+			}
+		}
+	`
 
-// 	deletePostReq.Header.Set("Cache-Control", "no-cache")
+	deletePostParams := []RequestParams{
+		RequestParams{"id", post2.ID},
+	}
 
-// 	// run it and capture the response
-// 	var deletePostRespData map[string]prisma.Post
-// 	if err := clientGraphql.Run(ctx, deletePostReq, &deletePostRespData); err != nil {
-// 		log.Printf("error: %v \n", err)
-// 		log.Fatal(err)
-// 	}
+	deleteCommentParams := []RequestParams{
+		RequestParams{"id", comment2.ID},
+	}
 
-// 	p, err := client.Post(prisma.PostWhereUniqueInput{
-// 		ID: &post2.ID,
-// 	}).Exec(ctx)
+	deleteCommentReq := clientRequests(DELETECOMMENT, deleteCommentParams)
+	deletedComment := deleteCommentReq["deleteComment"].(map[string]interface{})
+	deletedCommentId := deletedComment["id"].(string)
+	_, deletedCommenterr := client.Comment(prisma.CommentWhereUniqueInput{
+		ID: &deletedCommentId,
+	}).Exec(ctx)
 
-// 	deletePost := deletePostRespData["deletePost"]
-// 	fs.Assert().Equal(deletePost.Text, "test2post")
-// 	fs.Assert().Equal("query returned no result", err.Error())
-// 	fs.Assert().Nil(p)
-// }
+	fs.EqualError(deletedCommenterr, "query returned no result")
+
+	deletePostReq := clientRequests(DELETEPOST, deletePostParams)
+	deletedPost := deletePostReq["deletePost"].(map[string]interface{})
+	deletedPostId := deletedPost["id"].(string)
+	_, deletedPosterr := client.Post(prisma.PostWhereUniqueInput{
+		ID: &deletedPostId,
+	}).Exec(ctx)
+
+
+	fs.EqualError(deletedPosterr, "query returned no result")
+
+}
 
 func TestMutaion(t *testing.T) {
 	suite.Run(t, new(FullstackSuiteMutation))

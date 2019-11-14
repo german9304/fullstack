@@ -368,7 +368,15 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, id string, body st
 	return updatedComment, nil
 }
 func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (*prisma.Comment, error) {
-	panic("not implemented")
+	deletedComment, err := client.DeleteComment(prisma.CommentWhereUniqueInput{
+		ID: &id,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return deletedComment, nil
 }
 func (r *mutationResolver) CreatePostLike(ctx context.Context, likeinput PostLikeInput) (Like, error) {
 	likeinfo := likeinput.LikeInfo
