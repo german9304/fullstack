@@ -1,9 +1,9 @@
 package fullstack_backend
 
 import (
+	"encoding/json"
 	"log"
 	"testing"
-	"encoding/json"
 
 	// "github.com/stretchr/testify/assert"
 	// gqlgengraphql "github.com/99designs/gqlgen/graphql"
@@ -498,22 +498,21 @@ func (fs *FullstackSuiteMutation) TestQueryUser() {
 		fs.Require().Equal(fs.userEmail, authorPost["email"].(string))
 	}
 
-	usersQueryJson, errusersjson := json.MarshalIndent(usersQueryReq," ", "  ")
-	if  errusersjson != nil {
+	usersQueryJson, errusersjson := json.MarshalIndent(usersQueryReq, " ", "  ")
+	if errusersjson != nil {
 		log.Fatal(errusersjson)
 	}
 
 	log.Println(string(usersQueryJson))
 
-	userQueryJson, erruserjson := json.MarshalIndent(userQueryReq," ", "  ")
-	if  erruserjson != nil {
+	userQueryJson, erruserjson := json.MarshalIndent(userQueryReq, " ", "  ")
+	if erruserjson != nil {
 		log.Fatal(erruserjson)
 	}
 
 	log.Println(string(userQueryJson))
 
 }
-
 
 func (fs *FullstackSuiteMutation) TestQueryPosts() {
 	const POSTS string = `
@@ -539,18 +538,78 @@ func (fs *FullstackSuiteMutation) TestQueryPosts() {
 			}
 		}
 	`
+
 	postsQueryReq := clientRequests(POSTS, []RequestParams{})
-	postsQueryJson, errpostsjson := json.MarshalIndent(postsQueryReq," ", "  ")
-	if  errpostsjson != nil {
+	postsQueryJson, errpostsjson := json.MarshalIndent(postsQueryReq, " ", "  ")
+	if errpostsjson != nil {
 		log.Fatal(errpostsjson)
 	}
-	log.Println("=========================")
-	
 	log.Println(string(postsQueryJson))
+}
+
+func (fs *FullstackSuiteMutation) TestQueryComments() {
+	const COMMENTS string = `
+		query CommentsQuery {
+			comments {
+				id
+				body
+				createdAt
+				updatedAt
+				author {
+					id
+					email
+					name
+				}
+				post {
+					body
+					likes {
+						quantity
+					}
+				}
+				likes {
+					quantity
+				}
+			}
+		}
+	`
+
+	const COMMENT string = `
+		query CommentQuery($id: String!) {
+			comment(id: $id) {
+				body
+				author {
+					name
+				}
+				post {
+					body
+				}
+				likes {
+					quantity
+				}
+			}
+		}
+	
+	`
+
+	commentsQueryReq := clientRequests(COMMENTS, []RequestParams{})
+	commentsQueryJson, errcommentsjson := json.MarshalIndent(commentsQueryReq, " ", "  ")
+
+	commentQueryReq := clientRequests(COMMENT, []RequestParams{
+		RequestParams{"id", fs.commentID},
+	})
+	commentQueryJson, errcommentjson := json.MarshalIndent(commentQueryReq, " ", "  ")
+
+	if errcommentsjson != nil {
+		log.Fatal(errcommentsjson)
+	}
+	log.Println(string(commentsQueryJson))
+
+	if errcommentjson != nil {
+		log.Fatal(errcommentjson)
+	}
+	log.Println(string(commentQueryJson))
 }
 
 func TestMutaion(t *testing.T) {
 	suite.Run(t, new(FullstackSuiteMutation))
 }
-
-

@@ -617,11 +617,44 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, erro
 }
 
 func (r *queryResolver) Like(ctx context.Context, id string, liketype string) (Like, error) {
-	panic("not implemented")
+	lowerType := strings.ToLower(liketype)
+	// updates like based on comment or post type
+	switch lowerType {
+	case "post":
+		postLike, err := client.LikePost(prisma.LikePostWhereUniqueInput{
+			ID: &id,
+		}).Exec(ctx)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return postLike, nil
+	case "comment":
+		commentLike, err := client.LikeComment(prisma.LikeCommentWhereUniqueInput{
+			ID: &id,
+		}).Exec(ctx)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return commentLike, nil
+	default:
+		return nil, fmt.Errorf("type does not exists, please enter post or comment")
+	}
 }
 
 func (r *queryResolver) Comment(ctx context.Context, id string) (*prisma.Comment, error) {
-	panic("not implemented")
+
+	comment, err := client.Comment(prisma.CommentWhereUniqueInput{
+		ID: &id,
+	}).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return comment, nil
 }
 func (r *queryResolver) Me(ctx context.Context) (*prisma.User, error) {
 	w := ctx.Value("response").(Auth)
