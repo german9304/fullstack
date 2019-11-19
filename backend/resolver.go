@@ -87,18 +87,17 @@ func (r *commentResolver) Post(ctx context.Context, obj *prisma.Comment) (*prism
 
 	return commentPost, nil
 }
-func (r *commentResolver) Likes(ctx context.Context, obj *prisma.Comment) ([]Like, error) {
-	panic("not implemented")
-	// commentID := obj.ID
-	// commentLikes, err := client.Comment(prisma.CommentWhereUniqueInput{
-	// 	ID: &commentID,
-	// }).Likes(nil).Exec(ctx)
+func (r *commentResolver) Likes(ctx context.Context, obj *prisma.Comment) ([]prisma.LikeComment, error) {
+	commentID := obj.ID
+	commentLikes, err := client.Comment(prisma.CommentWhereUniqueInput{
+		ID: &commentID,
+	}).Likes(nil).Exec(ctx)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 
-	// return commentLikes, nil
+	return commentLikes, nil
 }
 
 type likeCommentResolver struct{ *Resolver }
@@ -466,22 +465,71 @@ func (r *mutationResolver) UpdateLike(ctx context.Context, id string, quantity i
 type postResolver struct{ *Resolver }
 
 func (r *postResolver) Picture(ctx context.Context, obj *prisma.Post) (*graphql.Upload, error) {
-	panic("not implemented")
+	postsPicture, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &obj.ID,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("picture %v \n", postsPicture.Picture)
+
+	return nil, nil
 }
 func (r *postResolver) CreatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
-	panic("not implemented")
+	createdAt := obj.CreatedAt
+	t, err := time.Parse(time.RFC3339, createdAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *postResolver) UpdatedAt(ctx context.Context, obj *prisma.Post) (*time.Time, error) {
-	panic("not implemented")
+	updatedAt := obj.UpdatedAt
+	t, err := time.Parse(time.RFC3339, updatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 func (r *postResolver) Author(ctx context.Context, obj *prisma.Post) (*prisma.User, error) {
-	panic("not implemented")
+	postsAuthor, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &obj.ID,
+	}).Author().Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postsAuthor, nil
 }
 func (r *postResolver) Comments(ctx context.Context, obj *prisma.Post) ([]prisma.Comment, error) {
-	panic("not implemented")
+	postsComments, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &obj.ID,
+	}).Comments(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postsComments, nil
 }
-func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]Like, error) {
-	panic("not implemented")
+func (r *postResolver) Likes(ctx context.Context, obj *prisma.Post) ([]prisma.LikePost, error) {
+	postID := obj.ID
+	postLikes, err := client.Post(prisma.PostWhereUniqueInput{
+		ID: &postID,
+	}).Likes(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postLikes, nil
 }
 
 type queryResolver struct{ *Resolver }
@@ -504,16 +552,27 @@ func (r *queryResolver) Posts(ctx context.Context) ([]prisma.Post, error) {
 
 	return posts, nil
 }
-func (r *queryResolver) Likes(ctx context.Context) ([]Like, error) {
-	panic("not implemented")
-	// likes, err := client.Likes(nil).Exec(ctx)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (r *queryResolver) LikesComment(ctx context.Context) ([]prisma.LikeComment, error) {
+	commentLikes, err := client.LikeComments(nil).Exec(ctx)
 
-	// return likes, nil
+	if err != nil {
+		return nil, err
+	}
+
+	return commentLikes, nil
 }
+
+func (r *queryResolver) LikesPost(ctx context.Context) ([]prisma.LikePost, error) {
+	postsLikes, err := client.LikePosts(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return postsLikes, nil
+}
+
 func (r *queryResolver) Comments(ctx context.Context) ([]prisma.Comment, error) {
 	comments, err := client.Comments(nil).Exec(ctx)
 
@@ -557,7 +616,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*prisma.Post, erro
 	return post, nil
 }
 
-func (r *queryResolver) Like(ctx context.Context, id string, typeArg string) (Like, error) {
+func (r *queryResolver) Like(ctx context.Context, id string, liketype string) (Like, error) {
 	panic("not implemented")
 }
 
@@ -607,17 +666,27 @@ func (r *userResolver) Posts(ctx context.Context, obj *prisma.User) ([]prisma.Po
 
 	return userPosts, nil
 }
-func (r *userResolver) Likes(ctx context.Context, obj *prisma.User) ([]Like, error) {
-	panic("not implemented")
-	// userLikes, err := client.User(prisma.UserWhereUniqueInput{
-	// 	ID: &obj.ID,
-	// }).Likes(nil).Exec(ctx)
+func (r *userResolver) LikesPost(ctx context.Context, obj *prisma.User) ([]prisma.LikePost, error) {
+	postsLikes, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &obj.ID,
+	}).PostLikes(nil).Exec(ctx)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 
-	// return userLikes, nil
+	return postsLikes, nil
+}
+func (r *userResolver) LikesComment(ctx context.Context, obj *prisma.User) ([]prisma.LikeComment, error) {
+	commentLikes, err := client.User(prisma.UserWhereUniqueInput{
+		ID: &obj.ID,
+	}).CommentLikes(nil).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return commentLikes, nil
 }
 
 func (r *userResolver) Comments(ctx context.Context, obj *prisma.User) ([]prisma.Comment, error) {

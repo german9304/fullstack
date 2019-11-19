@@ -1,13 +1,14 @@
 type Query {
   users: [User!]!
   posts: [Post!]!
-  likes: [Like!]!
+  likesPost: [LikePost!]!
+  likesComment: [LikeComment!]!
   comments: [Comment!]!
   userById(id: String!): User!
   userByEmail(email: String!): User!
   post(id: String!): Post!
   comment(id: String!): Comment!
-  like(id: String!, type: String!): Like!
+  like(id: String!, liketype: String!): Like!
   me: User!
 }
 
@@ -76,7 +77,8 @@ type User {
   createdAt: Time!
   posts: [Post!]!
   comments: [Comment!]!
-  likes: [Like!]!
+  likesPost: [LikePost!]!
+  likesComment: [LikeComment!]!
 }
 
 type Post {
@@ -88,7 +90,7 @@ type Post {
   updatedAt: Time!
   author: User!
   comments: [Comment!]!
-  likes: [Like!]!
+  likes: [LikePost!]!
 }
 
 type Comment {
@@ -98,7 +100,7 @@ type Comment {
   updatedAt: Time!
   author: User!
   post: Post!
-  likes: [Like!]!
+  likes: [LikeComment!]!
 }
 
 interface Like {

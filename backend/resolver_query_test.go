@@ -1,118 +1,32 @@
 package fullstack_backend
 
-// import (
-// 	"log"
-// 	"testing"
+import (
+	// "log"
+	"testing"
 
-// 	models "github.com/german9304/fullstack-backend/models"
-// 	prisma "github.com/german9304/fullstack-backend/prisma-client"
-// 	"github.com/machinebox/graphql"
-// 	"github.com/stretchr/testify/suite"
-// )
+	// models "github.com/german9304/fullstack-backend/models"
+	// prisma "github.com/german9304/fullstack-backend/prisma-client"
+	// "github.com/machinebox/graphql"
+	"github.com/stretchr/testify/suite"
+)
 
-// type FullstackSuiteQuery struct {
-// 	suite.Suite
-// 	queryUsers    []prisma.UserCreateInput
-// 	clientGraphql *graphql.Client
-// 	userIds       []string
-// }
+type FullstackSuiteQuery struct {
+	suite.Suite
+}
 
-// var (
-// 	testingModelUsers []models.User = []models.User{
-// 		models.User{
-// 			Email:    "pepe@mail.com",
-// 			Name:     "pepe",
-// 			Password: "pepe1234",
-// 		},
-// 		models.User{
-// 			Email:    "jimmy@mail.com",
-// 			Name:     "Jimmy",
-// 			Password: "jim1234",
-// 		},
-// 		models.User{
-// 			Email:    "miguel@mail.com",
-// 			Name:     "Miguel",
-// 			Password: "miguel1234",
-// 		},
-// 		models.User{
-// 			Email:    "kendrick@mail.com",
-// 			Name:     "Kendrick",
-// 			Password: "kendrick1234",
-// 		},
-// 	}
-// 	testingPostsNames []string = []string{
-// 		"post1",
-// 		"post2",
-// 		"post3",
-// 		"post4",
-// 	}
-// )
 
-// func (fs *FullstackSuiteQuery) SetupSuite() {
+func (fs *FullstackSuiteQuery) SetupSuite() {
+	
 
-// 	fs.clientGraphql = graphql.NewClient("http://localhost:8000/")
+	
+}
 
-// 	for i := 0; i < len(testingModelUsers); i++ {
-// 		user := testingModelUsers[i]
-// 		userInput := prisma.UserCreateInput{
-// 			Email:    user.Email,
-// 			Name:     user.Name,
-// 			Password: user.Password,
-// 			Posts: &prisma.PostCreateManyWithoutAuthorInput{
-// 				Create: []prisma.PostCreateWithoutAuthorInput{
-// 					prisma.PostCreateWithoutAuthorInput{
-// 						Text: testingPostsNames[i],
-// 						Likes: &prisma.LikeCreateManyWithoutPostInput{
-// 							Create: []prisma.LikeCreateWithoutPostInput{
-// 								prisma.LikeCreateWithoutPostInput{
-// 									User: prisma.UserCreateOneWithoutLikesInput{
-// 										Connect: &prisma.UserWhereUniqueInput{
-// 											Email: &user.Email,
-// 										},
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		}
 
-// 		fs.queryUsers = append(fs.queryUsers, userInput)
-// 	}
+func (fs *FullstackSuiteQuery) TearDownSuite() {
 
-// 	for i := 0; i < len(fs.queryUsers); i++ {
-// 		user := fs.queryUsers[i]
-// 		newUser, err := client.CreateUser(user).Exec(ctx)
-// 		fs.userIds = append(fs.userIds, newUser.ID)
 
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 	}
 
-// }
-
-// func clientReq(request, reqValue, reqVar string) *graphql.Request {
-// 	clientRequest := graphql.NewRequest(request)
-// 	clientRequest.Var(reqVar, reqValue)
-// 	clientRequest.Header.Set("Cache-Control", "no-cache")
-// 	return clientRequest
-// }
-
-// func (fs *FullstackSuiteQuery) TearDownSuite() {
-
-// 	for i := 0; i < len(fs.queryUsers); i++ {
-// 		user := fs.queryUsers[i]
-// 		_, err := client.DeleteUser(prisma.UserWhereUniqueInput{
-// 			Email: &user.Email,
-// 		}).Exec(ctx)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 	}
-
-// }
+}
 
 // func (fs *FullstackSuiteQuery) TestQueryUsers() {
 // 	USERS := `
@@ -350,6 +264,6 @@ package fullstack_backend
 
 // }
 
-// func TestQuery(t *testing.T) {
-// 	suite.Run(t, new(FullstackSuiteQuery))
-// }
+func TestQuery(t *testing.T) {
+	suite.Run(t, new(FullstackSuiteQuery))
+}

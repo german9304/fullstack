@@ -7,7 +7,9 @@ import (
 
 type Post struct {
 	Id        string
-	Text      string
+	Header string
+	Body string
+	Picture *string
 	CreatedAt string
 	UpdatedAt string
 	Author    prisma.User

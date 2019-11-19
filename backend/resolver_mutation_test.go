@@ -3,6 +3,7 @@ package fullstack_backend
 import (
 	"log"
 	"testing"
+	"encoding/json"
 
 	// "github.com/stretchr/testify/assert"
 	// gqlgengraphql "github.com/99designs/gqlgen/graphql"
@@ -336,7 +337,7 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 	}).Exec(ctx)
 
 	comment2, _ := client.CreateComment(prisma.CommentCreateInput{
-		Body:    "body from comment2",
+		Body: "body from comment2",
 		Author: prisma.UserCreateOneWithoutCommentsInput{
 			Connect: &prisma.UserWhereUniqueInput{
 				ID: &fs.usrID,
@@ -390,11 +391,166 @@ func (fs *FullstackSuiteMutation) TestMutationDelete() {
 		ID: &deletedPostId,
 	}).Exec(ctx)
 
-
 	fs.EqualError(deletedPosterr, "query returned no result")
 
+}
+
+func (fs *FullstackSuiteMutation) TestQueryUser() {
+	const USERS string = `
+		query UsersQuery {
+			users {
+				id
+				email
+				name
+				password 
+				createdAt
+				posts {
+					body
+					header
+					author {
+						email
+					}
+					likes {
+						quantity
+					}
+				}
+				comments {
+					id
+					body
+					author {
+						email
+					}
+					likes {
+						quantity
+					}
+				}
+				likesPost {
+					quantity
+				}
+				likesComment {
+					quantity
+				}
+			}
+		}
+	`
+
+	const USER string = `
+		query singleUser($email: String!) {
+			userByEmail(email: $email) {
+				id
+				email
+				password
+				name
+				comments {
+					body
+					author {
+						email
+					}
+				}
+				posts {
+					header
+					body
+					author {
+						email
+					}
+				}
+				likesPost {
+					quantity
+				}
+				likesComment {
+					quantity
+				}
+			}
+		}
+	
+	`
+
+	userParams := []RequestParams{
+		RequestParams{"email", fs.userEmail},
+	}
+	usersQueryReq := clientRequests(USERS, []RequestParams{})
+	userQueryReq := clientRequests(USER, userParams)
+	usersData := usersQueryReq["users"].([]interface{})
+	userEmail := userQueryReq["userByEmail"].(map[string]interface{})
+	userLikesPosts := userEmail["likesPost"]
+	userLikesComments := userEmail["likesComment"]
+
+	userComments := userEmail["comments"].([]interface{})
+	userPosts := userEmail["posts"].([]interface{})
+
+	fs.Require().Equal(2, len(usersData))
+	// for _, v := range usersData {
+	// 	log.Printf("user %v \n", v)
+	// }
+
+	log.Printf("post likes by user %v \n", userLikesPosts)
+	log.Printf("comment likes by user %v \n", userLikesComments)
+
+	for _, v := range userComments {
+		comment := v.(map[string]interface{})
+		authorComment := comment["author"].(map[string]interface{})
+		fs.Require().Equal(fs.userEmail, authorComment["email"].(string))
+	}
+
+	for _, v := range userPosts {
+		post := v.(map[string]interface{})
+		authorPost := post["author"].(map[string]interface{})
+		fs.Require().Equal(fs.userEmail, authorPost["email"].(string))
+	}
+
+	usersQueryJson, errusersjson := json.MarshalIndent(usersQueryReq," ", "  ")
+	if  errusersjson != nil {
+		log.Fatal(errusersjson)
+	}
+
+	log.Println(string(usersQueryJson))
+
+	userQueryJson, erruserjson := json.MarshalIndent(userQueryReq," ", "  ")
+	if  erruserjson != nil {
+		log.Fatal(erruserjson)
+	}
+
+	log.Println(string(userQueryJson))
+
+}
+
+
+func (fs *FullstackSuiteMutation) TestQueryPosts() {
+	const POSTS string = `
+		query PostsQuery {
+			posts {
+				id
+				header
+				picture
+				body
+				createdAt
+				updatedAt
+				author {
+					email
+					name
+				}
+				comments {
+					id
+					body
+				}
+				likes {
+					quantity
+				}
+			}
+		}
+	`
+	postsQueryReq := clientRequests(POSTS, []RequestParams{})
+	postsQueryJson, errpostsjson := json.MarshalIndent(postsQueryReq," ", "  ")
+	if  errpostsjson != nil {
+		log.Fatal(errpostsjson)
+	}
+	log.Println("=========================")
+	
+	log.Println(string(postsQueryJson))
 }
 
 func TestMutaion(t *testing.T) {
 	suite.Run(t, new(FullstackSuiteMutation))
 }
+
+
