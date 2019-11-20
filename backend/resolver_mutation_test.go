@@ -539,12 +539,46 @@ func (fs *FullstackSuiteMutation) TestQueryPosts() {
 		}
 	`
 
+	const POST string = `
+		query PostQuery($id: String!) {
+			post(id: $id) {
+				id
+				header
+				picture
+				body
+				createdAt
+				updatedAt
+				author {
+					email
+					name
+				}
+				comments {
+					id
+					body
+				}
+				likes {
+					quantity
+				}
+			}
+		}
+	`
+
 	postsQueryReq := clientRequests(POSTS, []RequestParams{})
+	postQueryReq := clientRequests(POST, []RequestParams{
+		RequestParams{"id", fs.postID},
+	})
 	postsQueryJson, errpostsjson := json.MarshalIndent(postsQueryReq, " ", "  ")
+	postQueryJson, errpostjson := json.MarshalIndent(postQueryReq, " ", "  ")
 	if errpostsjson != nil {
 		log.Fatal(errpostsjson)
 	}
+	if errpostjson != nil {
+		log.Fatal(errpostjson)
+	}
 	log.Println(string(postsQueryJson))
+	log.Printf("######### post ############")
+	log.Println(string(postQueryJson))
+	log.Printf("######### post ############")
 }
 
 func (fs *FullstackSuiteMutation) TestQueryComments() {
@@ -608,6 +642,92 @@ func (fs *FullstackSuiteMutation) TestQueryComments() {
 		log.Fatal(errcommentjson)
 	}
 	log.Println(string(commentQueryJson))
+}
+
+func (fs *FullstackSuiteMutation) TestQueryLike() {
+	const LIKEPOSTS string = `
+		query Likeposts {
+			likesPost {
+				quantity
+				createdAt
+				updatedAt
+				user {
+					email
+				}
+			}
+		}
+	
+	`
+
+	const LIKECOMMENTS string = `
+		query Likecomments {
+			likesComment {
+				quantity
+				createdAt
+				updatedAt
+				user {
+					email
+				}
+			}
+		}
+	
+	`
+
+	const LIKECOMMENT string = `
+		query LikeComment($id: String!, $liketype: String!) {
+			like(id: $id, liketype: $liketype) {
+				id
+				quantity
+				createdAt
+				updatedAt
+				user {
+					name
+				}
+				... on LikeComment {
+					comment {
+						body
+					}
+				}
+				... on LikePost {
+					post {
+						header
+					}
+				}
+			}
+		}
+	
+	
+	`
+
+	likecommentsQueryReq := clientRequests(LIKECOMMENTS, []RequestParams{})
+	likecommentsQueryJson, errlikecommentsjson := json.MarshalIndent(likecommentsQueryReq, " ", "  ")
+
+	likepostsQueryReq := clientRequests(LIKEPOSTS, []RequestParams{})
+	likepostsQueryJson, errlikepostsjson := json.MarshalIndent(likepostsQueryReq, " ", "  ")
+
+	likecommentQueryReq := clientRequests(LIKECOMMENT, []RequestParams{
+		RequestParams{"id", fs.postLikeID},
+		RequestParams{"liketype", "post"},
+	})
+	likecommentQueryJson, errlikecommentjson := json.MarshalIndent(likecommentQueryReq, " ", "  ")
+
+	if errlikecommentsjson != nil {
+		log.Fatal(errlikecommentsjson)
+	}
+	log.Println(string(likecommentsQueryJson))
+
+	if errlikepostsjson != nil {
+		log.Fatal(errlikepostsjson)
+	}
+	log.Println(string(likepostsQueryJson))
+
+	if errlikecommentjson != nil {
+		log.Fatal(errlikecommentjson)
+	}
+	log.Printf("###############LIKE COMMENT ######################")
+	log.Println(string(likecommentQueryJson))
+	log.Printf("###############LIKE COMMENT ######################")
+
 }
 
 func TestMutaion(t *testing.T) {
