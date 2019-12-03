@@ -1,10 +1,7 @@
+import Users from '../components/users';
+
 function Home() {
-  console.log('data here');
-  return (
-    <div className='container'>
-      <h1>Welcome to full stack application</h1>
-    </div>
-  );
+  return <div className='container'></div>;
 }
 
 export default Home;

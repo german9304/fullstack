@@ -5,7 +5,7 @@ const GRAPHQL_URL = 'http://backend:8000/';
 
 function client({ headers, initialState }) {
   return new ApolloClient({
-    uri: HERO_URL,
+    uri: GRAPHQL_URL,
     cache: new InMemoryCache().restore(initialState || {})
   });
 }
