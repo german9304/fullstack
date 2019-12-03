@@ -41,6 +41,12 @@ const NavStyled = styled.nav`
     padding: 1.5em;
     width: 200px;
   }
+
+  .right {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 2em;
+  }
 `;
 
 function Nav() {
@@ -56,6 +62,11 @@ function Nav() {
           <li className='menu signin'>
             <Link href='/signup'>
               <a>Signup</a>
+            </Link>
+          </li>
+          <li className='menu home'>
+            <Link href='/'>
+              <a>Home</a>
             </Link>
           </li>
         </div>

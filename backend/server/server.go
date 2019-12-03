@@ -24,6 +24,10 @@ func main() {
 
 	handleCtx := func(k string) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			headers := w.Header()
+			headers.Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			headers.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+			headers.Set("Access-Control-Allow-Credentials", "true")
 			ctx := r.Context()
 			auth := fullstack_backend.Auth{w, r}
 			newContext := context.WithValue(ctx, k, auth)

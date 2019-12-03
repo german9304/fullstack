@@ -2,20 +2,25 @@ import styled from 'styled-components';
 import Comment from './comment';
 
 const PostStyle = styled.section`
-  box-shadow: 0 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0.1em 0.1em rgba(0, 0, 0, 0.3);
   padding: 1em;
   width: 500px;
   margin: 1em;
   .info {
-    font-size: 1.4rem;
+    font-size: 1rem;
     margin: 0;
     font-family: 'Montserrat', sans-serif;
   }
 
   .header {
-    font-size: 1.8rem;
+    font-size: 1rem;
     font-weight: bolder;
-    margin-bottom: 1.3em;
+    margin-bottom: 1em;
+  }
+
+  .info.body {
+    font-size: 1.2rem;
+    font-weight: bolder;
   }
   .posts-article-section {
     display: grid;
@@ -26,15 +31,28 @@ const PostStyle = styled.section`
   }
   .posts-article-section button {
     padding: 0.2em;
-    border: solid 1px #aaaaaa;
     outline: none;
+    border: none;
     cursor: pointer;
     font-size: 1em;
+  }
+  .post .post-meta {
+    display: flex;
+  }
+
+  .post-meta .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.2em;
+  }
+
+  .material-icons {
+    font-size: 1.2em;
   }
 `;
 
 function Post({ data }) {
-  console.log(data);
   return (
     <PostStyle>
       <div className='post post-info'>
@@ -42,12 +60,22 @@ function Post({ data }) {
         <p className='info body'>{data.body}</p>
       </div>
       <div className='post posts-article-section'>
-        <button className='like'>Like</button>
-        <button className='comment'>comment</button>
+        <button className='post-meta like'>
+          <span className='icon'>
+            <i className='material-icons'>thumb_up</i>
+          </span>
+          <span className='text-icon'>Like</span>
+        </button>
+        <button className='post-meta comment'>
+          <span className='icon'>
+            <i className='material-icons'>comment</i>
+          </span>
+          <span className='text-icon'>comment</span>
+        </button>
       </div>
       <div className='posts-article-data'>
-        {data.comments.map(comment => {
-          return <Comment key={Comment.id} data={comment} />;
+        {data.comments.map((comment, i) => {
+          return <Comment key={comment.id} data={comment} />;
         })}
       </div>
     </PostStyle>

@@ -1,5 +1,11 @@
+import Signin from '../components/signin';
+
 function Signup() {
-  return <h1>signup page</h1>;
+  return (
+    <div className='signup'>
+      <Signin />
+    </div>
+  );
 }
 
 export default Signup;

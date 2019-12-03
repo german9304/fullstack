@@ -31,6 +31,9 @@ function Posts() {
   const { data, loading, error } = useQuery(POSTS_QUERY);
   if (loading) return <p>loading...</p>;
   if (error) console.error(error);
+  if (data) {
+    console.log(data);
+  }
 
   return (
     <PostStyle>
