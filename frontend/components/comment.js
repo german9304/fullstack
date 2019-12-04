@@ -1,7 +1,7 @@
 function Comment({ data }) {
   return (
-    <div className='body'>
-      <p> {data.body} </p>
+    <div className='comment comment-body'>
+      <p className='body'>{data.body}</p>
     </div>
   );
 }

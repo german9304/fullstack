@@ -3,7 +3,9 @@ import styled from 'styled-components';
 const FormStyles = styled.form`
   --font-f: 'Montserrat', sans-serif;
   /* border: solid 1px red; */
-  margin-top: 2em;
+  box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 2em;
   width: 400px;
   label {
     display: block;
@@ -39,6 +41,8 @@ const FormStyles = styled.form`
 
   fieldset {
     padding: 1.4em;
+    border: none;
+    font-family: var(--font-f);
   }
 `;
 

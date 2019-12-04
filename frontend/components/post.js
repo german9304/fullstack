@@ -2,10 +2,11 @@ import styled from 'styled-components';
 import Comment from './comment';
 
 const PostStyle = styled.section`
-  box-shadow: 0 0 0.1em 0.1em rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
   padding: 1em;
   width: 500px;
-  margin: 1em;
+  margin-bottom: 2em;
   .info {
     font-size: 1rem;
     margin: 0;
@@ -56,7 +57,7 @@ function Post({ data }) {
   return (
     <PostStyle>
       <div className='post post-info'>
-        <p className='info header'> {data.header}</p>
+        <p className='info header'>{data.header}</p>
         <p className='info body'>{data.body}</p>
       </div>
       <div className='post posts-article-section'>

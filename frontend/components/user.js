@@ -14,18 +14,18 @@ function User() {
   const { data, loading, error } = useQuery(ME_QUERY);
 
   if (error) {
-    console.error(error);
+    return {
+      error,
+      data: null
+    };
   }
 
   if (data) {
-    console.log('current user ', data);
+    return {
+      error: null,
+      data
+    };
   }
-
-  return (
-    <div className='user'>
-      <h1>user</h1>
-    </div>
-  );
 }
 
 export default User;

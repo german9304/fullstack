@@ -1,5 +1,6 @@
 import FormStyles from './styles/formStyles';
 import HomeStyles from './styles/homeStyles';
+import useValue from './hooks/useValue';
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
 import { useState } from 'react';
@@ -15,21 +16,12 @@ const SIGNIN_MUTATION = gql`
 `;
 function Signin() {
   const [signuser, { data, error }] = useMutation(SIGNIN_MUTATION);
-  function useValue(initValue) {
-    const [value, setValue] = useState(initValue);
-    const handleValue = e => {
-      setValue(e.target.value);
-    };
-    return {
-      value,
-      handleValue
-    };
-  }
+  const email = useValue('');
+  const password = useValue('');
+
   if (error) {
     console.error(error);
   }
-  const email = useValue('');
-  const password = useValue('');
 
   if (data) {
     console.log(data);

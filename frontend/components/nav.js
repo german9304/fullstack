@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 const NavStyled = styled.nav`
   border-bottom: solid 1em #111111;
+  margin-bottom: 2em;
   li[class~='menu'] {
     color: #111111;
     font-weight: bolder;
